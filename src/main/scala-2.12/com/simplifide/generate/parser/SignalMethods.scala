@@ -14,6 +14,7 @@ trait SignalMethods extends SignalParser {
   val REG    = OpType.Register
   val REGOUT = OpType.RegOutput
   val SIGNAL   = OpType.Signal
+  val STRUCT   = OpType.Struct
 
   implicit def BusParser2BusDirect(parser:BusParser) = parser.createSignal
 

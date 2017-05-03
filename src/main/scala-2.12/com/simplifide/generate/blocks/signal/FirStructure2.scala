@@ -32,8 +32,8 @@ trait FirStructure2 extends ComplexSegment {
   def createBody = {
 
     val multiplier = array("multiplier_output",WIRE,internalWidth)(taps.length)
-    val stageOut   = array("stage_out",WIRE,internalWidth)(taps.length-1)
-    val regOut     = array("reg_out",REG,internalWidth)(taps.length-1)
+    val stageOut   = array("stage_out",WIRE,internalWidth)(taps.length)
+    val regOut     = array("reg_out",REG,internalWidth)(taps.length)
     
     val lastStage  = signal("stage_last",WIRE,output.fixed)
     

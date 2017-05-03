@@ -27,7 +27,7 @@ trait ModuleParser extends ConditionParser with SignalParser with DescriptionHol
   implicit val creator = CreationFactory.Hardware
 
   val name:String
-  
+
 
 
   /** Splits the statements into groups */
@@ -57,5 +57,9 @@ trait ModuleParser extends ConditionParser with SignalParser with DescriptionHol
     mod.description = this.description
     mod
   }
+
+}
+
+object ModuleParser {
 
 }

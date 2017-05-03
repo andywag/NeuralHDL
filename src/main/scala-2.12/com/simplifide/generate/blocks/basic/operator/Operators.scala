@@ -36,6 +36,7 @@ object Operators {
       SegmentReturn("{") + createSegments + SegmentReturn("}")
     }
   }
+  def Concat(segments:SimpleSegment*):Concat = Concat(segments.toList)
 
   /** Parenthesis Operator for ( {in} )*/
   class Paren(val in:SimpleSegment) extends SimpleSegment {

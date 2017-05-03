@@ -45,9 +45,10 @@ trait BinaryOperator extends BinarySegment {
 
 
 
-  override def createCode(implicit writer:CodeWriter):SegmentReturn  =
+  override def createCode(implicit writer:CodeWriter):SegmentReturn  = {
+    val temp = writer.createCode(in2)
     SegmentReturn("(") + writer.createCode(in1 ++ operator ++ in2) + SegmentReturn(")")
-
+  }
 
 
 }
@@ -100,6 +101,12 @@ object BinaryOperator  {
   }
   class Sr(val in1:SimpleSegment,val in2:SimpleSegment) extends BinaryOperator {
       override val operator = " >> "
+  }
+  class SSl(val in1:SimpleSegment,val in2:SimpleSegment) extends BinaryOperator {
+    override val operator = " <<< "
+  }
+  class SSr(val in1:SimpleSegment,val in2:SimpleSegment) extends BinaryOperator {
+    override val operator = " >>> "
   }
 
   class LogicalAnd(val in1:SimpleSegment,val in2:SimpleSegment) extends BinaryOperator {

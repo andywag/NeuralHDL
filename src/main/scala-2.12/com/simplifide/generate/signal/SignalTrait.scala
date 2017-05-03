@@ -1,17 +1,19 @@
 package com.simplifide.generate.signal
 
-import com.simplifide.generate.generator.{SegmentReturn, CodeWriter, SimpleSegment}
-import com.simplifide.generate.parser.model.{Clock}
+import com.simplifide.generate.generator.{CodeWriter, SegmentReturn, SimpleSegment}
+import com.simplifide.generate.parser.model.Clock
 import com.simplifide.generate.html.Description
 import com.simplifide.generate.language.DescriptionHolder
 import com.simplifide.generate.parser.SegmentHolder
 import com.simplifide.generate.proc.Controls
 import com.simplifide.generate.blocks.basic.operator.{Operators, Select}
+
 import collection.mutable.ListBuffer
 import com.simplifide.generate.proc.parser.ProcessorSegment
 import com.simplifide.generate.blocks.basic.memory.Memory
 import com.simplifide.generate.blocks.basic.fixed.{FixedOperations, FixedSelect}
 import com.simplifide.generate.parser.items.MiscParser
+import com.simplifide.generate.signal.sv.Struct
 
 
 /**
@@ -45,6 +47,10 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
 
   override def toString = name
 
+  def createArray(iName:String, len:Int, opType:OpType = OpType.Register) = {
+    SignalTrait(appendName(iName),opType,FixedType.unsigned(width,0),len)
+  }
+
   def createSignal:SignalTrait = this
   def createSignal(opType:OpType):SignalTrait = this.copy(optype = opType)
   def createSignal(name:String, opType:OpType):SignalTrait = this.copy(nam = name,optype = opType)
@@ -66,12 +72,16 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
 
 
 
-
   override def createSubOutput(index:Int):SignalTrait = SignalTrait(name + "_" + index, opType, fixed)
 
 
   /** Changes the type for a testbench addition */
-  def changeTestType:SignalTrait = SignalTrait(this.name,this.opType.testType,this.fixed)
+  def changeTestType:SignalTrait = {
+    this match {
+      case x:Struct => x.copyStruct(this.name,OpType.Struct)
+      case _        => SignalTrait(this.name,this.opType.testType,this.fixed)
+    }
+  }
   /** Changes the type of the signal. Mainly used for Input Output Changes during connections */
   def changeType(typ:OpType):SignalTrait = SignalTrait(this.name,typ,this.fixed)
   /** Reverses the connection for this block */
@@ -120,6 +130,7 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
   def isParameter  = opType.isParameter
   /** Method which defines if the signal is an output */
   def isWire = opType.isWire
+
   /** Method which defines if the signal is an output */
   override def isReg = opType.isReg
 
@@ -199,7 +210,8 @@ object SignalTrait {
       }
       builder.toList
     }
-  
+
+
 
 
 }

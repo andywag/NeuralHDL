@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scaladl.iml" filepath="$PROJECT_DIR$/.idea/modules/scaladl.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scaladl-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scaladl-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scalahdl.iml" filepath="$PROJECT_DIR$/.idea/modules/scalahdl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scalahdl-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scalahdl-build.iml" />
     </modules>
   </component>
 </project>

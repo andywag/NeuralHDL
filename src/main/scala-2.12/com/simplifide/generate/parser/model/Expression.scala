@@ -63,8 +63,10 @@ trait Expression {
     def unary_+ : Expression = new UnaryParserOperator.Positive(this)
     def unary_- : Expression = new UnaryParserOperator.Negative(this)
     // Binary Operators
-    def - (rhs:Expression)(implicit creator:CreationFactory):Expression = new AdditionSegment.Truncate("",this.create,rhs.create,true,FixedType.Simple)
-    def + (rhs:Expression)(implicit creator:CreationFactory):Expression = new AdditionSegment.Truncate("",this.create,rhs.create,false,FixedType.Simple)
+    //def - (rhs:Expression)(implicit creator:CreationFactory):Expression = new AdditionSegment.Truncate("",this.create,rhs.create,true,FixedType.Simple)
+    //def + (rhs:Expression)(implicit creator:CreationFactory):Expression = new AdditionSegment.Truncate("",this.create,rhs.create,false,FixedType.Simple)
+    def - (rhs:Expression)(implicit creator:CreationFactory):Expression =  AdditionSegment("",this.create,rhs.create,true)
+    def + (rhs:Expression)(implicit creator:CreationFactory):Expression =  AdditionSegment("",this.create,rhs.create,false)
 
     /** Handle Multiplication */
     def * (rhs:Expression)(implicit creator:CreationFactory):Expression = MultiplySegment(this.create,rhs.create)
@@ -89,9 +91,10 @@ trait Expression {
     def ^~ (rhs:Expression):Expression     = new BinaryParserOperator.Nxor(this,rhs)
     def ~^ (rhs:Expression):Expression     = new BinaryParserOperator.Nxor(this,rhs)
     // Shift Operators                       new
-    def >> (rhs:Expression):Expression     = new BinaryParserOperator.Sl(this,rhs)
-    def << (rhs:Expression):Expression     = new BinaryParserOperator.Sr(this,rhs)
-
+    def >> (rhs:Expression):Expression     = new BinaryParserOperator.Sr(this,rhs)
+    def << (rhs:Expression):Expression     = new BinaryParserOperator.Sl(this,rhs)
+    def >>> (rhs:Expression):Expression     = new BinaryParserOperator.SSr(this,rhs)
+    def <<< (rhs:Expression):Expression     = new BinaryParserOperator.SSl(this,rhs)
 
     // Conditional Operators
     def ?  (rhs:Expression)    = Question.Open(this,rhs)

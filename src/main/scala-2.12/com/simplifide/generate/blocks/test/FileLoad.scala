@@ -20,8 +20,12 @@ import com.simplifide.generate.signal.{NewConstant, Constant, SignalTrait}
 
 class FileLoad(val signal:SignalTrait, val filename:String, val length:Int) extends SimpleSegment{
 
+  val memory = signal.createArray(appendName("mem"),length)
+  val rmem   = new FileLoad.ReadMemH(memory, filename)
+  val init   = Initial(List(rmem))
+
   override def createCode(implicit writer:CodeWriter):SegmentReturn = {
-      null
+      writer.createCode(init).extra(List(),List(memory))
   }
 
 }

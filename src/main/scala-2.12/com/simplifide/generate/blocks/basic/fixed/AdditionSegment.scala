@@ -1,10 +1,15 @@
 package com.simplifide.generate.blocks.basic.fixed
 
-import com.simplifide.generate.blocks.basic.operator.BinaryOperator
-import com.simplifide.generate.generator.{BasicSegments, SegmentReturn, CodeWriter, SimpleSegment}
-import com.simplifide.generate.blocks.basic.{BinarySegment, Statement}
+import com.simplifide.generate.blocks.basic.condition.ConditionStatement
+import com.simplifide.generate.blocks.basic.operator.{BinaryOperator, Operators}
+import com.simplifide.generate.generator.{BasicSegments, CodeWriter, SegmentReturn, SimpleSegment}
+import com.simplifide.generate.blocks.basic.{BinarySegment, Statement, fixed}
 import com.simplifide.generate.signal._
 import com.simplifide.generate.blocks.basic.fixed.Roundable.RoundType
+import com.simplifide.generate.blocks.float.FloatAddition
+import com.simplifide.generate.parser.items.SingleConditionParser.IfStatement
+import com.simplifide.generate.parser.model.BasicExpressions
+import com.simplifide.generate.parser.{ConditionParser, SegmentHolder, SignalParser}
 
 /**
  * Addition Segment
@@ -42,11 +47,11 @@ trait AdditionSegment extends BinarySegment with Roundable {
     fixed:FixedType    = this.fixed,
     internal:FixedType = this.internal) = {
     this match {
-      case x:AdditionSegment.Truncate     => new AdditionSegment.Truncate(name,in1,in2,negative,fixed,internal)
-      case x:AdditionSegment.TruncateClip => new AdditionSegment.TruncateClip(name,in1,in2,negative,fixed,internal)
-      case x:AdditionSegment.Round        => new AdditionSegment.Round(name,in1,in2,negative,fixed,internal)
-      case x:AdditionSegment.RoundClip    => new AdditionSegment.RoundClip(name,in1,in2,negative,fixed,internal)
-
+      case x:AdditionSegment.Truncate      => new AdditionSegment.Truncate(name,in1,in2,negative,fixed,internal)
+      case x:AdditionSegment.TruncateClip  => new AdditionSegment.TruncateClip(name,in1,in2,negative,fixed,internal)
+      case x:AdditionSegment.Round         => new AdditionSegment.Round(name,in1,in2,negative,fixed,internal)
+      case x:AdditionSegment.RoundClip     => new AdditionSegment.RoundClip(name,in1,in2,negative,fixed,internal)
+      case x:FloatAddition => new FloatAddition(name,x.in1,x.in2,negative)
     }
   }
 
@@ -100,6 +105,14 @@ trait AdditionSegment extends BinarySegment with Roundable {
 }
 
 object AdditionSegment {
+
+  def apply(name:String, in1:SimpleSegment, in2:SimpleSegment, negative:Boolean) = {
+    (in1,in2) match {
+      case (x:FloatSignal,y:FloatSignal) => new FloatAddition("",x,y,negative)
+      case _ =>   new Truncate("",in1,in2,negative,FixedType.Simple)
+    }
+  }
+
    class Truncate(
     override val name:String, 
     override val in1:SimpleSegment,
@@ -133,5 +146,4 @@ object AdditionSegment {
     override val internal:FixedType = FixedType.Simple) extends AdditionSegment
 
 
-
-}
+  }

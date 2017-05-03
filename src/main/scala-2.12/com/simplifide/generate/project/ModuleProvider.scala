@@ -49,10 +49,13 @@ trait ModuleProvider extends SimpleSegment  with DescriptionHolder {
     def typeDeclaration(typ:String, signals:List[SignalTrait]) = {
       "// " + typ + "\n\n" + createSignalDeclaration(signals) + "\n\n"
     }
+    val base      = returns.flatMap(x => x.internal)
     val internals = returns.flatMap(x => x.internal).filter(x => !x.isInput && !x.isOutput)
     val allSignals = SignalTrait.uniqueSignals(signals.flatMap(_.allSignalChildren).filter(x => x.opType.isSignal) ::: internals)
-    typeDeclaration("Parameters ",allSignals.filter(_.isParameter)) + typeDeclaration("Wires ",allSignals.filter(_.isWire)) +
-    typeDeclaration("Registers ",allSignals.filter(_.isReg))
+    typeDeclaration("Parameters ",allSignals.filter(_.isParameter)) +
+      typeDeclaration("Wires ",allSignals.filter(_.isWire)) +
+      typeDeclaration("Registers ",allSignals.filter(_.isReg)) +
+      typeDeclaration("Other",allSignals.filter(x => x.opType == OpType.Struct))
   }
 
   def internalSignals(implicit writer:CodeWriter = CodeWriter.Verilog) = {

@@ -20,7 +20,7 @@ trait NewEntityGenerator {
 
   protected def comment:String = {
     "//-----------------------------------------------------------------------------\n" +
-      "// Company: 			ACME Corp                                                     \n" +
+      "// Company: 			                                                              \n" +
       "// Author:				Andy                                                          \n" +
       "// Date:                                                                       \n" +
       "// Module Name:       " + entity.name +                                       "\n" +
@@ -50,11 +50,21 @@ trait NewEntityGenerator {
 
    def head(implicit writer:CodeWriter) = entity.head.map(_.createCode).foldLeft(SegmentReturn(""))(_+_)
 
+  val includeString =
+    """
+`ifndef TYPES
+  `include "types.v"
+  `define TYPES
+`endif
+
+    """.stripMargin
+
   def createCode(writer:CodeWriter):SegmentReturn = {
     implicit val writ:CodeWriter = writer
     val mod = entity.createModule
     return SegmentReturn(comment) +
       head +
+      SegmentReturn(includeString) +
       SegmentReturn("module ") +
       entity.name +
       this.createHead(writer) +

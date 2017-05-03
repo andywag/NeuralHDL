@@ -31,11 +31,12 @@ trait ConditionParser extends BaseParser with SingleConditionParser with SingleC
 
 
   /** Creation of AlwaysBlock Block containing the expressions given by expressions */
-  def $always_star(expressions:Expression*) {
-    val expr = expressions.toList.filter(_ != null)
+  def $always_star(expressions:Expression*):Expression =  {
+    val expr = expressions.toList.filter(_ != null).map(_.create)
     //removeExpressions(expr)
     val always = ObjectFactory.AlwaysStar(expr)
     scope.assign(always)
+    always
   }
 
   /** Creation of AlwaysBlock Block with a sensitivity list containing the expressions given by expressions */

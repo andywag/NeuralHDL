@@ -1,8 +1,11 @@
 package com.simplifide.generate.blocks.test
 
-import com.simplifide.generate.signal.SignalTrait
-import com.simplifide.generate.blocks.basic.flop.{SimpleFlop, ClockControl}
-import com.simplifide.generate.generator.{BasicSegments, SegmentReturn, CodeWriter, SimpleSegment}
+import java.io.File
+
+import com.simplifide.generate.signal.{FixedType, SignalTrait}
+import com.simplifide.generate.blocks.basic.flop.{ClockControl, SimpleFlop}
+import com.simplifide.generate.generator.{BasicSegments, CodeWriter, SegmentReturn, SimpleSegment}
+import com.simplifide.generate.signal.OpType.Register
 
 
 /** Class which contains simulations methods and classes for dumping data to a file */
@@ -26,7 +29,7 @@ object FileDump {
   class FDisplay(val fptr:SignalTrait,signals:List[SignalTrait]) extends SimpleSegment {
     override def createCode(implicit writer:CodeWriter):SegmentReturn = {
       def createQuotes(len:Int):String = {
-        def vals:String = List.fill(len)("%d ").reduceLeft(_+_)
+        def vals:String = List.fill(len)("%h ").reduceLeft(_+_)
         "\"" + vals + "\""
       }
       def createSignals:String = {
@@ -38,10 +41,28 @@ object FileDump {
   }
 
   /** Flop which contains the fdisplay statement */
-  class DisplayFlop(val fptr:SignalTrait,signals:List[SignalTrait])(implicit clk:ClockControl) extends SimpleSegment {
+  case class DisplayFlop(val fptr:SignalTrait,signals:List[SignalTrait])(implicit clk:ClockControl) extends SimpleSegment {
     override def createCode(implicit writer:CodeWriter):SegmentReturn = {
       val flop = new SimpleFlop(None,clk,BasicSegments.List(List()),new FDisplay(fptr,signals))
       writer.createCode(flop)
+    }
+  }
+
+  class DisplayGroup(val fileName:String,signals:List[SignalTrait])(implicit clk:ClockControl) extends SimpleSegment {
+
+    val fptrName = {
+      val file = new File(fileName)
+      file.getName.split("\\.")(0)
+    }
+
+    val fptr = SignalTrait(s"${fptrName}_fptr",Register,FixedType.unsigned(32,0))
+
+    val state = Initial(List(new FOpen(fileName,fptr)))
+    val flop  = DisplayFlop(fptr,signals)
+
+    override def createCode(implicit writer:CodeWriter):SegmentReturn = {
+      val flop = new SimpleFlop(None,clk,BasicSegments.List(List()),new FDisplay(fptr,signals))
+      (writer.createCode(state) + writer.createCode(flop)).extra(List(),List(fptr))
     }
   }
 

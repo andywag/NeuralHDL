@@ -1,13 +1,18 @@
 package com.simplifide.generate.blocks.basic.fixed
 
-import com.simplifide.generate.generator.{BasicSegments, SimpleSegment, CodeWriter, SegmentReturn}
+import com.simplifide.generate.generator.{BasicSegments, CodeWriter, SegmentReturn, SimpleSegment}
 import com.simplifide.generate.language.Conversions._
-import com.simplifide.generate.parser.{SegmentHolder, ObjectFactory, ExpressionReturn}
+import com.simplifide.generate.parser._
 import com.simplifide.generate.proc.Controls
 import com.simplifide.generate.proc.parser.ProcessorSegment
 import com.simplifide.generate.blocks.basic.{BinarySegment, Statement}
 import com.simplifide.generate.blocks.basic.fixed.Roundable.RoundType
+import com.simplifide.generate.blocks.basic.float.RangeShift
+import com.simplifide.generate.blocks.basic.operator.Operators
+import com.simplifide.generate.blocks.float.FloatMult
+import com.simplifide.generate.parser.items.SingleConditionParser
 import com.simplifide.generate.signal._
+import com.simplifide.generate.signal.bus.FloatSignal2
 
 
 /**
@@ -43,7 +48,13 @@ trait MultiplySegment extends BinarySegment with Roundable {
     fixed:FixedType                            = this.fixed,
     internal:FixedType                         = this.internal,
     roundType:Roundable.RoundType              = this.roundType):MultiplySegment =
-      new MultiplySegment.Impl(name,in1,in2,fixed,internal,roundType)
+  {
+    this match {
+      case x:FloatMult =>  new FloatMult(name,x.in1,x.in2)
+      case _           =>  new MultiplySegment.Impl(name,in1,in2,fixed,internal,roundType)
+    }
+  }
+
 
 
 
@@ -62,7 +73,7 @@ trait MultiplySegment extends BinarySegment with Roundable {
 
 
   /** Output of the initial round block */
-  val internalSignalM:SignalTrait = SignalTrait(name + "_im",OpType.Signal,multiplierFixed)
+  val internalSignalM:SignalTrait = SignalTrait(appendName("im"),OpType.Signal,multiplierFixed)
   //val internalSignalR:SignalTrait = SignalTrait(name + "_ir",OpType.Signal,realInternal)
 
 
@@ -72,21 +83,23 @@ trait MultiplySegment extends BinarySegment with Roundable {
     val state = (internalSignalM ::= new MultiplySegment.Basic(in1,in2)).create
     val multiplier = state
 
-    if (this.fixed == this.multiplierFixed) {
-      return writer.createCode(multiplier)
+    val result = if (this.fixed == this.multiplierFixed) {
+
+      writer.createCode(internalSignalM)
     }
     else if (round && clip) {
-      writer.createCode(RoundSegment.RoundClip(this.internalSignalM,this.multiplierFixed,this.fixed)).extra(List(state))
+      writer.createCode(RoundSegment.RoundClip(this.internalSignalM,this.multiplierFixed,this.fixed))
     }
     else if (clip) {
-      writer.createCode(ClipSegment(this.internalSignalM,this.fixed)).extra(List(state))
+      writer.createCode(ClipSegment(this.internalSignalM,this.fixed))
     }
     else if (round) {
-      writer.createCode(RoundSegment.Round(this.internalSignalM,this.multiplierFixed,this.fixed)).extra(List(state))
+      writer.createCode(RoundSegment.Round(this.internalSignalM,this.multiplierFixed,this.fixed))
     }
     else {
-      writer.createCode(this.internalSignalM(fixed)).extra(List(state))
+      writer.createCode(this.internalSignalM(fixed))
     }
+    result.extra(List(state),List(internalSignalM))
   }
 
 
@@ -96,13 +109,17 @@ object MultiplySegment {
 
   /** Factory Method for creating multiplier */
   def apply(in1:SimpleSegment, in2:SimpleSegment) = {
-    in1 match {
-      case x:NewConstant =>
+    (in1,in2) match {
+      case (x:NewConstant,_) =>
         if (x.binaryFactor.isDefined) BinaryShift(in2,x.binaryFactor.get)
         else  new Impl("",in1,in2,FixedType.Simple,FixedType.Simple)
-      case _ => new Impl("",in1,in2,FixedType.Simple,FixedType.Simple)
+      case (x:FloatSignal,y:FloatSignal) =>
+        new FloatMult("",x,y)
+      case _ =>
+        new Impl("",in1,in2,FixedType.Simple,FixedType.Simple)
+      }
     }
-  }
+
   /** Truncation Addition Segment */
   class Impl(override val name:String,
     override val in1:MultiplySegment#T,
@@ -117,7 +134,8 @@ object MultiplySegment {
       return writer.createCode(in1) + " * " + writer.createCode(in2)
     }
   }
-  
+
+
   
 }
 

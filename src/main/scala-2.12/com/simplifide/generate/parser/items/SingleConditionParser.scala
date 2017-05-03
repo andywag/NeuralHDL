@@ -59,6 +59,7 @@ object SingleConditionParser {
   class Open(val statements:List[IfStatement], val condition:Option[Expression]) {
     /** Closes out the condition statement with the results condition */
     def $then(result:Expression*) = new Close(statements ::: List(new IfStatement(condition,BasicExpressions.List(result.toList))))
+    //-def $then(result:Seq[Expression]) = new Close(statements ::: List(new IfStatement(condition,BasicExpressions.List(result.toList))))
 
   }
 

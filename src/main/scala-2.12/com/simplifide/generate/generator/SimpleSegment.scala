@@ -33,6 +33,9 @@ trait SimpleSegment extends Expression with ControlHolder with AssignmentHolder 
 
   val opType:OpType = OpType.Signal
 
+  def appendName(iname:String) =
+    (this.name.replace(".","_") + s"_$iname").replace("__","_")
+
 
   def isReg    = false
   

@@ -47,7 +47,8 @@ object ProcessOps {
 	  outputReaderThread.join()
 
 	  ins.close()
-    return error
+		if (proc.exitValue() !=0 ) false else true
+    //  return error
 }
 
 }

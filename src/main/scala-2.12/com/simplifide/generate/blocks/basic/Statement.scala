@@ -72,10 +72,12 @@ trait Statement extends SimpleSegment with ParserStatement  {
 
     this match {
       case x:Statement.Assign      => {
-        if (root) rootBase else basic
+        //if (root) rootBase else basic
+        rootBase
       }
       case x:Statement.Reg         => {
         if (root) rootBase else basic
+        //rootBase
       }
       case x:Statement.Delay       => SegmentReturn("assign #") + x.delay.toString + " "  + outSegment + " = " + inSegment + ";\n"
       case x:Statement.FunctionBody        => outSegment + " = " + inSegment + ";\n"
@@ -110,13 +112,17 @@ trait Statement extends SimpleSegment with ParserStatement  {
     val outC = writer.createCode(output)
     val ret =  returnSegment(outC,inC,root)
     // TODO convert the extra to actual statements
-    val state = inC.extra.map(_.asInstanceOf[Statement]).map(x => new Statement.Declaration(x.output,x.input))
+    //val state = inC.extra.map(_.asInstanceOf[Statement]).map(x => new Statement.Declaration(x.output,x.input))
+    val results = inC.extra.map(x => writer.createCode(x)).foldLeft(SegmentReturn(""))(_+_)
     this match {
       case x:Statement.Reg => {
-        ret.extra(state)
+//        //ret.extra(state)
+        results + ret
       }
       case _               => {
-        SegmentReturn(StringOps.accumulate(state.map(writer.createCode(_).code))) + ret.code
+        //val code = StringOps.accumulate(state.map(writer.createCode(_).code))
+        //(SegmentReturn( code) + ret.code).extra(List(),inC.internal)
+        results + ret
       }
     }
   }

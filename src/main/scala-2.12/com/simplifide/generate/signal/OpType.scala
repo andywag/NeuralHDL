@@ -24,7 +24,8 @@ class OpType  {
 
   /** Converts the type of the signal to append to a testbench */
   def testType:OpType = {
-    if (this.isInput) OpType.Register
+    if (this == OpType.Struct) OpType.Struct
+    else if (this.isInput) OpType.Register
     else if (this.isOutput) OpType.Signal
     else this
   }
@@ -81,6 +82,7 @@ object OpType {
   object Register extends OpType
   object Param    extends OpType
   object RegOutput extends OpType
-
+  object Logic     extends OpType
+  object Struct     extends OpType
   
 }
