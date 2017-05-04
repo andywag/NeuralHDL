@@ -1,5 +1,6 @@
 package com.simplifide.scala2.test
 
+
 /**
  * Created by IntelliJ IDEA.
  * User: andy

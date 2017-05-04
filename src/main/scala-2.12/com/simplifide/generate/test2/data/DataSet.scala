@@ -3,7 +3,7 @@ package com.simplifide.generate.test2.data
 import com.simplifide.generate.generator.{CodeWriter, SegmentReturn, SimpleSegment}
 import com.simplifide.generate.parser.{ConditionParser, EntityParser, SegmentHolder}
 import com.simplifide.generate.signal.SignalTrait
-import com.simplifide.generate.test2.data.DataSet.{CompareError, CompareResult, CompareSuccess, DataGenerator}
+import com.simplifide.generate.test2.data.DataSet._
 import com.simplifide.generate.test2.{TestEntityParser, TestParser}
 import com.simplifide.generate.util.FileOps
 
@@ -41,6 +41,8 @@ case class DataSet[T](data:Seq[DataTrait[T]], signal:SignalTrait, gen:DataTrait[
 
   def createDebug =
     FileOps.createFile(new java.io.File(location.get+"t"),data.map(x => x.debug).mkString("\n"))
+
+
 
 
   def <--(loc:String, index:SignalTrait)(implicit scope:TestEntityParser):DataSet[T] = {
@@ -101,5 +103,7 @@ object DataSet {
   case class CompareTest(title:String, errors:Seq[CompareResult]) {
     def debugString = s"$title\n   ${errors.mkString("\n   ")}"
   }
+
+
 
 }

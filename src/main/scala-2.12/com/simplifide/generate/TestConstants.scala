@@ -1,5 +1,6 @@
 package com.simplifide.generate
 
+
 /**
  * Created by IntelliJ IDEA.
  * User: awagner

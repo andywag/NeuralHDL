@@ -11,6 +11,13 @@ trait Struct extends SignalTrait {
   val typeName:String
   val signals:List[SignalTrait]
 
+  override def equals(obj: scala.Any): Boolean = {
+    obj match {
+      case x:Struct => if (x.typeName.equals(this.typeName)) true else false
+      case _ =>          false
+    }
+  }
+
   override lazy val width = {
     val w = signals.map(_.width).reduceLeft(_+_)
     w

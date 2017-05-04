@@ -1,9 +1,17 @@
 package com.simplifide.generate.project
 
-import com.simplifide.generate.parser.SignalHolder
+import com.simplifide.generate.parser.{EntityParser, SignalHolder}
 import com.simplifide.generate.test2.SimInterface
 import com.simplifide.generate.test2.Test
 import java.io.File
+
+import com.simplifide.generate.generator.CodeWriter.Verilog
+import com.simplifide.generate.generator.SegmentReturn
+import com.simplifide.generate.project.Project.TypeModule
+import com.simplifide.generate.signal.SignalTrait
+import com.simplifide.generate.signal.sv.Struct
+import com.simplifide.generate.signal.sv.Struct.StructDeclaration
+import com.simplifide.generate.util.FileOps
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,6 +43,19 @@ trait Project extends SignalHolder{
   val extraFiles:List[String] = List()
 
 
+  def handleTypes(entities:List[NewEntity]) = {
+    def getType(input:SignalTrait):Option[Struct] = {
+      input match {
+        case x:Struct => Some(x)
+        case _        => None
+      }
+    }
+    val types = entities.flatMap(x => x.signals).flatMap(getType(_)).toSet.toSeq
+
+    types
+
+  }
+
   def createProject = {
 
     projectStructure.create
@@ -46,6 +67,10 @@ trait Project extends SignalHolder{
     total.foreach(x => x.writeModule(projectStructure.design))
     // Create the tests for this project
     tests.foreach(x => x.createTest(this))
+    // Create
+    val types = handleTypes(total)
+    Project.createTypeModule(projectStructure.design,types)
+
 
   }
 
@@ -59,5 +84,18 @@ trait Project extends SignalHolder{
 
 object Project {
 
+  def createTypeModule(location:String, types:Seq[Struct]) = {
+    val code = types.map(x => new StructDeclaration(x)).map(x => Verilog.createCode(x))
+    val total = code.foldLeft(SegmentReturn(""))(_+_)
+    FileOps.createFile(location,"types.v",total.code)
+  }
+
+  case class TypeModule(types:Seq[Struct]) extends EntityParser {
+
+    override val name: String = "types"
+    types.foreach(x => ->(new StructDeclaration(x)))
+
+
+  }
 
 }

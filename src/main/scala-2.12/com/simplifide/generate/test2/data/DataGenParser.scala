@@ -8,7 +8,7 @@ import com.simplifide.generate.parser.ConditionParser
 import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.test2.TestEntityParser
 import com.simplifide.generate.test2.data.DataGenParser.{CompareItem, DisplayDump}
-import com.simplifide.generate.test2.data.DataSet.CompareTest
+import com.simplifide.generate.test2.data.DataSet.{CompareTest}
 import com.simplifide.generate.test2.data.FloatData.FloatWrap
 
 import scala.collection.mutable.ListBuffer
@@ -27,6 +27,8 @@ trait DataGenParser {
       case x:FloatSignal => FloatData.randomList(signal,length)
       case _             => FloatData.randomList(signal,length)
     }
+
+    def << (typ:DataGenParser.TestType) = null
 
     def -->(name:String)(implicit clk:ClockControl,scope:TestEntityParser) = {
      val dataSet = signal match {
@@ -72,5 +74,8 @@ object DataGenParser {
       new CompareTest(title,result)
     }
   }
+
+  trait TestType
+  object RANDOM extends TestType
 
 }
