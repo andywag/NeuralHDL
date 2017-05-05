@@ -26,7 +26,7 @@ int main(int argc, char **argv, char **env) {
   Verilated::traceEverOn(true);
   VerilatedVcdC* tfp = new VerilatedVcdC;
   top->trace (tfp, 99);
-  tfp->open ("trace/simx.vcd");
+  tfp->open ("simx.vcd");
 
 
   while (!Verilated::gotFinish()) {

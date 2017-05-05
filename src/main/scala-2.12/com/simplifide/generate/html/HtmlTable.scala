@@ -1,8 +1,6 @@
 package com.simplifide.generate.html
 
-import xml.Attribute._
-import xml.Text._
-import xml._
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,7 +9,7 @@ import xml._
  * Time: 4:02 PM
  * To change this template use File | Settings | File Templates.
  */
-
+/*
 class HtmlTable(val head:List[Description],val body:List[List[Description]],val caption:Option[String] = None) {
 
   private def createHead(tit:Description) =
@@ -49,3 +47,4 @@ class HtmlTable(val head:List[Description],val body:List[List[Description]],val 
   }
 
 }
+*/

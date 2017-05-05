@@ -1,8 +1,6 @@
 package com.simplifide.generate.html
 
-import xml.Attribute._
-import xml.Text._
-import xml.{Attribute, Text, Null, Node}
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,7 +9,7 @@ import xml.{Attribute, Text, Null, Node}
  * Time: 9:16 PM
  * To change this template use File | Settings | File Templates.
  */
-
+/*
 object HtmlUtilities {
 
   def fullHtml(title:String,internal:List[Node]):Node = {
@@ -32,3 +30,4 @@ object HtmlUtilities {
     <a>{text}</a> % Attribute(None, "name", Text(location), Null)
 
 }
+*/

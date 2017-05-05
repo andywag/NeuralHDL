@@ -44,7 +44,11 @@ object Struct {
 
   class StructInternal(struct:Struct) extends SimpleSegment {
     def createCode(implicit writer:CodeWriter):SegmentReturn = {
-      val ret:SegmentReturn = struct.signals.map(x => new SignalDeclaration(x)).map(x => writer.createCode(x)).reduceLeft(_+_)
+      val ret:SegmentReturn = struct.signals.map(x => {
+        val n = x.name.split("\\.")(1)
+        new SignalDeclaration(x.newSignal(name = n, opType = OpType.Logic ))
+      }
+      ).map(x => writer.createCode(x)).reduceLeft(_+_)
       SegmentReturn("struct packed {\n") + ret+ SegmentReturn(s"} ${struct.typeName}; \n")
     }
   }

@@ -18,10 +18,7 @@ trait DescriptionHolder {
 
   var description:Option[Description] = None
 
-  def html:xml.Elem = description match {
-    case Some(x) => x.html
-    case None    => <p></p>
-  }
+
   /*
   def shortHtml:xml.Elem = description match {
     case Some(x) => x.html

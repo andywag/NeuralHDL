@@ -1,6 +1,6 @@
 package com.simplifide.generate.proc
 
-import com.simplifide.generate.html.{Description, HtmlTable}
+import com.simplifide.generate.html.{Description}
 import com.simplifide.generate.util.FileOps
 import java.io.File
 
@@ -15,9 +15,7 @@ import java.io.File
 class ControlHTML(val programMap:ProgramMap) {
 
   def createTable(location:String) = {
-    val table = new HtmlTable(programMap.programMap.keys.toList.map(x => Description(x.toString)),
-      programMap.programMap.values.toList.map(x => x.map(y => Description(y.value.toString))).transpose)
-    FileOps.createFile(new File(location),table.htmlTable.toString())
+
 
   }
 }

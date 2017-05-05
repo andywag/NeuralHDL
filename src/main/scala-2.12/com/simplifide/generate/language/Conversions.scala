@@ -80,7 +80,7 @@ object Conversions {
 
   // Description Conversions
   implicit def String2Description(str:String) = Description(str)
-  implicit def Xml2Description(str:xml.Elem) = Description(str)
+  //implicit def Xml2Description(str:xml.Elem) = Description(str)
 
   // Parameter Conversions
   implicit def Parameter2Value[T](parameter:Parameter[T]):T = parameter.get

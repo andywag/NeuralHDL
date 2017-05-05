@@ -52,8 +52,9 @@ object FileOps {
     val fil = new FileWriter(file)
     fil.write(contents.toString)
     fil.close()
-    System.out.println("Wrote File" + file)
-    Logger.debug(contents)
+    Log().info(s"Wrote File" + file)
+    //System.out.println("Wrote File" + file)
+    InternalLogger.debug(contents)
   }
 
   /** Create a new file with the directory from fileLocation with filename 'filename' and the contents 'contents' */

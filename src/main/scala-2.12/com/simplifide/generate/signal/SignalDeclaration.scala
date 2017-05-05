@@ -5,6 +5,7 @@ import com.simplifide.generate.html.Description
 import com.simplifide.generate.signal.sv.Struct
 import com.simplifide.generate.util.StringOps
 
+
 /**
  * Class describing segment to create a signal declaration
  *
@@ -62,6 +63,8 @@ class SignalDeclaration(val signal:SignalTrait) extends SimpleSegment{
         case _ => if (signal.fixed.isSigned) "signed " else ""
       }
     }
+
+
 
     signal match {
       case x: Struct => {

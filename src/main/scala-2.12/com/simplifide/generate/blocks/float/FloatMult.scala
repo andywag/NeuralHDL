@@ -2,12 +2,12 @@ package com.simplifide.generate.blocks.float
 
 import com.simplifide.generate.blocks.basic.fixed.MultiplySegment
 import com.simplifide.generate.blocks.basic.operator.Operators
+import com.simplifide.generate.blocks.float.FloatMult.Dut
 import com.simplifide.generate.generator.{CodeWriter, SegmentReturn}
 import com.simplifide.generate.parser.{ConditionParser, EntityParser, SignalParser}
 import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal._
-import com.simplifide.generate.test2.blocktest
-import com.simplifide.generate.test2.blocktest.BlockTestParser
+import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
 import com.simplifide.generate.test2.data.DataGenParser.RANDOM
 
 /**
@@ -63,6 +63,8 @@ class FloatMult(override val name:String,
   }
 }
 
+
+
 object FloatMult {
 
 
@@ -75,24 +77,4 @@ object FloatMult {
 
   }
 
-
-  object RandomTest extends blocktest.BlockTestParser {
-    def blockName:String = "floatMultRandom"
-
-    val dutParser = new Dut(blockName)
-    override val dut: NewEntity = dutParser.createEntity
-
-    //override val dut = dutParser.createEntity
-
-
-    val testLength = 1000
-    /** Design Under Test */
-    dutParser.in1 << RANDOM
-    dutParser.in2 << RANDOM
-  }
-
-  def main(args: Array[String]): Unit = {
-    val temp = RandomTest
-    RandomTest.create
-  }
 }

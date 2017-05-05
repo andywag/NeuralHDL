@@ -18,9 +18,9 @@ trait FloatSignal extends Struct {
   val packed   = true
 
   val sgn  = SignalTrait(createName("sgn"),OpType.Signal,FixedType.unsigned(1,0))
+  val man  = SignalTrait(createName("man"),OpType.Signal,FixedType.unsigned(signalWidth,0))
   val exp  = SignalTrait(createName("exp"),OpType.Signal,FixedType.unsigned(expWidth,0))
-  val man  = SignalTrait(createName("man"),OpType.Signal,FixedType.signed(signalWidth,0))
-  val signals = List(sgn, man, exp)
+  val signals = List(sgn, exp, man)
 
   /*
   override def slice(index:Int):SimpleSegment  =

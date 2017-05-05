@@ -11,7 +11,8 @@ trait ProjectStructure {
 
   val separator = "/"
 
-  val project:Project
+  //val project:Project
+  val baseLocation:String
   /** Location where the design sources are stored */
   val designLocation:String
   /**Location where the documents are stored */
@@ -21,20 +22,20 @@ trait ProjectStructure {
   /** */
   val dataLocation:String
 
-  def design = project.location + separator + designLocation
-  def doc    = project.location + separator + docLocation
-  def test    = project.location + separator + testLocation
-  def data    = project.location  + separator + dataLocation
+  def design = baseLocation + separator + designLocation
+  def doc    = baseLocation + separator + docLocation
+  def test    = baseLocation + separator + testLocation
+  def data    = baseLocation  + separator + dataLocation
 
-  def designDirectory:File = new File(project.location,designLocation)
-  def docDirectory:File    = new File(project.location,docLocation)
-  def testDirectory:File   = new File(project.location,testLocation)
-  def dataDirectory:File   = new File(project.location, dataLocation)
+  def designDirectory:File = new File(baseLocation,designLocation)
+  def docDirectory:File    = new File(baseLocation,docLocation)
+  def testDirectory:File   = new File(baseLocation,testLocation)
+  def dataDirectory:File   = new File(baseLocation, dataLocation)
 
 
 
   def create = {
-    FileOps.createDirectory(project.location)
+    FileOps.createDirectory(baseLocation)
     FileOps.createDirectory(design)
     FileOps.createDirectory(doc)
     FileOps.createDirectory(test)
@@ -54,9 +55,16 @@ object ProjectStructure {
             designLocation:String = DESIGN,
             docLocation:String = DOC,
             testLocation:String = TEST,
-            dataLocation:String = DATA) = new User(project,designLocation,docLocation,testLocation, dataLocation)
+            dataLocation:String = DATA) = new User(project.location,designLocation,docLocation,testLocation, dataLocation)
 
-  class User(override val project:Project,
+  def project(location:String,
+            designLocation:String = DESIGN,
+            docLocation:String = DOC,
+            testLocation:String = TEST,
+            dataLocation:String = DATA) = new User(location,designLocation,docLocation,testLocation, dataLocation)
+
+
+  class User(override val baseLocation:String,
     override val designLocation:String = DESIGN,
     override val docLocation:String    = DOC,
     override val testLocation:String   = TEST,

@@ -3,13 +3,11 @@ package com.simplifide.generate.blocks.proc2
 import com.simplifide.generate.language.ExtraFile
 import com.simplifide.generate.language.Conversions._
 import com.simplifide.generate.signal.ParameterTrait
-import com.simplifide.generate.html.{HtmlTable2, Description, HtmlUtilities, HtmlTable}
-
 
 class HtmlDescription(override val filename:String,
                       val registerMap:RegisterMapNew) extends ExtraFile {
 
-
+/*
   private def detailedAddress(address:AddressNew) = {
     def addressMap   = <h2>{HtmlUtilities.hypername(address.name,address.name)}</h2>
     def addressTable = {
@@ -60,8 +58,8 @@ class HtmlDescription(override val filename:String,
   }
   /** Header of this Document */
   val header = <p>This document describes the registers defined by this processor interface</p>
-
-  val contents = HtmlUtilities.fullHtml(filename + " Register Map Description",List(header,addressDescription,detailedAddresses)).toString()
+*/
+  val contents = null//HtmlUtilities.fullHtml(filename + " Register Map Description",List(header,addressDescription,detailedAddresses)).toString()
   //val contents = HtmlUtilities.fullHtml(filename + " Register Map Description",List(addressDescription)).toString()
 
 }

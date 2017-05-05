@@ -14,7 +14,7 @@ import com.simplifide.generate.blocks.basic.memory.Memory
 import com.simplifide.generate.blocks.basic.fixed.{FixedOperations, FixedSelect}
 import com.simplifide.generate.parser.items.MiscParser
 import com.simplifide.generate.signal.sv.Struct
-
+//import org.scalatest._
 
 /**
  * Trait describing a signal

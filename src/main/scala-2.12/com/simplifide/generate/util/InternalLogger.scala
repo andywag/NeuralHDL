@@ -8,7 +8,7 @@ package com.simplifide.generate.util
  * To change this template use File | Settings | File Templates.
  */
 
-object Logger {
+object InternalLogger {
 
   var DEBUG = false
 
@@ -18,4 +18,8 @@ object Logger {
   def error(value:String)   = System.out.println(value)
 
   def booleanMessage(value:String):Boolean = {System.out.println(value); return false;}
+
+
+
+
 }

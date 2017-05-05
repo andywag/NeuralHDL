@@ -61,12 +61,12 @@ case class DataSet[T](data:Seq[DataTrait[T]], signal:SignalTrait, gen:DataTrait[
 
   def *(data:DataSet[T]) = {
     val newData = (this.data zip data.data).map(x => x._1 * x._2)
-    new DataSet[T](newData,signal,this.gen,None)
+    new DataSet[T](newData,signal.copy(s"${this.signal.name}_${data.signal.name}"),this.gen,None)
   }
 
   def +(data:DataSet[T]) = {
     val newData = (this.data zip data.data).map(x => x._1 + x._2)
-    new DataSet[T](newData,signal,this.gen,None)
+    new DataSet[T](newData,signal.copy(s"${this.signal.name}_${data.signal.name}"),this.gen,None)
   }
 
   def transform[S,V](x:DataSet[S])(f:(DataTrait[T],DataTrait[S])=>DataTrait[V]) {

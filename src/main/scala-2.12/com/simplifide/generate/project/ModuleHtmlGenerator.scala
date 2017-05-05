@@ -1,7 +1,6 @@
 package com.simplifide.generate.project
 
 import com.simplifide.generate.language.ExtraFile
-import com.simplifide.generate.html.{HtmlTable, Description, HtmlUtilities}
 import com.simplifide.generate.language.Conversions._
 import com.simplifide.generate.signal.{RegisterTrait, ArrayTrait, SignalTrait}
 

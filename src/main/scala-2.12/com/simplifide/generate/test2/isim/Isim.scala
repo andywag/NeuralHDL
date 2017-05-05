@@ -3,7 +3,7 @@ package com.simplifide.generate.test2.isim
 import com.simplifide.generate.TestConstants
 import com.simplifide.generate.project.{NewEntity, Project}
 import com.simplifide.generate.test2.SimInterface
-import com.simplifide.generate.util.{Logger, ProcessOps, FileOps}
+import com.simplifide.generate.util.{InternalLogger, ProcessOps, FileOps}
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,12 +35,12 @@ class Isim(val project: Project) extends SimInterface {
 
   def compile(entity: NewEntity) = {
     def command = TestConstants.fuseLocation + " work." + entity.name + " -prj " + projectFile + " -o " + testLocation + separator + entity.name
-    ProcessOps.exec(command, Some(testLocation))(ln => Logger.booleanMessage(ln))
+    ProcessOps.exec(command, Some(testLocation))(ln => InternalLogger.booleanMessage(ln))
   }
 
   def run(entity: NewEntity) = {
     val command = testLocation + separator + entity.name + ".exe" + " -tclbatch " + TCLFILE + " -log " + LOGFILE
-    ProcessOps.exec(command, Some(testLocation))(ln => Logger.booleanMessage(ln))
+    ProcessOps.exec(command, Some(testLocation))(ln => InternalLogger.booleanMessage(ln))
   }
 
 

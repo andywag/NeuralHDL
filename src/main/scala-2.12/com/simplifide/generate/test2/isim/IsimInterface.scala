@@ -4,7 +4,7 @@ import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.TestConstants
 import com.simplifide.generate.test2.{NewSimInterface, SimInterface}
 import java.io.File
-import com.simplifide.generate.util.{Logger, ProcessOps, FileOps}
+import com.simplifide.generate.util.{InternalLogger, ProcessOps, FileOps}
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,7 +40,7 @@ object IsimInterface extends NewSimInterface {
 
   def compile(rootModule:String, testLocation:String) = {
     def handleExpression(input:String):Boolean = {
-      Logger.message(input)
+      InternalLogger.message(input)
       if (input.startsWith("ERROR")) true else false
     }
     
@@ -50,6 +50,6 @@ object IsimInterface extends NewSimInterface {
 
   def run(rootModule:String, testLocation:String) = {
     val command = testLocation + separator + rootModule + ".exe" + " -tclbatch " + TCLFILE + " -log " + LOGFILE
-    ProcessOps.exec(command, Some(testLocation))(ln => Logger.booleanMessage(ln))
+    ProcessOps.exec(command, Some(testLocation))(ln => InternalLogger.booleanMessage(ln))
   }
 }

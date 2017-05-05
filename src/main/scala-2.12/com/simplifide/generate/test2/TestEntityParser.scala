@@ -1,7 +1,7 @@
 package com.simplifide.generate.test2
 
 import com.simplifide.generate.parser.EntityParser
-import com.simplifide.generate.project.{NewEntity, NewEntityInstance}
+import com.simplifide.generate.project.{NewEntity, NewEntityInstance, Project}
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.generator.BasicSegments
 import com.simplifide.generate.blocks.test.{BasicBlocks, ClockGenerator}
@@ -19,8 +19,11 @@ trait TestEntityParser extends EntityParser with TestParser with InitialParser w
   implicit val clk:ClockControl
   implicit val parser:TestEntityParser = this
 
+  def dataLocation:String = ""
+
   /** Design Under Test */
   val dut:NewEntity
+  val index = signal("counter",REG,U(32,0))
 
   def checkMatch(signal:List[SignalTrait], input:SignalTrait) = {
     signal.map(_.name).contains(input.name)
@@ -33,6 +36,10 @@ trait TestEntityParser extends EntityParser with TestParser with InitialParser w
     head(new BasicBlocks.TimeScale("10ns","1ns"))
 
     appendSignals(clk.allSignals(INPUT))
+
+    /- ("Counter to Index Test")
+
+    index := (index + 1) $at (clk)
 
     // Create the signals associated with this entity 
     signal(internalSignals)

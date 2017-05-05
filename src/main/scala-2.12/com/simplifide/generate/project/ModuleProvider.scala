@@ -6,7 +6,6 @@ import com.simplifide.generate.signal.{RegisterTrait, SignalTrait, SignalDeclara
 import com.simplifide.generate.language.{ DescriptionHolder, ExtraFile}
 import com.simplifide.generate.util.StringOps
 
-
 /** Trait describing an implementation of the body of a module */
 trait ModuleProvider extends SimpleSegment  with DescriptionHolder {
   /** Impl Name */

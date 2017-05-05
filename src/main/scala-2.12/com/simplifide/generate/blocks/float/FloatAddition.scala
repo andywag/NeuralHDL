@@ -4,7 +4,7 @@ import com.simplifide.generate.blocks.basic.condition.ConditionStatement
 import com.simplifide.generate.blocks.basic.fixed.AdditionSegment
 import com.simplifide.generate.blocks.basic.operator.{Operators, UnaryOperator}
 import com.simplifide.generate.generator.{CodeWriter, SegmentReturn}
-import com.simplifide.generate.parser.{ConditionParser, SegmentHolder}
+import com.simplifide.generate.parser.{ConditionParser, EntityParser, SegmentHolder}
 import com.simplifide.generate.parser.items.SingleConditionParser.IfStatement
 import com.simplifide.generate.parser.model.BasicExpressions
 import com.simplifide.generate.signal.{Constant, FloatSignal, OpType, SignalTrait}
@@ -111,6 +111,20 @@ class FloatAddition(override val name:String,
       writer.createCode(x)
     )
     writer.createCode(internalSig).extra(statements.toList.map(_.create),signals.toList)
+  }
+
+}
+
+object FloatAddition {
+
+
+  class Dut(val name:String) extends EntityParser {
+    val in1   = signal(FloatSignal("in1",INPUT))
+    val in2   = signal(FloatSignal("in2",INPUT))
+    val out1  = signal(FloatSignal("out",OUTPUT))
+
+    out1 := in1 + in2
+
   }
 
 }

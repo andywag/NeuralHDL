@@ -2,7 +2,7 @@ package com.simplifide.generate.test2.util
 
 import java.io.File
 import io.Source
-import com.simplifide.generate.util.Logger
+import com.simplifide.generate.util.InternalLogger
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,9 +52,9 @@ object FileMatch {
     val matLength = matLines.size
     val hardLength = hardLines.size
 
-    if (matLength == 0) Logger.message("ERROR - Stimulus File Empty");
-    else if (hardLength == 0) Logger.message("ERROR - Output File Empty")
-    else if (matLength != hardLength) Logger.message("ERROR - File Sizes don't match")
+    if (matLength == 0) InternalLogger.message("ERROR - Stimulus File Empty");
+    else if (hardLength == 0) InternalLogger.message("ERROR - Output File Empty")
+    else if (matLength != hardLength) InternalLogger.message("ERROR - File Sizes don't match")
     else {
       val data = ((matLines) zip (hardLines))
       val errors = data.zipWithIndex.flatMap(x => lineCompare(x._1._1,x._1._2,x._2,comparator)).toList
@@ -62,12 +62,12 @@ object FileMatch {
 
 
       if (errors.size > 0) {
-        Logger.message("Matching Failed Between " + matchFile + " --- " + hardFile)
-        Logger.message(this.printErrors(errors))
+        InternalLogger.message("Matching Failed Between " + matchFile + " --- " + hardFile)
+        InternalLogger.message(this.printErrors(errors))
 
       }
       else {
-        Logger.message("Matching Passed between " + matchFile + " --- " + hardFile)
+        InternalLogger.message("Matching Passed between " + matchFile + " --- " + hardFile)
         result = true
       }
     }

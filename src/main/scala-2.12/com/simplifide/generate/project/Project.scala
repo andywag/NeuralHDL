@@ -26,8 +26,9 @@ trait Project extends SignalHolder{
 
   /** Base Location of the ProjectGenerator */
   val location:String
+
   /** Structure Defining where the project outputs are written */
-  val projectStructure = ProjectStructure(this)
+  lazy val projectStructure = ProjectStructure(this)
   /** Base Entity for the ProjectGenerator */
 
   /** List of Tests for the project */

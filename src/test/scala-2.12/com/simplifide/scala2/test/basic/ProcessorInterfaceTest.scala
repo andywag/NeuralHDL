@@ -41,7 +41,7 @@ object ProcessorInterfaceTest {
 
     registerGroup(8) (
       address("DEFAULT",0) registers (
-        readWrite("i",5) start (0) default("25") comment (<p>Signal <b>Alpha</b></p>)
+        readWrite("i",5) start (0) default("25")
         readWrite("J",1) start (6)
       ) comment ("Basic Register")
       address("INITIAL",1) registers (

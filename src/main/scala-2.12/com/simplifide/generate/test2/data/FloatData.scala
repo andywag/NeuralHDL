@@ -88,5 +88,6 @@ object FloatData {
   }
   object FloatWrap {
     val GENERATOR = FloatWrap(1.0.toFloat)
+
   }
 }
