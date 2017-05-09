@@ -61,6 +61,13 @@ trait SignalHolder extends SignalMethods{
     if (values.size > 0) values(0) else null
   }
 
+  def sigs[T <: SignalTrait](sigs:Seq[T]) = {
+    signals.appendAll(sigs)
+    sigs
+  }
+
+
+
   def inputs(values:SignalTrait*) {
     signals.appendAll(values.map(_.changeType(OpType.Input)))
   }

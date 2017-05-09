@@ -1,9 +1,10 @@
 package com.simplifide.generate.generator
 
-import com.simplifide.generate.signal.SignalTrait
+import com.simplifide.generate.signal.{OpType, SignalTrait}
 import com.simplifide.generate.language.Conversions._
 import com.simplifide.generate.parser._
-import com.simplifide.generate.generator.ComplexSegment.Holder
+import com.simplifide.generate.generator.ComplexSegment.{Holder, SegmentEntity}
+
 import collection.mutable.ListBuffer
 import factory.CreationFactory
 import items.MiscParser
@@ -17,12 +18,11 @@ import com.simplifide.generate.blocks.basic.misc.Comment
 
 trait ComplexSegment extends ConditionParser with SignalHolder with SimpleSegment with MiscParser{
 
+
   val title:Option[String] = None
   /** Defines the body in the block */
   def createBody
 
- 
-  
   override def create(implicit creator:CreationFactory) = {
     this.createBody
     val states = if (title.isDefined) List(new Comment.Section(title.get)) ::: this.allStatements ::: List(new Comment.Section("END " + title.get)) else this.allStatements
@@ -35,11 +35,24 @@ trait ComplexSegment extends ConditionParser with SignalHolder with SimpleSegmen
     null
   }
 
+  def inputs:Seq[SignalTrait] = Seq()
+
+  /*
+  def createEntity[T]:SegmentEntity[T] = {
+    SegmentEntity[this.type](this)
+  }
+  */
+
 }
 
 object ComplexSegment {
 
 
+  case class SegmentEntity[T <: ComplexSegment](segment:T, override val name:String) extends EntityParser {
+    ->(segment)
+    signal(segment.inputs.map(x => x.changeType(OpType.Input)).toList)
+    signal(segment.outputs.map(x => x.changeType(OpType.Output)))
+  }
   
   /** Class which is used to contain the body of the complex value after the split operation */
   class Holder(val statements:List[SimpleSegment], 

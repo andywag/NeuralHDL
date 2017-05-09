@@ -28,6 +28,8 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
   /** Length of array if this is an array */
   val arrayLength = 0
 
+  val ioType:IoType = IoType.IoNone
+
   /** Method which an indexing of a variable from a clk. Called from the parser x[n-k] */
   def apply(clk:Clock):SimpleSegment = if (clk.delay == 0) this else child(clk.delay)
   /** Returns this variable indexed by the input signal */
@@ -83,7 +85,13 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
     }
   }
   /** Changes the type of the signal. Mainly used for Input Output Changes during connections */
-  def changeType(typ:OpType):SignalTrait = SignalTrait(this.name,typ,this.fixed)
+  def changeType(typ:OpType):SignalTrait = {
+    this match {
+      case x:Struct => x.copyStruct(this.name,typ)
+      case _        => SignalTrait(this.name,typ,this.fixed)
+    }
+
+  }
   /** Reverses the connection for this block */
   def reverseType:SignalTrait = SignalTrait(this.name,this.opType.reverseType,this.fixed)
 

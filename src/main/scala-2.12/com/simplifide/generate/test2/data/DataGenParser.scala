@@ -50,6 +50,7 @@ trait DataGenParser {
      dataSet
     }
 
+
     // FIXME : Not General
     def -->(data:DataSet[FloatWrap], title:String)(implicit clk:ClockControl,scope:TestEntityParser) = {
 

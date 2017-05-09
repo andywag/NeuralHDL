@@ -8,5 +8,5 @@ import com.typesafe.scalalogging.Logger
   */
 object Log {
   def apply(name:String) = Logger(name)
-  def apply()            = Logger("MAIN")
+  def apply()            = Logger("Main")
 }

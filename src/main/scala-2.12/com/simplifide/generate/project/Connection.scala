@@ -46,16 +46,24 @@ object Connection {
     }
     val realConnections = connections.flatMap(flatten(_)).toMap
 
-    override def connect(signal:SignalTrait):SignalTrait = realConnections.getOrElse(signal,signal).copy(optype = signal.opType)
+    override def connect(signal:SignalTrait):SignalTrait = {
+      val port = realConnections.getOrElse(signal,signal)
+      port.copy(optype =  signal.opType)
+    }
   }
   object MapSignalConnection {
-    /*def apply(connections:(SignalTrait,SignalTrait)*):MapSignalConnection = {
-      MapSignalConnection(Map(connections))
-    }*/
+
+    /** @deprecated : Doesn't seem to work */
     def apply(connections:Map[SignalTrait,SignalTrait]):MapSignalConnection = {
       val imap = connections.flatMap(x => x._1.connect(x._2))
       new MapSignalConnection(imap)
     }
+
+    def name(connections:Map[SignalTrait,SignalTrait]) = {
+      val strMap = connections.map(x => (x._1.name, x._2.name)).toMap
+      new MapConnection(strMap)
+    }
+
   }
 
 }

@@ -52,7 +52,9 @@ object FileOps {
     val fil = new FileWriter(file)
     fil.write(contents.toString)
     fil.close()
-    Log().info(s"Wrote File" + file)
+    Log("Main").info(s"Wrote File" + file)
+
+
     //System.out.println("Wrote File" + file)
     InternalLogger.debug(contents)
   }

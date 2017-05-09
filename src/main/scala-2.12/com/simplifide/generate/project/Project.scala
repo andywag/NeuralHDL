@@ -51,8 +51,9 @@ trait Project extends SignalHolder{
         case _        => None
       }
     }
-    val types = entities.flatMap(x => x.signals).flatMap(getType(_)).toSet.toSeq
-
+    val signals = entities.flatMap(x => x.signals)
+    val types1 = signals.flatMap(getType(_)).map(x => (x.typeName,x)).toMap
+    val types  = types1.values.toSeq
     types
 
   }

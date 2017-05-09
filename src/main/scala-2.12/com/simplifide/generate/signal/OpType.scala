@@ -84,5 +84,6 @@ object OpType {
   object RegOutput extends OpType
   object Logic     extends OpType
   object Struct     extends OpType
-  
+
+
 }

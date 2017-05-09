@@ -44,8 +44,10 @@ trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser 
     segment
   }
 
+
+
   def instance(entity:NewEntity,name:String,connections:Map[SignalTrait,SignalTrait]):NewEntityInstance[_] = {
-   this.instance(entity,name,new Connection.MapSignalConnection(connections))
+   this.instance(entity,name,Connection.MapSignalConnection.name(connections))
   }
   
   def instance(entity:NewEntity,name:String,connection:Connection = Connection.Default) = {

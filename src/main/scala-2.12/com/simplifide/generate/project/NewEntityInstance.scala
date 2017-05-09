@@ -20,7 +20,10 @@ trait NewEntityInstance[T <: NewEntity] extends SimpleSegment with PathProvider{
   override def toString = name + "(" + entity + ")"
 
   def allSignals = SignalTrait.uniqueSignals(entity.signals.flatMap(_.allSignalChildren).filter(_.isIo)).flatMap(x => connection.connectOption(x))
-  def allConnections = SignalTrait.uniqueSignals(entity.signals.flatMap(_.allSignalChildren).filter(_.isIo)).map(x => (x, connection.connectSegment(x)))
+  def allConnections = {
+    val allSignals = SignalTrait.uniqueSignals(entity.signals.flatMap(_.allSignalChildren).filter(_.isIo))
+    allSignals.map(x => (x, connection.connectSegment(x)))
+  }
 
   /** Returns a list of all signals as seen at the enclosing module */
   //def allSignals = entity.signals.flatMap(_.allSignalChildren).map(connection.connect(_))
