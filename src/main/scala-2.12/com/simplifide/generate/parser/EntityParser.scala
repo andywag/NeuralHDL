@@ -11,7 +11,7 @@ import items.InstanceParser
  * Parser which creates an entity
  */
 
-trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser {
+trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser  {
 
 
 

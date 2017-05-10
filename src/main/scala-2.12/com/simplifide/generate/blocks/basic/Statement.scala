@@ -2,8 +2,6 @@ package com.simplifide.generate.blocks.basic
 
 import com.simplifide.generate.signal.SignalTrait
 import com.simplifide.generate.parser.block.ParserStatement
-import com.simplifide.generate.proc.parser.ProcessorSegment
-import com.simplifide.generate.proc.Controls
 import com.simplifide.generate.generator.SegmentReturn._
 import com.simplifide.generate.parser.ExpressionReturn
 import com.simplifide.generate.util.StringOps
@@ -35,7 +33,7 @@ trait Statement extends SimpleSegment with ParserStatement  {
   /** Output of this code segment */
   override def outputs:List[SignalTrait] = if (output == null) List() else output.outputs
   /** Attach the input to the output */
-  if (output != null) output.assignment = Some(input)
+
 
   override def toString = "assign " + output + " = " + input
 
@@ -53,13 +51,7 @@ trait Statement extends SimpleSegment with ParserStatement  {
   }
 
 
-  // TODO Needs to be moved to another fileLocation
-  /** Controls for Processor Generator */
-  override lazy val controls = if (input != null) input.controls else List()
-  /** Control Generation for the Processor Generator */
-  def createControl(actual:Statement,statements:ProcessorSegment, index:Int):List[Controls.Value] = {
-    this.input.createControl(actual.input,statements,index)
-  }
+
 
 
 

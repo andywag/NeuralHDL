@@ -1,13 +1,8 @@
 package com.simplifide.generate.generator
 
 import com.simplifide.generate.parser.model.Expression
-import com.simplifide.generate.parser.block.ParserStatement
-import com.simplifide.generate.parser.{SegmentHolder, ExpressionReturn}
-import com.simplifide.generate.proc.{ControlHolder, Controls}
-import com.simplifide.generate.proc.parser.ProcessorSegment
-import com.simplifide.generate.blocks.basic.Statement
 import com.simplifide.generate.parser.factory.{CreationFactory}
-import com.simplifide.generate.signal.{SignalSelect, OpType, SignalTrait, FixedType}
+import com.simplifide.generate.signal.{OpType, SignalTrait, FixedType}
 import com.simplifide.generate.parser.items.MiscParser
 
 
@@ -15,7 +10,7 @@ import com.simplifide.generate.parser.items.MiscParser
  * Base trait for a code segment.
  */
 
-trait SimpleSegment extends Expression with ControlHolder with AssignmentHolder  {
+trait SimpleSegment extends Expression   {
 
   implicit val creator = CreationFactory.Hardware
   

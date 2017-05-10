@@ -3,7 +3,7 @@ package com.simplifide.generate.neural
 import com.simplifide.generate.blocks.neural.{Neuron, NeuronStage}
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.project.NewEntity
-import com.simplifide.generate.signal.FloatSignal
+import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
 import com.simplifide.generate.test2.data.DataGenParser.RANDOM
 
@@ -17,11 +17,12 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   def blockName:String = "neuronStage"
 
   val depth = 8;
+  val start = (math.log10(depth)/math.log10(2.0)).toInt
   //override implicit val testLength = 1000
 
 
 
-  val valid     = signal("valid")
+  val valid     = SignalTrait("valid",INPUT)
   val dataIn    = Seq(FloatSignal("dataIn",INPUT))
   val tapIn     = Seq.tabulate(depth)(x => FloatSignal(s"tapIn_$x",INPUT))
   val biasIn    = Seq.tabulate(depth)(x => FloatSignal(s"biasIn_$x",INPUT))
@@ -31,8 +32,10 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   val tapInD    = List.tabulate(depth) {x => tapIn(x) <-- RANDOM }
   val biasInD   = List.tabulate(depth) {x => biasIn(x) <-- RANDOM }
 
-  val data = List.tabulate(depth)(x => dataInD * tapInD(x))
-  def getData(x:Int) = dataOut(x) --> (data(x),"Results")
+  valid := (index(start-1,0) === 0)
+
+  val data = List.tabulate(depth)(x => dataInD * tapInD(x) + biasInD(x))
+  def getData(x:Int) = dataOut(x) --> (data(x),s"Results$x")
   val dataOutD = List.tabulate(depth)(x => getData(x))
 
 

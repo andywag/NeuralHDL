@@ -3,8 +3,6 @@ package com.simplifide.generate.blocks.basic.fixed
 import com.simplifide.generate.generator.{BasicSegments, CodeWriter, SegmentReturn, SimpleSegment}
 import com.simplifide.generate.language.Conversions._
 import com.simplifide.generate.parser._
-import com.simplifide.generate.proc.Controls
-import com.simplifide.generate.proc.parser.ProcessorSegment
 import com.simplifide.generate.blocks.basic.{BinarySegment, Statement}
 import com.simplifide.generate.blocks.basic.fixed.Roundable.RoundType
 import com.simplifide.generate.blocks.basic.float.RangeShift
@@ -50,7 +48,7 @@ trait MultiplySegment extends BinarySegment with Roundable {
     roundType:Roundable.RoundType              = this.roundType):MultiplySegment =
   {
     this match {
-      case x:FloatMult =>  new FloatMult(name,x.in1,x.in2)
+      //case x:FloatMult =>  new FloatMult(name,x.in1,x.in2)
       case _           =>  new MultiplySegment.Impl(name,in1,in2,fixed,internal,roundType)
     }
   }
@@ -113,8 +111,8 @@ object MultiplySegment {
       case (x:NewConstant,_) =>
         if (x.binaryFactor.isDefined) BinaryShift(in2,x.binaryFactor.get)
         else  new Impl("",in1,in2,FixedType.Simple,FixedType.Simple)
-      case (x:FloatSignal,y:FloatSignal) =>
-        new FloatMult("",x,y)
+      //case (x:FloatSignal,y:FloatSignal) =>
+       // new FloatMult("",x,y)
       case _ =>
         new Impl("",in1,in2,FixedType.Simple,FixedType.Simple)
       }

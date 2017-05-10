@@ -68,18 +68,5 @@ object XilinxMemory extends SignalMethods {
     val memory = new XilinxMemory(name,bus.wrAddress,bus.wrData,bus.wrVld,bus.rdAddress,bus.rdData,Some(depth))
     this.assign(memory)
   }
-  /*
-  class Entity(memory:XilinxMemory)(implicit clk:ClockControl) extends EntityParser {
-    signal(clk.allSignals(INPUT))
-    signal(memory.wrAddress.asInput)
-    signal(memory.wrData.asInput)
-    signal(memory.wrVld.asInput)
-    signal(memory.rdAddress.asInput)
-    signal(memory.rdData.asOutput)
 
-    this.assign(memory)
-    
-  }
-
-  */
 }

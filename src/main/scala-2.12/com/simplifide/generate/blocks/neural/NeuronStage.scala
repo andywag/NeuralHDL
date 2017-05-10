@@ -17,10 +17,13 @@ case class NeuronStage(override val name:String,
                        numberOfNeurons:Int,
                        neuron:SegmentEntity[Neuron]) extends  EntityParser{
 
-  def inputs = dataIn.toList ::: tapIn.toList ::: biasIn.toList
+  def inputs = valid :: dataIn.toList ::: tapIn.toList ::: biasIn.toList
 
   sigs(inputs.map(_.changeType(OpType.Input)))
   sigs(dataOut.map(_.changeType(OpType.Output)))
+
+  val neuronInput = biasIn.map(x => signal(x.newSignal(name = x.appendName("_input"),opType=OpType.Logic)))
+  List.tabulate(numberOfNeurons)(x => neuronInput(x) := valid ? biasIn(x) :: dataOut(x))
 
   for (i <- 0 until numberOfNeurons) {
 

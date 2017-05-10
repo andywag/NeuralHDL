@@ -5,8 +5,6 @@ import com.simplifide.generate.blocks.basic.condition.NewCaseStatement
 import com.simplifide.generate.signal.{Constant, SignalTrait}
 import com.simplifide.generate.blocks.basic.state.Always
 import com.simplifide.generate.generator.{SegmentReturn, CodeWriter, SimpleSegment}
-import com.simplifide.generate.proc.Controls
-import com.simplifide.generate.parser.SegmentHolder
 import com.simplifide.generate.blocks.basic.Statement
 import com.simplifide.generate.parser.factory.CreationFactory
 

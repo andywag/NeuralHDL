@@ -1,9 +1,12 @@
 package com.simplifide.generate.blocks.float
 
 import com.simplifide.generate.blocks.basic.fixed.MultiplySegment
+import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.operator.Operators
+import com.simplifide.generate.blocks.basic.typ.{NumberType, TypeParser}
 import com.simplifide.generate.blocks.float.FloatMult.Dut
-import com.simplifide.generate.generator.{CodeWriter, SegmentReturn}
+import com.simplifide.generate.generator.{CodeWriter, ComplexSegment, SegmentReturn, SimpleSegment}
+import com.simplifide.generate.parser.factory.CreationFactory
 import com.simplifide.generate.parser.{ConditionParser, EntityParser, SignalParser}
 import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal._
@@ -14,10 +17,13 @@ import com.simplifide.generate.test2.data.DataGenParser.RANDOM
   * Created by andy on 5/2/17.
   */
 class FloatMult(override val name:String,
-                override val in1:FloatSignal,
-                override val in2:FloatSignal) extends MultiplySegment
+                val in1:FloatSignal,
+                val in2:FloatSignal)(implicit clk:ClockControl) extends ComplexSegment
   with ConditionParser with SignalParser  {
 
+
+  override def createOutput(output:SimpleSegment)(implicit creator:CreationFactory):SimpleSegment =
+    new FloatMult(output.name,in1,in2)
 
 
   //val mFixed = in1.mantissa.fixed * in2.mantissa.fixed
@@ -32,12 +38,15 @@ class FloatMult(override val name:String,
     val res       = SignalTrait(appendName("res") ,OpType.Signal,man1.fixed*man2.fixed)
     val shift     = SignalTrait(appendName("sh"),OpType.Signal,FixedType.unsigned(2,0))
     val internal  = FloatSignal(appendName("int"),OpType.Register,in1.signalWidth, in1.expWidth)
+    val reg       = FloatSignal(appendName("reg"),OpType.Register,in1.signalWidth, in1.expWidth)
+
 
     val res1      = SignalTrait(appendName("_man1"),OpType.Signal,U(in1.signalWidth+1,0))
 
     val s0 = (man1 ::= Operators.Concat(List(Constant(1.0,U(1,0)),in1.man)))
     val s1 = (man2 ::= Operators.Concat(List(Constant(1.0,U(1,0)),in2.man)))
     val mult = (res ::= man1*man2)
+
 
     val fi = $always_star(
       internal.sgn ::= in1.sgn ^ in2.sgn,
@@ -57,10 +66,13 @@ class FloatMult(override val name:String,
         internal.man ::= res(res.width-4,res.width-3-in1.signalWidth)+res(res.width-4-in1.signalWidth)
       )
     ).create
+    val re = reg := internal $at (clk)
 
-
-    return writer.createCode(internal).extra(List(s0,s1,mult,fi).map(_.create),List(man1,man2,res,shift,internal))
+    return writer.createCode(internal).extra(List(s0,s1,mult,fi,re).map(_.create),List(man1,man2,res,shift,internal,reg))
   }
+
+  /** Defines the body in the block */
+  override def createBody: Unit = {}
 }
 
 
@@ -68,12 +80,16 @@ class FloatMult(override val name:String,
 object FloatMult {
 
 
-  class Dut(val name:String) extends EntityParser {
+  class Dut(val name:String)(implicit val clk:ClockControl) extends EntityParser  {
+    import NumberType.NumberLike._
+
+    signal(clk.allSignals(INPUT))
     val in1   = signal(FloatSignal("in1",INPUT))
     val in2   = signal(FloatSignal("in2",INPUT))
     val out1  = signal(FloatSignal("out",OUTPUT))
 
-    out1 := in1 * in2
+    //val result = in1 * in2
+    out1 := in1 times in2
 
   }
 

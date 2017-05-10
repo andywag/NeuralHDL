@@ -29,7 +29,7 @@ class BusDirect(override val name:String,
     if (inputSignal.isInstanceOf[BusDirect])
       (this.signals zip inputSignal.asInstanceOf[BusDirect].signals).map(x => (x._1,x._2)).toMap
     else
-      Map(signal -> inputSignal)
+      Map(this.signals(0) -> inputSignal)
 
   }
 

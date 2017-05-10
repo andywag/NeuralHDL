@@ -3,8 +3,6 @@ package com.simplifide.generate.signal
 import com.simplifide.generate.blocks.basic.flop.{SimpleFlopList, ClockControl}
 import com.simplifide.generate.parser.model.Clock
 import com.simplifide.generate.parser.SegmentHolder
-import com.simplifide.generate.proc.Controls
-import com.simplifide.generate.proc.parser.ProcessorSegment
 import com.simplifide.generate.generator.{SegmentReturn, CodeWriter, SimpleSegment}
 import com.simplifide.generate.generator.SegmentReturn._
 
@@ -56,32 +54,6 @@ trait RegisterTrait[T <: SignalTrait] extends ArrayTrait[T] {
     val res = thisChildren.map(x => new SimpleFlopList.Segment(x,None))
     val ena = thisChildren.zipWithIndex.map(x => new SimpleFlopList.Segment(x._1,Some(if (x._2 == 0) this.prototype else children(x._2-1))))
     new SimpleFlopList(None,this.clock,res,ena)
-  }
-
-    /** TODO : Copy of Control Match ... */
-  override def createControl(actual:SimpleSegment,statements:ProcessorSegment,index:Int):List[Controls.Value] = {
-    if (actual.isInstanceOf[SignalTrait]) return List()
-
-    val state = statements.getStatement(this.prototype)
-    state match {
-      case None    => return List()
-      case Some(x) => x.input.createControl(actual,statements,index)
-    }
-  }
-
-
-  override def controlMatch(actual:SimpleSegment,statements:ProcessorSegment):Boolean = {
-    if (actual.isInstanceOf[SignalTrait]) {
-      val mat = (prototype.name == actual.name) || (this.name == actual.name)
-      return mat
-    }
-
-    val state = statements.getStatement(this)
-    state match {
-      case None    => false
-      case Some(x) => x.input.controlMatch(actual,statements)
-    }
-
   }
 
 

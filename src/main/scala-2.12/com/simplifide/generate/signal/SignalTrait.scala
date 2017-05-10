@@ -5,11 +5,9 @@ import com.simplifide.generate.parser.model.Clock
 import com.simplifide.generate.html.Description
 import com.simplifide.generate.language.DescriptionHolder
 import com.simplifide.generate.parser.SegmentHolder
-import com.simplifide.generate.proc.Controls
 import com.simplifide.generate.blocks.basic.operator.{Operators, Select}
 
 import collection.mutable.ListBuffer
-import com.simplifide.generate.proc.parser.ProcessorSegment
 import com.simplifide.generate.blocks.basic.memory.Memory
 import com.simplifide.generate.blocks.basic.fixed.{FixedOperations, FixedSelect}
 import com.simplifide.generate.parser.items.MiscParser
@@ -20,7 +18,7 @@ import com.simplifide.generate.signal.sv.Struct
  * Trait describing a signal
  */
 
-trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls with SignalCreator {
+trait SignalTrait extends SimpleSegment with DescriptionHolder with SignalCreator {
 
   override val name:String
   /** Fixed type of signal */
@@ -144,26 +142,9 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with Controls wit
 
 
 
-  /** TODO : Copy of Control Match ... */
-  override def createControl(actual:SimpleSegment,statements:ProcessorSegment,index:Int):List[Controls.Value] = {
-
-    this.assignment match {
-      case None    => return actual.createControl(null,null,index)
-      case Some(x) => x.createControl(actual,statements,index)
-    }
-  }
 
 
-  override def controlMatch(actual:SimpleSegment,statements:ProcessorSegment):Boolean = {
-    if (actual.isInstanceOf[SignalTrait]) return this.name == actual.name
 
-    val state = statements.getStatement(this)
-    state match {
-      case None    => false
-      case Some(x) => x.input.controlMatch(actual,statements)
-    }
-
-  }
 
   
 
