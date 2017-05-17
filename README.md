@@ -2,7 +2,7 @@
 
 NeuralHDL is an internal DSL in scala for hardware design geared towards neural networks. The goal of this project will be to create (or expand) existing tool sets like [DeepLearningForJ](https://deeplearning4j.org/) or [CAFFE](http://caffe.berkeleyvision.org/) to directly generate and interface to hardware designs. This project is based on an existing general purpose hardware DSL ([ScalaDL](https://github.com/andywag/ScalaDL)) which was used in the design of a highly parallel optical modem. 
 
-Given the nature of neural networks there is no reason that a CAFFE like description shown below can't be directly mapped to a hardware structure which is far easier. This design tool will use an internal DSL rather than JSON but the concepts are the same. 
+Given the nature of neural networks there is no reason that a CAFFE like description shown below can't be directly mapped to a hardware structure which is far easier. This design tool will use an internal DSL rather than JSON but the concepts are the same with a simple description describing the hardware. 
 
 ```json
 layer {
