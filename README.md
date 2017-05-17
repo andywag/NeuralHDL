@@ -1,7 +1,28 @@
 # ScalaHDL
 
-ScalaHDL is an internal DSL for hardware design based on Scala. It is the culmination of years of struggle with 
-creating parameterizable hardware designs with languages which are not specifically tailored to the problem. 
+ScalaHDL is an internal DSL for hardware design using Scala as the base language. It is the culmination of decades of automating signal processing design using HDL generators due to limitations in HDLs. Through these years there have been many commercial tools to solve this problem but have all suffered from the same flaw. 
+
+1. Tools are not good at architecture
+
+Abstraction should allow designers/architects a convenient way to describe their designs. Most tools including the current C++ HLS languages do not support an entry mechanism which gives architects the power/control to specify their design. This approach works but tends to lead to inefficient and difficult to support designs. 
+
+The approach used with an internal DSL is to allow the "architect/designer" to define his own abstraction to be able to completely specify his design in an abstract way. Other tools have been built following this approach (including a prior version of this tool) which have not had great adoption. 
+
+https://github.com/VeriScala/VeriScala
+https://chisel.eecs.berkeley.edu/
+
+The issue with these languages is that hardware designers in general have extremely limited software abilities and the initial design of the DSL can be challenging. The goal of this project is not to solve the general problem but to port an existing tool used in the development of a highly parallel optical receiver to another highly parallel architecture (neural networks). 
+
+## Background
+
+HDL languages have advantages and disadvantages. For structured designs like signal processing the disadvantages far outweigh the advantages so I have spent years attempting to automate the design of structured operations. 
+
+1. HDLs (Verilog-VHDL) are good at timing, low-level bit manipulation and control
+2. HDLs are not good at parameterization and abstraction or automating structured designs
+
+These two conflicting issues make automation problematic since it is beneficial to write control logic using an HDL but abstract more structured items using a higher level language. This led to various incarnations of hybrid design tools which only used partial generation leading to issues. Internal DSL solve this issues by allowing control over the syntax so the complete design can be included in the same language and structure
+
+
 
 ## Issues with Current Design Paradigms
 
