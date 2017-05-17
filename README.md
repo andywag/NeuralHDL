@@ -1,6 +1,9 @@
 # ScalaHDL
 
-ScalaHDL is an internal DSL for hardware design using Scala as the base language. It is the culmination of decades of automating signal processing design using HDL generators due to limitations in HDLs. Through these years there have been many commercial tools to solve this problem but have all suffered from the same flaw. 
+ScalaHDL is an internal DSL for hardware design using Scala as the base language. It is the culmination of decades of automating signal processing design using HDL generators due to limitations in HDLs. The purpose of this project is not to change the general workflow of ASIC teams or create a new language for design. The purpose of this project is to port an existing working generator used for highly parallel optical chips to Neural Networks. 
+
+## Background
+Through these years there have been many commercial tools to solve this problem but have all suffered from the same flaw. 
 
 1. Tools are not good at architecture
 
@@ -8,12 +11,12 @@ Abstraction should allow designers/architects a convenient way to describe their
 
 The approach used with an internal DSL is to allow the "architect/designer" to define his own abstraction to be able to completely specify his design in an abstract way. Other tools have been built following this approach (including a prior version of this tool) which have not had great adoption. 
 
-https://github.com/VeriScala/VeriScala
-https://chisel.eecs.berkeley.edu/
+1. https://github.com/VeriScala/VeriScala
+2. https://chisel.eecs.berkeley.edu/
 
 The issue with these languages is that hardware designers in general have extremely limited software abilities and the initial design of the DSL can be challenging. The goal of this project is not to solve the general problem but to port an existing tool used in the development of a highly parallel optical receiver to another highly parallel architecture (neural networks). 
 
-## Background
+## Repeat
 
 HDL languages have advantages and disadvantages. For structured designs like signal processing the disadvantages far outweigh the advantages so I have spent years attempting to automate the design of structured operations. 
 
