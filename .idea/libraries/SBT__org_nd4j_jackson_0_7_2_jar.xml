@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: org.nd4j:jackson:0.7.2:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.nd4j/jackson/jars/jackson-0.7.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.nd4j/jackson/srcs/jackson-0.7.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: org.nd4j:nd4j-buffer:0.7.2:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.nd4j/nd4j-buffer/jars/nd4j-buffer-0.7.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.nd4j/nd4j-buffer/srcs/nd4j-buffer-0.7.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
