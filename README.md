@@ -20,6 +20,24 @@ layer {
 
 This project and design methodology is the culmination of decades of work struggling to efficiently design signal processing hardware. Signal processing hardware in general contains repeatable structured hardware which is easy to visualize and describe mathematically yet difficult to describe in HDLs or HLS tools. As an architect, I wanted to conveniently specify the hardware in an abstract fashion but still control the resulting design which is not possible with other tools. Some background of this is described [here](#background). 
 
+## Getting Started
+
+This project is a scala project using SBT as a build tool and Intellij for code development and verilator for RTL simulation. 
+
+1. http://www.scala-sbt.org/
+2. https://www.jetbrains.com/idea/
+3. https://www.veripool.org/wiki/verilator
+
+To get started, download this project and import into Intellij or run using the sbt tool. Verilator is a free simulator which is used for testing the generated RTL and is not required. Currently the building blocks are being developed which will expand to for the basis for the higher level description of the design. 
+
+## Examples
+
+### Sigmoid Function
+
+### Neuron
+
+### Neural Stage
+
 ## Background
 Through these years there have been many commercial tools to solve this problem but have all suffered from the same flaw. 
 
