@@ -68,8 +68,9 @@ trait NewConstant extends SimpleSegment {
   def longValue:scala.Long = {
     this match {
       case x:NewConstant.Long   => x.value
+      case x:NewConstant.NewLong => x.value
       case x:NewConstant.Double => (math.pow(2.0,x.fixed.fraction)*x.value).toLong
-      case _                    => 0.toLong
+      case _                    => this.trueValue
     }
   }
   
@@ -83,11 +84,15 @@ trait NewConstant extends SimpleSegment {
       case NewConstant.HEX     => if (this.fixed.isSigned) "'sh" else "'h"
     }
     val neg = if (negative) "-" else ""
-    if (this.fixed.width > 0) negative + fixed.width.toString + prefix + value else negative + prefix + value
+    if (this.fixed.width > 0) neg + fixed.width.toString + prefix + value else negative + prefix + value
   }
   
   /** Creates the true value of the constant */
-  private def trueValue = if (!this.fixed.isSigned & this.longValue > math.pow (2.0,63)) this.longValue - math.pow(2.0,64).toLong else this.longValue
+  private def trueValue = {
+    val value = if (!this.fixed.isSigned & this.longValue > math.pow (2.0,63)) this.longValue - math.pow(2.0,64).toLong
+                else this.longValue
+    value
+  }
 
   private def stringValue = {
     val negative = (fixed.isSigned & longValue < 0)
@@ -100,7 +105,8 @@ trait NewConstant extends SimpleSegment {
   }
 
   def createCodeSimple2 (implicit writer:CodeWriter):SegmentReturn =  {
-    this.stringValue
+    val result = this.stringValue
+    result
   }
 
   def createCodeSimple(value:scala.Long, fixed:FixedType) (implicit writer:CodeWriter):SegmentReturn =  {

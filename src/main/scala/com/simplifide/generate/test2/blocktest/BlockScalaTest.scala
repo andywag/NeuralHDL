@@ -14,11 +14,13 @@ class BlockScalaTest extends FlatSpec{
     NeuralTest.Project.testCase,
     this.pr)
   */
+  /// /project.cleanProject
   lazy val project = this.create
   lazy val test    = project.tests(0)
   lazy val run = new RunVerilator(test,
     this,
     project)
+
 
 
 

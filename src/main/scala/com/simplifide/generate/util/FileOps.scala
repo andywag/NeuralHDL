@@ -16,7 +16,9 @@ class FileOps {}
 
 object FileOps {
 
-
+  def removeDirectory(file:String) = {
+    new File(file).delete()
+  }
 
   /** Create a directory at the file fileLocation file */
   def createDirectory(file:String) {

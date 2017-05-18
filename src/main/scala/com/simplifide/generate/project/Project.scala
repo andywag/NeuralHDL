@@ -58,6 +58,13 @@ trait Project extends SignalHolder{
 
   }
 
+
+  def cleanProject = {
+
+    projectStructure.clean
+
+  }
+
   def createProject = {
 
     projectStructure.create
@@ -72,7 +79,6 @@ trait Project extends SignalHolder{
     // Create
     val types = handleTypes(total)
     Project.createTypeModule(projectStructure.design,types)
-
 
   }
 

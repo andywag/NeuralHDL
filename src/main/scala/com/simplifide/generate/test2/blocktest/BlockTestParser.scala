@@ -39,6 +39,7 @@ trait BlockTestParser extends TestEntityParser{
 
   def create = {
     val project = new BlockProject(this)
+    //project.
     project.createProject
     project
   }

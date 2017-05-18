@@ -22,7 +22,6 @@ class RunVerilator(test:Test, testCase:TestEntityParser, project:Project) {
   val runCommand = s"./V${entity.name} "
 
   def verilate = {
-    println (s"Running $verilatorCommand")
     ProcessOps.exec(verilatorCommand, Some(project.location))(ln => InternalLogger.booleanMessage(ln))
   }
   def build =
@@ -58,7 +57,16 @@ class RunVerilator(test:Test, testCase:TestEntityParser, project:Project) {
     //run
   }
 
+}
 
+object RunVerilator {
 
+  case class Result(name:Test, description:String, result:Boolean)
+
+  case class Results(clean:Option[Result]   = None,
+                    create:Option[Result]   = None,
+                    verilate:Option[Result] = None,
+                    run:Option[Result]      = None,
+                    post:Option[Result]     = None)
 
 }

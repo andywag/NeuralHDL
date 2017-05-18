@@ -31,5 +31,7 @@ libraryDependencies += "org.nd4j" %% "nd4s" % nd4jVersion
 
 libraryDependencies += "com.quantifind" %% "wisp" % "0.0.4"
 
+libraryDependencies += "org.jfree" % "jfreechart" % "1.0.14"
+
 //
 
