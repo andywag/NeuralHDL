@@ -32,15 +32,15 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   val out  = DataFileGenerator.createFlatten(s"$dataLocation/out",result)
 
   val dataInD   = dutParser.dataIn <-- data
-  val dumpD     = dutParser.dataOut ---> (s"$dataLocation/rout", Some(out), "Sigmoid Output")
+  val dumpD     = dutParser.dataOut ---> (s"$dataLocation/rout", None, "Sigmoid Output")
   override def createBody = {
 
   }
 
   override def postRun = {
     val data = dumpD.load()
-    PlotUtility.plotError(data.data().asDouble(), result.data().asDouble())
-    System.out.println("Here")
+    val error = PlotUtility.plotError(data.data().asDouble(), result.data().asDouble())
+    System.out.println(error)
 
   }
 

@@ -13,7 +13,7 @@ class RunVerilator(test:Test, testCase:TestEntityParser, project:Project) {
 
   val verilatorRoot = if (System.getenv("VERILATOR_ROOT") == null) "/home/andy/software/verilator" else System.getenv("VERILATOR_ROOT")
 
-  val verilatorCommand = s"${verilatorRoot}/verilator_bin --trace --trace-structs -Wall -Wno-lint -Idesign -cc test/${entity.name}.v --exe test/${entity.name}.cpp"
+  val verilatorCommand = s"${verilatorRoot}/verilator_bin --trace --trace-structs -Wall -Wno-fatal -Wno-lint -Idesign -cc test/${entity.name}.v --exe test/${entity.name}.cpp"
 
   val makeCommand = s"make -f V${entity.name}.mk"
 

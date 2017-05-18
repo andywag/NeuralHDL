@@ -37,6 +37,11 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with SignalCreato
     if (this.numberOfChildren > 0) child(index).asInstanceOf[SignalTrait]
     else if (index > 0) new SignalSelect(this,index,index)
     else new SignalSelect(this,this.width-1,-index)
+
+  def bit(index:Int) = {
+    if (index > 0 ) new SignalSelect(this,index,index)
+    else new SignalSelect(this,this.width-index-1,this.width-index-1)
+  }
   /** Creates a slice of a signal */
   override def apply(index:(Int,Int)) = new SignalSelect(this,index._1,index._2)
   override def apply(width:MiscParser.Width) =  new SignalSelect(this,width.top,width.bottom)
