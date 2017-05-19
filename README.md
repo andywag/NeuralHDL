@@ -37,6 +37,7 @@ The examples shown below are not full level examples of neural networks but show
 
 
 ### Sigmoid Function
+[Sigmoid.scala](Sigmnoid.scala)
 
 ### Neuron
 
