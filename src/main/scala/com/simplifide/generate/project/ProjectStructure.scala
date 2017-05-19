@@ -44,11 +44,6 @@ trait ProjectStructure {
 
   def clean = {
     FileOps.removeDirectory(baseLocation)
-    //FileOps.createDirectory(baseLocation)
-    //FileOps.createDirectory(design)
-    //FileOps.createDirectory(doc)
-    //FileOps.createDirectory(test)
-    //FileOps.createDirectory(data)
   }
 
 }

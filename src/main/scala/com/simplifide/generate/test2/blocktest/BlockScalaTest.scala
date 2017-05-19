@@ -15,6 +15,20 @@ class BlockScalaTest extends FlatSpec{
     this.pr)
   */
   /// /project.cleanProject
+
+
+  def createAndRun = {
+    val project1 = new BlockProject(this)
+    project1.cleanProject
+    project1.createProject
+    val run = new RunVerilator(test, this, project)
+    run.verilate
+    run.build
+    run.move
+    run.run
+  }
+
+
   lazy val project = this.create
   lazy val test    = project.tests(0)
   lazy val run = new RunVerilator(test,
