@@ -17,9 +17,9 @@ trait FloatSignal extends Struct {
   val typeName = s"float_${signalWidth+1}_${expWidth}"
   val packed   = true
 
-  val sgn  = SignalTrait(createName("sgn"),OpType.Signal,FixedType.unsigned(1,0))
-  val man  = SignalTrait(createName("man"),OpType.Signal,FixedType.unsigned(signalWidth,0))
-  val exp  = SignalTrait(createName("exp"),OpType.Signal,FixedType.unsigned(expWidth,0))
+  val sgn  = SignalTrait(createName("sgn"),this.opType,FixedType.unsigned(1,0))
+  val man  = SignalTrait(createName("man"),this.opType,FixedType.unsigned(signalWidth,0))
+  val exp  = SignalTrait(createName("exp"),this.opType,FixedType.unsigned(expWidth,0))
   val signals = List(sgn, exp, man)
 
   /*

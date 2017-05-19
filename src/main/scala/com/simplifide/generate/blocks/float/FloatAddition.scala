@@ -96,7 +96,7 @@ class FloatAddition(override val name:String,
   val cconds = conds.zipWithIndex.map(x => x._1.createSegment(x._2))
 
   $always_star(
-    internalSig.sgn := add_out.sign ,
+    internalSig.sgn ::= add_out.sign ,
     new ConditionStatement(cconds)
   )
   reg := internalSig $at (clk)

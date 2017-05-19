@@ -13,12 +13,11 @@ class BlockProject(test:BlockTestParser)(implicit val clk:ClockControl) extends 
   override val location: String = s"tests/${test.blockName}"
 
 
-  override val newRoot  = test.dutParser.createEntity
-  val testCase          = test
-  override val tests    = List(
-    Test(testCase.createEntity)
-  )
+  override val newRoot  = null //test.dutParser.createEntity
+  override def rootEntity        = test.dutParser.createEntity
 
+  val testCase          = test
+  override def rootTests = List(Test(testCase.createEntity))
 
 }
 

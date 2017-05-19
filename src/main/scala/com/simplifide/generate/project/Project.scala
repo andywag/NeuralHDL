@@ -5,6 +5,7 @@ import com.simplifide.generate.test2.SimInterface
 import com.simplifide.generate.test2.Test
 import java.io.File
 
+import com.simplifide.generate.doc.{MdEntity, MdGenerator, MdProject}
 import com.simplifide.generate.generator.CodeWriter.Verilog
 import com.simplifide.generate.generator.SegmentReturn
 import com.simplifide.generate.project.Project.TypeModule
@@ -31,12 +32,15 @@ trait Project extends SignalHolder{
   lazy val projectStructure = ProjectStructure(this)
   /** Base Entity for the ProjectGenerator */
 
-  /** List of Tests for the project */
+  /** @deprecated : List of Tests for the project */
   val tests:List[Test] = List()
-  /** Top Level Entity for this project */
+  def rootTests        = tests
+
+  /** @deprecated : Top Level Entity for this project*/
   val newRoot:NewEntity = null
-  
-  def allEntities = newRoot.children ::: List(newRoot)
+  def rootEntity = newRoot
+
+  def allEntities = rootEntity.children ::: List(rootEntity)
 
   def designFiles:List[java.io.File] =
     allEntities.map(x => x.fileLocation(projectStructure.designDirectory))//new File(projectStructure.designDirectory,x.name + ".v"))
@@ -60,31 +64,37 @@ trait Project extends SignalHolder{
 
 
   def cleanProject = {
-
     projectStructure.clean
+  }
 
+  lazy val totalEntities = {
+    // Expand the modules and connect the signals -- Emacs Auto Type Stuff
+    val expanded = rootEntity.connect
+    // Create a total list of entities in the design
+    val total = List(expanded) ::: expanded.children
+    total
   }
 
   def createProject = {
 
     projectStructure.create
-    // Expand the modules and connect the signals -- Emacs Auto Type Stuff
-    val expanded = newRoot.connect
-    // Create a total list of entities in the design
-    val total = List(expanded) ::: expanded.children
     // Write out all of the verilog modules
-    total.foreach(x => x.writeModule(projectStructure.design))
+    totalEntities.foreach(x => x.writeModule(projectStructure.design))
+    // Write out the documentation for all the verilog modules
+    new MdProject(this).create(projectStructure.doc)
+    //totalEntities.foreach(x => new MdEntity(x).create(s"${projectStructure.doc}/${x.name}.md"))
     // Create the tests for this project
-    tests.foreach(x => x.createTest(this))
-    // Create
-    val types = handleTypes(total)
+    rootTests.foreach(x => x.createTest(this))
+
+    // Create extra verilog file which contains the structures used in this project
+    val types = handleTypes(totalEntities)
     Project.createTypeModule(projectStructure.design,types)
 
   }
 
   def runTests(testType:SimInterface) {
     //def createFiles = 
-    tests.foreach(_.runTest(this,testType))
+    rootTests.foreach(_.runTest(this,testType))
   }
 
 

@@ -1,5 +1,7 @@
 package com.simplifide.generate.parser
 
+import com.simplifide.generate.doc.DocumentHolder
+
 import collection.mutable.ListBuffer
 import com.simplifide.generate.language.ExtraFile
 import com.simplifide.generate.project.{Connection, NewEntity, NewEntityInstance}
@@ -11,7 +13,7 @@ import items.InstanceParser
  * Parser which creates an entity
  */
 
-trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser  {
+trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser with DocumentHolder {
 
 
 

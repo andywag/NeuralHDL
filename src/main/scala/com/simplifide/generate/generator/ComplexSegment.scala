@@ -10,13 +10,15 @@ import factory.CreationFactory
 import items.MiscParser
 import model.Expression
 import com.simplifide.generate.blocks.basic.misc.Comment
+import com.simplifide.generate.doc.DocumentHolder
 
 /**
  * Trait which allows complex segments to be built using the more descriptive syntax from the module rather than
  * building off subblocks. The body of the block should be defined using the createbody method
  */
 
-trait ComplexSegment extends ConditionParser with SignalHolder with SimpleSegment with MiscParser{
+trait ComplexSegment extends ConditionParser with SignalHolder
+  with SimpleSegment with MiscParser with DocumentHolder {
 
 
   val title:Option[String] = None
@@ -37,11 +39,7 @@ trait ComplexSegment extends ConditionParser with SignalHolder with SimpleSegmen
 
   def inputs:Seq[SignalTrait] = Seq()
 
-  /*
-  def createEntity[T]:SegmentEntity[T] = {
-    SegmentEntity[this.type](this)
-  }
-  */
+
 
 }
 

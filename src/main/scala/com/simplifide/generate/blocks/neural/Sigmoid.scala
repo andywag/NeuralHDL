@@ -24,6 +24,28 @@ object Sigmoid {
                        dataOut:FloatSignal,
                        dataIn:FloatSignal) extends Sigmoid {
 
+    import com.simplifide.generate.doc.MdGenerator._
+    override val document =
+
+      s"""
+This block contains a sigmoid nonlinear operation based on "Myers and Hutchinson" piecewise linear approximation.
+There are a few slight differences in the operation to simplify things due to the floating point aspect but
+there output error has similar properties with a maximum error of ~4.8%. This block is more naturally done using
+fixed point which inherently is internally done in the internal shifters of this block
+
+
+## Input/Output
+* output ${dataOut.document} : Output of the block
+
+* input ${dataIn.document}   : Input of the block
+
+## Generator Code
+
+The code used to generate this code is relatively complex
+
+"""
+
+
     val lut  = List(0.0, 0.0625/2, 0.125, 0.25, 0.75, 0.8725, 0.935, 1.0).map(x => FloatWrap(x.toFloat))
     val bias = 127;
 

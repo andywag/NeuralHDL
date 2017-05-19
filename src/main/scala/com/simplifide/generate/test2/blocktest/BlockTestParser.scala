@@ -31,11 +31,13 @@ trait BlockTestParser extends TestEntityParser{
       )
   )
 
-  override def dataLocation:String = {
-    val structure = BlockProject.getStructure(blockName)
-    structure.create
-    structure.dataDirectory.getAbsolutePath
-  }
+  val project = new BlockProject(this)
+
+  override def dataLocation:String =
+    project.projectStructure.dataDirectory.getAbsolutePath
+
+  def docLocation:String =
+    project.projectStructure.docDirectory.getAbsolutePath
 
   def create = {
     val project = new BlockProject(this)

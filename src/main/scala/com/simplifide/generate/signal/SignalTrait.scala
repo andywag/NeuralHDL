@@ -10,6 +10,7 @@ import com.simplifide.generate.blocks.basic.operator.{Operators, Select}
 import collection.mutable.ListBuffer
 import com.simplifide.generate.blocks.basic.memory.Memory
 import com.simplifide.generate.blocks.basic.fixed.{FixedOperations, FixedSelect}
+import com.simplifide.generate.doc.DocumentHolder
 import com.simplifide.generate.parser.items.MiscParser
 import com.simplifide.generate.signal.sv.Struct
 //import org.scalatest._

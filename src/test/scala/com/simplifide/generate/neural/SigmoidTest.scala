@@ -26,7 +26,7 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   import com.simplifide.generate.model.NdArrayWrap._
 
   val data = DataFileGenerator.createData(Array(testLength,1),s"$dataLocation/data",
-    DataFileGenerator.Ramp(-8.0,8.0))
+    DataFileGenerator.Ramp(-9.0,9.0))
 
   val result = Transforms.sigmoid(data.data)
   val out  = DataFileGenerator.createFlatten(s"$dataLocation/out",result)
@@ -39,9 +39,9 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
 
   override def postRun = {
     val data = dumpD.load()
-    val error = PlotUtility.plotError(data.data().asDouble(), result.data().asDouble())
-    System.out.println(error)
-
+    val error = PlotUtility.plotError(data.data().asDouble(),
+      result.data().asDouble(),Some(s"$docLocation/discrim"))
+    assert(error.max < .05)
   }
 
 
@@ -53,7 +53,9 @@ object SigmoidTest {
     val dataIn    = signal(FloatSignal("data",INPUT))
     val dataOut   = signal(FloatSignal("out",OUTPUT))
 
-    ->(new Sigmoid.AlawFloat2("sigmoid",dataOut, dataIn))
+    val sig = ->(new Sigmoid.AlawFloat2("sigmoid",dataOut, dataIn))
+
+    override val document = sig.document
 
   }
 }

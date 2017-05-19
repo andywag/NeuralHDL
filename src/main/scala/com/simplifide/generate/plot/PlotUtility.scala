@@ -4,11 +4,13 @@ package com.simplifide.generate.plot
   * Created by andy on 5/16/17.
   */
 
+import java.io.File
 import javax.swing.JFrame
 
 import com.quantifind.charts.Highcharts._
 import org.jfree.chart.{ChartFactory, ChartPanel, ChartUtilities}
 import org.jfree.chart.plot.PlotOrientation
+import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.xy.{XYDataset, XYSeries, XYSeriesCollection}
 
 
@@ -33,36 +35,33 @@ object PlotUtility {
     line(time,input)
   }
 
-  def jPlot(input:Seq[Double],ref:Seq[Double]) = {
-    val data = new XYSeries("RTL")
-    val rdata = new XYSeries("Reference")
-    input.zipWithIndex.foreach(x => data.add(x._2,x._1))
-    ref.zipWithIndex.foreach(x => rdata.add(x._2,x._1))
+  def jPlot(input:Seq[Double],ref:Seq[Double],error:Seq[Double],file:Option[String]) = {
 
-    val dataset = new XYSeriesCollection()
-    dataset.addSeries(data)
-    dataset.addSeries(rdata)
 
-    val chart = ChartFactory.createXYAreaChart("Difference","input","value",dataset,PlotOrientation.VERTICAL,false,true,false)
-    val panel = new ChartPanel(chart)
-    panel.setPreferredSize(new java.awt.Dimension(800,800))
-    panel.setVisible(true)
-    val frame = new JFrame()
-    frame.setContentPane(panel)
-    frame.setVisible(true)
+    val dataSet = new DefaultCategoryDataset()
+    input.zipWithIndex.foreach(x => dataSet.addValue(x._1,"RTL",x._2))
+    ref.zipWithIndex.foreach(x => dataSet.addValue(x._1,"Reference",x._2))
+
+    val errorSet = new DefaultCategoryDataset()
+    error.zipWithIndex.foreach(x => errorSet.addValue(x._1,"Error",x._2))
+
+
+
+    val chart = ChartFactory.createLineChart("Difference","input","value",dataSet,PlotOrientation.VERTICAL,false,true,false)
+    file.map(x => {
+      ChartUtilities.saveChartAsJPEG(new File(s"$x.jpg"),chart,600,600)
+    })
+
+    val chart1 = ChartFactory.createLineChart("Error","input","value",errorSet,PlotOrientation.VERTICAL,false,true,false)
+    file.map(x => {
+      ChartUtilities.saveChartAsJPEG(new File(s"${x}e.jpg"),chart1,600,600)
+    })
+
   }
 
-  def plotError(input:Seq[Double], ref:Seq[Double]) = {
+  def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None) = {
     val diff = (input zip ref).map(x => x._2 - x._1)
-    jPlot(input,ref)
-    /*plotLine(diff)
-    unhold()
-    title("Error")
-    plotLine(input)
-    hold
-    plotLine(ref)
-    unhold
-    */
+    jPlot(input,ref,diff,file)
     ErrorStat(diff)
 
   }
