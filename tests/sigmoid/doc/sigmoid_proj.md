@@ -19,7 +19,7 @@ fixed point which inherently is internally done in the internal shifters of this
 
 The code used to generate this code is relatively complex
 
-* [Code Generator](../../../src/main/scala/com/simplifide/generate/neural//Sigmoid.scala)
+* [Code Generator](../../../src/main/scala/com/simplifide/generate/blocks/neural//Sigmoid.scala)
 
 
 
@@ -43,7 +43,7 @@ against a reference model which give a maximum error of around 4.8%.
 * [Testbench (Verilog)](../test/testSigmoid.v)
 * [Test Wrapper (C++)](../test/testSigmoid.cpp)
 * [Test Generator](../../../src/test/scala/com/simplifide/generate/neural//SigmoidTest.scala)
-* [Code Generator](../../../src/main/scala/com/simplifide/generate/neural//Sigmoid.scala)
+* [Code Generator](../../../src/main/scala/com/simplifide/generate/blocks/neural//Sigmoid.scala)
 
 
 
