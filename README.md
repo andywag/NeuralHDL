@@ -52,7 +52,7 @@ The example below is a basic building block for the design. It is actually a MAC
 
 The example below is a fully connected neural network stage. This is the most basic example where the number of MAC units available is the same as the input and output but the block itself is programmable to handle generic configurations. 
 
-[Neural Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/neuronStage/doc/neuron_proj.md)
+[Neural Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/neuronStage/doc/neuronStage_proj.md)
 
 ## Background
 I have been attempting to automate signal processing hardware design for longer than I would like to admit. Through these years there have been many commercial tools to solve this problem but have all suffered from the same inherent flaw in having the tools automate architeture.  
