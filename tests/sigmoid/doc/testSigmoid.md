@@ -18,8 +18,8 @@ against a reference model which give a maximum error of around 4.8%.
 ## Reference Code for Test
 * [Testbench (Verilog)](../test/testSigmoid.v)
 * [Test Wrapper (C++)](../test/testSigmoid.cpp)
-* [Test Generator](../../src/main/scala/com/simplifide/generate/neural/SigmoidTest.scala)
-* [Code Generator](../../src/test/scala/com/simplifide/generate/neural/Sigmoid.scala)
+* [Test Generator](../../../src/test/scala/com/simplifide/generate/neural//SigmoidTest.scala)
+* [Code Generator](../../../src/main/scala/com/simplifide/generate/neural//Sigmoid.scala)
 
 
 
