@@ -37,7 +37,7 @@ The examples shown below are not full level examples of neural networks but show
 
 
 ### Sigmoid Function
-[https://github.com/andywag/NeuralHDL/blob/master/tests/sigmoid/doc/sigmoid_proj.md](Sigmoid)
+[Sigmoid](https://github.com/andywag/NeuralHDL/blob/master/tests/sigmoid/doc/sigmoid_proj.md)
 
 ### Neuron
 
