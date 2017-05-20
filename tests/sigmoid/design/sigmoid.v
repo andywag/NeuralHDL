@@ -99,6 +99,13 @@ always @* begin
   end
 end
 assign sigmoid_int.sgn = 'd0;
-assign out = sigmoid_int;
+always @(posedge clk) begin
+  if (reset) begin
+    out <= 'd0;
+  end
+  else begin
+    out <= sigmoid_int;
+  end
+end
 endmodule
 

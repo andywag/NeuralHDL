@@ -1,5 +1,6 @@
 package com.simplifide.generate.blocks.neural
 
+import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.misc.Lut
 import com.simplifide.generate.blocks.basic.operator.Operators
 import com.simplifide.generate.generator.{ComplexSegment, SimpleSegment}
@@ -23,7 +24,7 @@ object Sigmoid {
 
   case class AlawFloat2(override val name:String,
                        dataOut:FloatSignal,
-                       dataIn:FloatSignal) extends Sigmoid {
+                       dataIn:FloatSignal)(implicit clk:ClockControl) extends Sigmoid {
 
     import com.simplifide.generate.doc.MdGenerator._
     override def document =
@@ -126,9 +127,11 @@ The code used to generate this code is relatively complex
 
     intOut.sgn := 0
 
-    dataOut    := intOut
-    /** Defines the body in the block */
-    override def createBody: Unit = {}
+    dataOut    := intOut $at clk
+
+    override def createBody = {}
+    override def inputs: Seq[SignalTrait] = dataIn :: clk.allSignals(INPUT)
+    override def outputs:List[SignalTrait] = List(dataOut)
 
 
   }

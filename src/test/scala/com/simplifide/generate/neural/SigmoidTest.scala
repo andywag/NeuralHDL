@@ -31,7 +31,7 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   val data = DataFileGenerator.createData(Array(testLength,1),s"$dataLocation/data",
     DataFileGenerator.Ramp(range._1, range._2))
 
-  val result = Transforms.sigmoid(data.data)
+  val result = Transforms.sigmoid(data.data).d(1)
   val out  = DataFileGenerator.createFlatten(s"$dataLocation/out",result)
 
   val dataInD   = dutParser.dataIn <-- data
@@ -74,6 +74,11 @@ against a reference model which give a maximum error of around 4.8%.
 }
 
 object SigmoidTest {
+
+  object RampTest extends SigmoidTest {
+
+  }
+
   class Dut(val name:String)(implicit val clk:ClockControl) extends EntityParser {
     signal(clk.allSignals(INPUT))
     val dataIn    = signal(FloatSignal("data",INPUT))

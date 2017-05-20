@@ -59,9 +59,12 @@ object PlotUtility {
 
   }
 
-  def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None) = {
-    val diff = (input zip ref).map(x => x._2 - x._1)
-    jPlot(input,ref,diff,file)
+  def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None, delay:Int=0, ignore:Int=0) = {
+    val len = math.min(input.length,ref.length)
+    val in  = input.slice(delay+ignore,len)
+    val out = ref.slice(ignore,len)
+    val diff = (in zip out).map(x => x._2 - x._1)
+    jPlot(in,out,diff,file)
     ErrorStat(diff)
 
   }

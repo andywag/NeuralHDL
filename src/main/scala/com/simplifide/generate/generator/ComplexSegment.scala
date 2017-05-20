@@ -46,7 +46,7 @@ trait ComplexSegment extends ConditionParser with SignalHolder
 object ComplexSegment {
 
 
-  case class SegmentEntity[T <: ComplexSegment](segment:T, override val name:String) extends EntityParser {
+  case class SegmentEntity[+T <: ComplexSegment](segment:T, override val name:String) extends EntityParser {
     ->(segment)
     signal(segment.inputs.map(x => x.changeType(OpType.Input)).toList)
     signal(segment.outputs.map(x => x.changeType(OpType.Output)))

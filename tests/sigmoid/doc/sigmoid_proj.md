@@ -20,6 +20,7 @@ fixed point which inherently is internally done in the internal shifters of this
 The code used to generate this code is relatively complex
 
 * [Code Generator](../../../src/main/scala/com/simplifide/generate/blocks/neural//Sigmoid.scala)
+* [Verilog Output](../design/sigmoid.v)
 
 
 
