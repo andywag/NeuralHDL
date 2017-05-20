@@ -44,6 +44,8 @@ The sigmoid function is a standard nonlinearity used for neurons. A hardware app
 
 ### Neuron
 
+[Neuron](https://github.com/andywag/NeuralHDL/blob/master/tests/neuron/doc/neuron_proj.md)
+
 ### Neural Stage
 
 ## Background
