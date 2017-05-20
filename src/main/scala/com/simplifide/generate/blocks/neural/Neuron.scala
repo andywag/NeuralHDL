@@ -5,6 +5,7 @@ import com.simplifide.generate.blocks.basic.typ.NumberType
 import com.simplifide.generate.generator._
 import com.simplifide.generate.parser.{ConditionParser, SignalParser}
 import com.simplifide.generate.signal.{OpType, SignalTrait}
+import com.simplifide.generate.util.PathUtilities
 
 /**
   * Created by andy on 5/8/17.
@@ -19,7 +20,7 @@ case class Neuron(dataOut:SignalTrait,
 
   def createBody = {}
 
-  override val document =
+  override def document =
 
 s"""
 This block contains a simple neuron (actually a MAC) which contains a multiplier and an adder. The
@@ -49,8 +50,9 @@ dataOut        := internalSignal plus bias
 
 ## Reference Code
 
-[Neuron.scala](Neuron.scala)
-[neuron.v](Neuron.v)
+* [Code Generator](${PathUtilities.nueralPath}/Neuron.scala)
+* [Verilog Output](../design/${name}.v)
+
 
 """
 

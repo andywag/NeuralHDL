@@ -11,11 +11,14 @@ import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
 import com.simplifide.generate.test2.data.DataGenParser.RANDOM
+import com.simplifide.generate.util.PathUtilities
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.ops.transforms.Transforms
 
 class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   def blockName:String = "sigmoid"
+
+  val range = (-9.0,9.0)
 
   val dutParser = new SigmoidTest.Dut(blockName)
   override val dut: NewEntity = dutParser.createEntity
@@ -26,7 +29,7 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   import com.simplifide.generate.model.NdArrayWrap._
 
   val data = DataFileGenerator.createData(Array(testLength,1),s"$dataLocation/data",
-    DataFileGenerator.Ramp(-9.0,9.0))
+    DataFileGenerator.Ramp(range._1, range._2))
 
   val result = Transforms.sigmoid(data.data)
   val out  = DataFileGenerator.createFlatten(s"$dataLocation/out",result)
@@ -44,6 +47,29 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
     assert(error.max < .05)
   }
 
+  override def document =
+    s"""
+This module is a block test wrapper for the sigmoid block. The block tests the output of this block
+against a linear ramp over a range of ${range._1} to ${range._2}. The output of this is matched
+against a reference model which give a maximum error of around 4.8%.
+
+## Test Results
+
+### Plot of RTL vs Reference Data
+
+![Ref vs RTL](discrim.jpg)
+
+### Actual Difference between Rtl and Reference Data
+![RTL](discrime.jpg)
+
+## Reference Code for Test
+* [Testbench (Verilog)](../test/${name}.v)
+* [Test Wrapper (C++)](../test/${name}.cpp)
+* [Test Generator](${PathUtilities.nueralTestPath}/SigmoidTest.scala)
+* [Code Generator](${PathUtilities.nueralPath}/Sigmoid.scala)
+
+"""
+
 
 }
 
@@ -55,7 +81,7 @@ object SigmoidTest {
 
     val sig = ->(new Sigmoid.AlawFloat2("sigmoid",dataOut, dataIn))
 
-    override val document = sig.document
+    override def document = sig.document
 
   }
 }

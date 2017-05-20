@@ -11,6 +11,7 @@ import com.quantifind.charts.Highcharts._
 import org.jfree.chart.{ChartFactory, ChartPanel, ChartUtilities}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.data.xy.{XYDataset, XYSeries, XYSeriesCollection}
 
 
@@ -37,7 +38,6 @@ object PlotUtility {
 
   def jPlot(input:Seq[Double],ref:Seq[Double],error:Seq[Double],file:Option[String]) = {
 
-
     val dataSet = new DefaultCategoryDataset()
     input.zipWithIndex.foreach(x => dataSet.addValue(x._1,"RTL",x._2))
     ref.zipWithIndex.foreach(x => dataSet.addValue(x._1,"Reference",x._2))
@@ -46,15 +46,15 @@ object PlotUtility {
     error.zipWithIndex.foreach(x => errorSet.addValue(x._1,"Error",x._2))
 
 
+    val chart = ChartFactory.createLineChart("Difference","input","value",dataSet,PlotOrientation.VERTICAL,true,true,false)
 
-    val chart = ChartFactory.createLineChart("Difference","input","value",dataSet,PlotOrientation.VERTICAL,false,true,false)
     file.map(x => {
-      ChartUtilities.saveChartAsJPEG(new File(s"$x.jpg"),chart,600,600)
+      ChartUtilities.saveChartAsJPEG(new File(s"$x.jpg"),chart,500,300)
     })
 
     val chart1 = ChartFactory.createLineChart("Error","input","value",errorSet,PlotOrientation.VERTICAL,false,true,false)
     file.map(x => {
-      ChartUtilities.saveChartAsJPEG(new File(s"${x}e.jpg"),chart1,600,600)
+      ChartUtilities.saveChartAsJPEG(new File(s"${x}e.jpg"),chart1,500,300)
     })
 
   }

@@ -4,6 +4,7 @@ import java.io.File
 
 import com.simplifide.generate.signal.SignalTrait
 import com.simplifide.generate.signal.sv.Struct
+import com.simplifide.generate.test2.Test
 import com.simplifide.generate.util.FileOps
 
 /**
@@ -25,4 +26,15 @@ object MdGenerator {
       }
     }
   }
+
+  implicit class MdTest(val test:Test) extends MdGenerator[Test] {
+    override def document: String =
+      s"""
+# ${test.testBench.name}
+
+${test.testBench.base.get.document}
+
+        """
+  }
+
 }

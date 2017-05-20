@@ -5,6 +5,7 @@ import com.simplifide.generate.blocks.basic.operator.Operators
 import com.simplifide.generate.generator.{ComplexSegment, SimpleSegment}
 import com.simplifide.generate.signal.{Constant, FloatSignal, OpType, SignalTrait}
 import com.simplifide.generate.test2.data.FloatData.FloatWrap
+import com.simplifide.generate.util.PathUtilities
 import org.nd4j.linalg.ops.transforms.Transforms
 
 /**
@@ -25,7 +26,7 @@ object Sigmoid {
                        dataIn:FloatSignal) extends Sigmoid {
 
     import com.simplifide.generate.doc.MdGenerator._
-    override val document =
+    override def document =
 
       s"""
 This block contains a sigmoid nonlinear operation based on "Myers and Hutchinson" piecewise linear approximation.
@@ -35,13 +36,15 @@ fixed point which inherently is internally done in the internal shifters of this
 
 
 ## Input/Output
-* output ${dataOut.document} : Output of the block
-
-* input ${dataIn.document}   : Input of the block
+* output ${dataOut.document}  : Output of the block
+* input  ${dataIn.document}   : Input of the block
 
 ## Generator Code
 
 The code used to generate this code is relatively complex
+
+* [Code Generator](${PathUtilities.nueralPath}/Sigmoid.scala)
+* [Verilog Output](../design/${name}.v)
 
 """
 

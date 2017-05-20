@@ -50,8 +50,8 @@ over the data, taps and bias. All the inputs and outputs are floating point.
 
 ![Ref vs RTL](results.jpg)
 
-### Actual Difference between Rtl and Reference Data
-![RTL](results.jpg)
+### Difference between Rtl and Reference Data
+![RTL](resultse.jpg)
 
 ## Reference Code for Test
 * [Testbench (Verilog)](../test/testNeuron.v)

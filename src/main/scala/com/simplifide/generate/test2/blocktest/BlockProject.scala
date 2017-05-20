@@ -14,10 +14,13 @@ class BlockProject(test:BlockTestParser)(implicit val clk:ClockControl) extends 
 
 
   override val newRoot  = null //test.dutParser.createEntity
-  override def rootEntity        = test.dutParser.createEntity
+
+  lazy val rootEntity1 = test.dutParser.createEntity
+  override def rootEntity        = rootEntity1
 
   val testCase          = test
-  override def rootTests = List(Test(testCase.createEntity))
+  lazy val rootTests1    = List(Test(testCase.createEntity))
+  override def rootTests = rootTests1
 
 }
 
