@@ -34,15 +34,17 @@ To get started, download this project and import into Intellij or run using the 
 
 The examples shown below are not full level examples of neural networks but show the method and structure which is used for creating and testing the building blocks. Higher level functionallity will be added as the building block development progresses. 
 
-
+As a starting point most of the operations are done using floating point. The reason for this is avoid quantization and numerical issues in the development. Floating point operations were added for this specific purpose as the initial language design was completely fixed point. The designs will be generalized to any number system as a second step. The language chooses operations internally based on the signal type so it should be a simple exercise.
 
 ### Sigmoid Function
 
-The sigmoid function is a standard nonlinearity used for neurons. A hardware approximation of this function is shown below as an example. 
+The sigmoid function is a standard nonlinearity used for neurons. A hardware approximation of this function is shown below as an example. The approach uses 7 stage piecewise linear approximation. 
 
 [Sigmoid](https://github.com/andywag/NeuralHDL/blob/master/tests/sigmoid/doc/sigmoid_proj.md)
 
 ### Neuron
+
+The example below is a basic building block for the design. It is actually a MAC rather than a neuron as it only contains the multiply accumulate operation without a nonlinearity and external control. This is required to allow a more general architecture. 
 
 [Neuron](https://github.com/andywag/NeuralHDL/blob/master/tests/neuron/doc/neuron_proj.md)
 
