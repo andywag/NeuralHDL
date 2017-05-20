@@ -37,7 +37,10 @@ The examples shown below are not full level examples of neural networks but show
 
 
 ### Sigmoid Function
-[Sigmoid.scala](Sigmnoid.scala)
+
+The sigmoid function is a standard nonlinearity used for neurons. A hardware approximation of this function is shown below as an example. 
+
+[Sigmoid](https://github.com/andywag/NeuralHDL/blob/master/tests/sigmoid/doc/sigmoid_proj.md)
 
 ### Neuron
 
