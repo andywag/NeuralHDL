@@ -55,6 +55,9 @@ always @* begin
       else if (~dataOutPre_0.man[19]) begin 
         sigmoid_int.exp <= 8'd118;
       end
+      else begin
+        sigmoid_int.exp <= 8'd0;
+      end
     end
     else begin
       sigmoid_int.exp <= 8'd126;

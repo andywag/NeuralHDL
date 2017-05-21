@@ -65,14 +65,14 @@ end
 
 // Load data
 initial begin
-  $readmemh("/home/andy/IdeaProjects/ScalaHDL/tests/sigmoid/data/data.hex",data_mem);
+  $readmemh("/home/andy/IdeaProjects/NeuralHDL/tests/sigmoid/data/data.hex",data_mem);
 end
 
 assign data = data_mem[counter];
 
 // Store Store out
 initial begin
-  rout_fptr = $fopen("/home/andy/IdeaProjects/ScalaHDL/tests/sigmoid/data/rout.hex","w");
+  rout_fptr = $fopen("/home/andy/IdeaProjects/NeuralHDL/tests/sigmoid/data/rout.hex","w");
 end
 
 always @(posedge clk) begin

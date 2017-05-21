@@ -74,28 +74,28 @@ assign d_index = counter[30:0] - 31'd1;
 
 // Load data
 initial begin
-  $readmemh("/home/andy/IdeaProjects/ScalaHDL/tests/neuron/data/data.hex",data_mem);
+  $readmemh("/home/andy/IdeaProjects/NeuralHDL/tests/neuron/data/data.hex",data_mem);
 end
 
 assign data = data_mem[counter];
 
 // Load tap
 initial begin
-  $readmemh("/home/andy/IdeaProjects/ScalaHDL/tests/neuron/data/tap.hex",tap_mem);
+  $readmemh("/home/andy/IdeaProjects/NeuralHDL/tests/neuron/data/tap.hex",tap_mem);
 end
 
 assign tap = tap_mem[counter];
 
 // Load bias
 initial begin
-  $readmemh("/home/andy/IdeaProjects/ScalaHDL/tests/neuron/data/bias.hex",bias_mem);
+  $readmemh("/home/andy/IdeaProjects/NeuralHDL/tests/neuron/data/bias.hex",bias_mem);
 end
 
 assign bias = bias_mem[counter];
 
 // Store Store out
 initial begin
-  rout_fptr = $fopen("/home/andy/IdeaProjects/ScalaHDL/tests/neuron/data/rout.hex","w");
+  rout_fptr = $fopen("/home/andy/IdeaProjects/NeuralHDL/tests/neuron/data/rout.hex","w");
 end
 
 always @(posedge clk) begin

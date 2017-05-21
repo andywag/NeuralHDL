@@ -63,9 +63,9 @@ trait Project extends SignalHolder{
   }
 
 
-  def cleanProject = {
-    projectStructure.clean
-  }
+  def cleanProject = projectStructure.clean
+  def createProjectStructure = projectStructure.create
+
 
   lazy val totalEntities = {
     // Expand the modules and connect the signals -- Emacs Auto Type Stuff

@@ -18,50 +18,49 @@ class BlockScalaTest extends FunSpec{
 
 
 
+    describe(s"Test") {
 
-  describe (s"Test") {
-    it ("should be properly cleaned") {
-      project.cleanProject
+      it ("should be properly created") {
+        project.createProject
+      }
+      lazy val run = new RunVerilator(project.rootTests(0),
+        this,
+        project)
+
+
+      it("should be properly verilated") {
+        val ver = run.verilate
+        assert(ver == true)
+      }
+
+      it("should be properly built") {
+        val build = run.build
+        assert(build == true)
+      }
+
+      it("should be moved") {
+        val move = run.move
+        assert(move == true)
+      }
+
+      it("should be properly run") {
+        val ru = run.run
+        assert(ru == true)
+      }
+
+      it("should pass checking results") {
+        postRun()
+      }
+
+
+      it("should match") {
+        val res = this.compareAllResults()
+        res.map(x => {
+          assert(x.errors.size == 0)
+          println(x.debugString)
+        })
+      }
     }
-    it ("should be properly created") {
-      project.createProject
-    }
-
-    lazy val run = new RunVerilator(project.rootTests(0),
-      this,
-      project)
-
-    it ("should be properly verilated") {
-      assert (run.verilate == true)
-    }
-
-    it ("should be properly built")  {
-      assert (run.build == true)
-    }
-
-    it ("should be moved")  {
-      assert (run.move == true)
-    }
-
-    it ("should be properly run")  {
-      assert (run.run == true)
-    }
-
-    it ("should pass checking results") {
-      this.postRun()
-    }
-
-
-    it ("should match") {
-      val res = this.compareAllResults()
-      res.map(x => {
-        assert(x.errors.size == 0)
-        println(x.debugString)
-      })
-    }
-
-  }
-
 
 
 

@@ -67,7 +67,7 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
     assert(error.max < .001)
 
     val error2 = PlotUtility.plotError(output2.data().asDouble(),
-      vectors.output2.data.data().asDouble(),Some(s"$docLocation/results2"),1,16)
+      vectors.output2.data.data().asDouble(),Some(s"$docLocation/results2"),1,2*depth)
     assert(error2.max < .06)
 
 

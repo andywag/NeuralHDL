@@ -32,6 +32,8 @@ trait BlockTestParser extends TestEntityParser{
   )
 
   val project = new BlockProject(this)
+  project.cleanProject
+  project.createProjectStructure
 
   override def dataLocation:String =
     project.projectStructure.dataDirectory.getAbsolutePath

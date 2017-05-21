@@ -29,7 +29,7 @@ libraryDependencies += "org.nd4j" % "nd4j-native-platform" % nd4jVersion
 //libraryDependencies += "org.nd4j" % "nd4s_2.12.0-M3" % "0.4-rc3.8"
 libraryDependencies += "org.nd4j" %% "nd4s" % nd4jVersion
 
-libraryDependencies += "com.quantifind" %% "wisp" % "0.0.4"
+libraryDependencies += "org.bytedeco" % "javacpp" % "1.3.2"
 
 libraryDependencies += "org.jfree" % "jfreechart" % "1.0.14"
 

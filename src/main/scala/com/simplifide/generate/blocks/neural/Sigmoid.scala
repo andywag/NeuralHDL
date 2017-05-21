@@ -73,6 +73,7 @@ The code used to generate this code is relatively complex
         $else_if (~dataIn.man.bit(-1)) $then (exponent(1)-2)
         $else_if (~dataIn.man.bit(-2)) $then (exponent(1)-3)
         $else_if (~dataIn.man.bit(-3)) $then (exponent(1)-4)
+        $else 0
       )
       $else (exponent(6))
     ) $else_if (dataIn.exp === bias + 1) $then (

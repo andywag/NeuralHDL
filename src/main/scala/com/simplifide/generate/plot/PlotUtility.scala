@@ -7,7 +7,6 @@ package com.simplifide.generate.plot
 import java.io.File
 import javax.swing.JFrame
 
-import com.quantifind.charts.Highcharts._
 import org.jfree.chart.{ChartFactory, ChartPanel, ChartUtilities}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
@@ -31,10 +30,7 @@ object PlotUtility {
     }
   }
 
-  def plotLine(input:Seq[Double]) = {
-    val time = (0 until input.length)
-    line(time,input)
-  }
+
 
   def jPlot(input:Seq[Double],ref:Seq[Double],error:Seq[Double],file:Option[String]) = {
 
