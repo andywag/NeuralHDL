@@ -2,6 +2,7 @@ package com.simplifide.generate.test2.blocktest
 
 import com.simplifide.generate.test2.Test
 import com.simplifide.generate.test2.verilator.RunVerilator
+import com.simplifide.generate.util.TimeUtil
 import org.scalatest.{FlatSpec, FlatSpecLike, FunSpec}
 
 /**
@@ -21,7 +22,9 @@ class BlockScalaTest extends FunSpec{
     describe(s"Test") {
 
       it ("should be properly created") {
-        project.createProject
+        TimeUtil.time("Project Creation") {
+          project.createProject
+        }
       }
       lazy val run = new RunVerilator(project.rootTests(0),
         this,
@@ -29,27 +32,38 @@ class BlockScalaTest extends FunSpec{
 
 
       it("should be properly verilated") {
-        val ver = run.verilate
-        assert(ver == true)
+        TimeUtil.time("Verilate") {
+          val ver = run.verilate
+          assert(ver == true)
+        }
       }
 
       it("should be properly built") {
-        val build = run.build
-        assert(build == true)
+        TimeUtil.time("Build") {
+          val build = run.build
+          assert(build == true)
+        }
       }
 
       it("should be moved") {
-        val move = run.move
-        assert(move == true)
+        TimeUtil.time("Move") {
+          val move = run.move
+          assert(move == true)
+        }
+
       }
 
       it("should be properly run") {
-        val ru = run.run
-        assert(ru == true)
+        TimeUtil.time("Run") {
+          val ru = run.run
+          assert(ru == true)
+        }
       }
 
       it("should pass checking results") {
-        postRun()
+        TimeUtil.time("Post") {
+          postRun()
+        }
       }
 
 

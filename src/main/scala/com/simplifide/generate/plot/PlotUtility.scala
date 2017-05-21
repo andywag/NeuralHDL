@@ -32,7 +32,7 @@ object PlotUtility {
 
 
 
-  def jPlot(input:Seq[Double],ref:Seq[Double],error:Seq[Double],file:Option[String]) = {
+  def jPlot(input:Seq[Double],ref:Seq[Double],error:Seq[Double],file:String) = {
 
     val dataSet = new DefaultCategoryDataset()
     input.zipWithIndex.foreach(x => dataSet.addValue(x._1,"RTL",x._2))
@@ -43,15 +43,13 @@ object PlotUtility {
 
 
     val chart = ChartFactory.createLineChart("Difference","input","value",dataSet,PlotOrientation.VERTICAL,true,true,false)
+    ChartUtilities.saveChartAsJPEG(new File(s"$file.jpg"),chart,500,300)
 
-    file.map(x => {
-      ChartUtilities.saveChartAsJPEG(new File(s"$x.jpg"),chart,500,300)
-    })
+
 
     val chart1 = ChartFactory.createLineChart("Error","input","value",errorSet,PlotOrientation.VERTICAL,false,true,false)
-    file.map(x => {
-      ChartUtilities.saveChartAsJPEG(new File(s"${x}e.jpg"),chart1,500,300)
-    })
+    ChartUtilities.saveChartAsJPEG(new File(s"${file}e.jpg"),chart1,500,300)
+
 
   }
 
@@ -60,7 +58,8 @@ object PlotUtility {
     val in  = input.slice(delay+ignore,len)
     val out = ref.slice(ignore,len)
     val diff = (in zip out).map(x => x._2 - x._1)
-    jPlot(in,out,diff,file)
+    file.map(x => jPlot(in,out,diff,x))
+
     ErrorStat(diff)
 
   }

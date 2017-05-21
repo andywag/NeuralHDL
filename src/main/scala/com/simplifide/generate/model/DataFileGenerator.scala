@@ -95,14 +95,16 @@ object DataFileGenerator {
   object ZEROS extends DataGenType
   object ONES extends DataGenType
   case class Ramp(min:Double, max:Double) extends DataGenType
+  case class Random(min:Double, max:Double) extends DataGenType
 
   def createData(size:Array[Int], file:String, typ:DataGenType, offset:Int=0) = {
     val len = size.foldLeft(1)(_*_)
     val data1   = typ match {
       case RANDOM        => Nd4j.randn(size)
-      case ONES         => Array.tabulate(len)(x => 1.0.toFloat).mkNDArray(size)
-      case ZEROS        => Array.tabulate(len)(x => 0.0.toFloat).mkNDArray(size)
-      case Ramp(mi,ma)  => {
+      case Random(mi,ma) => Nd4j.rand(size,mi,ma,Nd4j.getRandom)
+      case ONES          => Array.tabulate(len)(x => 1.0.toFloat).mkNDArray(size)
+      case ZEROS         => Array.tabulate(len)(x => 0.0.toFloat).mkNDArray(size)
+      case Ramp(mi,ma)   => {
         val slope = (ma - mi).toFloat/len.toFloat
         Array.tabulate(len)(x => (mi + x.toFloat*slope)).mkNDArray(size)
       }

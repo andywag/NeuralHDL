@@ -28,8 +28,10 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   import org.nd4s.Implicits._
   import com.simplifide.generate.model.NdArrayWrap._
 
+  val typ = DataFileGenerator.Random(range._1, range._2)//DataFileGenerator.Ramp(range._1, range._2)
+
   val data = DataFileGenerator.createData(Array(testLength,1),s"$dataLocation/data",
-    DataFileGenerator.Ramp(range._1, range._2))
+    typ)
 
   val result = Transforms.sigmoid(data.data).d(1)
   val out  = DataFileGenerator.createFlatten(s"$dataLocation/out",result)

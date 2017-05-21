@@ -30,7 +30,7 @@
 // Registers 
 
   reg                   [31:0]  counter           ;  // <32,0>
-  reg                   [31:0]  data_mem[0:1000]  ;  // <32,0>
+  reg                   [31:0]  data_mem[0:50000] ;  // <32,0>
   reg                   [31:0]  rout_fptr         ;  // <32,0>
 
 
@@ -57,7 +57,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd1000)) begin
+    if ((counter == 'd50000)) begin
       $finish;
     end
   end

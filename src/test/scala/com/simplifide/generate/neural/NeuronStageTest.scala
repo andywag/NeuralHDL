@@ -26,7 +26,7 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   import com.simplifide.generate.model.NdArrayWrap._
 
   def blockName:String = "neuronStage"
-  val depth = 8
+  val depth = 128
   val share = 1
 
   val start = (math.log10(depth)/math.log10(2.0)).toInt
@@ -54,20 +54,25 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   val tapInD    = List.tabulate(depth) {x => tapIn(x)  <-- (vectors.taps(x),Some(delayIndex))}
   val biasInD   = List.tabulate(share) {x => biasIn(x) <-- vectors.bias}
 
-  val rout  = List.tabulate(share) {x => dataOutPre(x) ---> (s"$dataLocation/rout", None, "Stage Output",8)}
+  //val rout  = List.tabulate(share) {x => dataOutPre(x) ---> (s"$dataLocation/rout", None, "Stage Output",8)}
   val rout1 = List.tabulate(share) {x => dataOut(x) ---> (s"$dataLocation/rout1", None, "Sigmoid Output",8)}
 
 
   override def postRun = {
-    val output  = rout(0).load()
+    //val output  = rout(0).load()
     val output2 = rout1(0).load()
 
+    val plotEnable = true
+    val plot1 = if (plotEnable) Some(s"$docLocation/results") else None
+    val plot2 = if (plotEnable) Some(s"$docLocation/results") else None
+/*
     val error = PlotUtility.plotError(output.data().asDouble(),
-      vectors.output.data.data().asDouble(),Some(s"$docLocation/results"))
+      vectors.output.data.data().asDouble(),plot1)
     assert(error.max < .001)
+*/
 
     val error2 = PlotUtility.plotError(output2.data().asDouble(),
-      vectors.output2.data.data().asDouble(),Some(s"$docLocation/results2"),1,2*depth)
+      vectors.output2.data.data().asDouble(),plot2,1,2*depth)
     assert(error2.max < .06)
 
 

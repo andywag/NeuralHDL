@@ -5,9 +5,9 @@ import java.io.PrintWriter
 /**
   * Created by andy on 4/27/17.
   */
-class TestCWrapper(val name:String) {
+class TestCWrapper(val name:String, wave:Boolean=false) {
 
-
+  def getDump = "tfp->dump(main_time);"
 
   val code = s"""
 #include "V${name}.h"
@@ -34,7 +34,7 @@ int main(int argc, char **argv, char **env) {
 
     if (main_time % 10 == 1) {
       top->clk = 0;
-      tfp->dump(main_time);
+      ${getDump}
     }
     else if (main_time % 10 == 6) {
       top->clk = 1;
