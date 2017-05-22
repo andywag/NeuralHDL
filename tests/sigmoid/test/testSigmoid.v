@@ -30,7 +30,7 @@
 // Registers 
 
   reg                   [31:0]  counter           ;  // <32,0>
-  reg                   [31:0]  data_mem[0:50000] ;  // <32,0>
+  reg                   [31:0]  data_mem[0:1000000];  // <32,0>
   reg                   [31:0]  rout_fptr         ;  // <32,0>
 
 
@@ -57,7 +57,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd50000)) begin
+    if ((counter == 'd1000000)) begin
       $finish;
     end
   end
@@ -65,14 +65,14 @@ end
 
 // Load data
 initial begin
-  $readmemh("/home/andy/IdeaProjects/NeuralHDL/tests/sigmoid/data/data.hex",data_mem);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/sigmoid/data/data.hex",data_mem);
 end
 
 assign data = data_mem[counter];
 
 // Store Store out
 initial begin
-  rout_fptr = $fopen("/home/andy/IdeaProjects/NeuralHDL/tests/sigmoid/data/rout.hex","w");
+  rout_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/sigmoid/data/rout.hex","w");
 end
 
 always @(posedge clk) begin

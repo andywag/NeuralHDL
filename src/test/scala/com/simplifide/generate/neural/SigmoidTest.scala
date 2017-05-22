@@ -43,10 +43,11 @@ class SigmoidTest extends BlockScalaTest with BlockTestParser  {
   }
 
   override def postRun = {
+    val plot = if (true) None else Some(s"$docLocation/discrim")
     val data = dumpD.load()
     val error = PlotUtility.plotError(data.data().asDouble(),
-      result.data().asDouble(),Some(s"$docLocation/discrim"))
-    assert(error.max < .05)
+      result.data().asDouble(),plot)
+    checkMaxError(error,.05)
   }
 
   override def document =

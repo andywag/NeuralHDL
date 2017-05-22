@@ -50,7 +50,7 @@ class NeuronTest extends BlockScalaTest with BlockTestParser  {
     val output = rout.load()
     val error = PlotUtility.plotError(output.data().asDouble(),
       result.data().asDouble(),Some(s"$docLocation/results"))
-    assert(error.max < .05)
+    assert(error.max._1 < .05)
   }
 
 

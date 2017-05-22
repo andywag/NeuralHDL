@@ -16,14 +16,18 @@ import org.jfree.data.xy.{XYDataset, XYSeries, XYSeriesCollection}
 
 object PlotUtility {
 
-  case class ErrorStat(max:Double, mean:Double, va:Double) {
+  case class ErrorStat(max:(Double,Int), mean:Double, va:Double) {
     override def toString = s"Max : $max, Mean : $mean, Var : $va"
   }
 
   object ErrorStat {
     def apply(input:Seq[Double]) = {
+      def maxIndex(x:(Double,Int),y:(Double,Int)) = {
+        if (y._1 > x._1) y else x
+      }
+
       val abs = input.map(x => math.abs(x))
-      val max  = abs.foldLeft(0.0)(math.max(_,_))
+      val max  = abs.zipWithIndex.foldLeft((0.0,-1))(maxIndex(_,_))
       val mean = abs.foldLeft(0.0)(_+_) / abs.length.toDouble
       val va   = abs.map(x => (x - mean)*(x-mean)).foldLeft(0.0)(_+_)/abs.length.toDouble
       new ErrorStat(max,mean,va)
@@ -53,14 +57,16 @@ object PlotUtility {
 
   }
 
-  def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None, delay:Int=0, ignore:Int=0) = {
+  def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None,
+                delay:Int=0, ignore:Int=0) = {
     val len = math.min(input.length,ref.length)
     val in  = input.slice(delay+ignore,len)
     val out = ref.slice(ignore,len)
     val diff = (in zip out).map(x => x._2 - x._1)
-    file.map(x => jPlot(in,out,diff,x))
+    val stat = ErrorStat(diff)
 
-    ErrorStat(diff)
+    file.map(x => jPlot(in,out,diff,x))
+    stat
 
   }
 }

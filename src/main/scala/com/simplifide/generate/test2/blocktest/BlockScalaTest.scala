@@ -1,5 +1,6 @@
 package com.simplifide.generate.test2.blocktest
 
+import com.simplifide.generate.plot.PlotUtility.ErrorStat
 import com.simplifide.generate.test2.Test
 import com.simplifide.generate.test2.verilator.RunVerilator
 import com.simplifide.generate.util.TimeUtil
@@ -17,7 +18,15 @@ class BlockScalaTest extends FunSpec{
   */
   /// /project.cleanProject
 
-
+    def checkMaxError(errorStat:ErrorStat, threshold:Double): Unit = {
+      System.out.println(s"Errors $errorStat")
+      assert(errorStat.max._1 > threshold)
+      /*
+      if (errorStat.max._1 > threshold) {
+        System.out.println(s"Error occured at ${errorStat.max._2}")
+      }
+      */
+    }
 
     describe(s"Test") {
 

@@ -80,12 +80,14 @@ object DataFileGenerator {
     createHexFile(location,data,order)
   }
 
-  def createSlices(location:String, data:INDArray):Seq[NdDataSet] = {
+  // FIXME : This should return a slice of data but is only returnign teh original data
+  def createSlices(location:String, data:INDArray) = {
     val shape = data.shape()
 
     val result = Seq.tabulate(shape(1))(x => {
       val slice = sliceDim3(data,x)
       createHexFile(s"${location}${x}",data,slice,Some(shape(2)*shape(0)))
+
     })
     result
   }
