@@ -59,7 +59,7 @@ object Connection {
       new MapSignalConnection(imap)
     }
 
-    def name(connections:Map[SignalTrait,SignalTrait]) = {
+    def name(connections:Map[SignalTrait,SimpleSegment]) = {
       val strMap = connections.map(x => (x._1.name, x._2.name)).toMap
       new MapConnection(strMap)
     }

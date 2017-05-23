@@ -32,11 +32,15 @@ class FileLoad(val signal:SignalTrait, val filename:String, val length:Int) exte
 
 object FileLoad {
 
-  class ReadMemH(val array:SignalTrait,val filename:String) extends SimpleSegment {
+  // FIXME : Converge methods to single block
+  class ReadMemHName(val signalName:String,val filename:String) extends SimpleSegment {
+    override def createCode(implicit writer:CodeWriter):SegmentReturn =
+      SegmentReturn("$readmemh(\"" + filename + "\"," + signalName + ");\n")
+  }
 
+  class ReadMemH(val array:SignalTrait,val filename:String) extends SimpleSegment {
     override def createCode(implicit writer:CodeWriter):SegmentReturn =
       SegmentReturn("$readmemh(\"" + filename + "\"," + array.name + ");\n")
-
   }
 
   class LoadCommand(val signal:SignalTrait,

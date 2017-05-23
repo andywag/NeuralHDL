@@ -18,7 +18,7 @@ trait BlockTestParser extends TestEntityParser{
 
 
   override implicit val clk: ClockControl = ClockControl("clk","reset")
-  implicit val testLength = 200000
+  implicit val testLength = 50000
 
   val dutParser:EntityParser
 

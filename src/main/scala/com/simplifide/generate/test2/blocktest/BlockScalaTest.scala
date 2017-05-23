@@ -20,7 +20,7 @@ class BlockScalaTest extends FunSpec{
 
     def checkMaxError(errorStat:ErrorStat, threshold:Double): Unit = {
       System.out.println(s"Errors $errorStat")
-      assert(errorStat.max._1 > threshold)
+      assert(errorStat.max._1 < threshold)
       /*
       if (errorStat.max._1 > threshold) {
         System.out.println(s"Error occured at ${errorStat.max._2}")

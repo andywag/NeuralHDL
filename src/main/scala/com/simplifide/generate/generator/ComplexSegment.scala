@@ -11,6 +11,7 @@ import items.MiscParser
 import model.Expression
 import com.simplifide.generate.blocks.basic.misc.Comment
 import com.simplifide.generate.doc.DocumentHolder
+import com.simplifide.generate.project.NewEntityInstance
 
 /**
  * Trait which allows complex segments to be built using the more descriptive syntax from the module rather than
@@ -18,8 +19,9 @@ import com.simplifide.generate.doc.DocumentHolder
  */
 
 trait ComplexSegment extends ConditionParser with SignalHolder
-  with SimpleSegment with MiscParser with DocumentHolder {
+  with SimpleSegment with MiscParser with DocumentHolder  {
 
+  val instances = new ListBuffer[NewEntityInstance[_]]()
 
   val title:Option[String] = None
   /** Defines the body in the block */

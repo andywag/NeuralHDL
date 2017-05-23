@@ -18,6 +18,7 @@ object DataFileGenerator {
     def convert(value:Double, typ:DataBuffer.Type) = {
       typ match {
         case DataBuffer.Type.FLOAT => DataWrapper.FloatWrap(value.toFloat)
+        case DataBuffer.Type.INT   => DataWrapper.FloatWrap(value.toFloat)
         case _                     => ???
       }
     }

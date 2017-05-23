@@ -18,6 +18,13 @@ trait DataWrapper[T] {
 }
 
 object DataWrapper {
+
+  case class IntWrap(override val value:Int) extends DataWrapper[Int] {
+    override val write: String = Integer.toHexString(value)
+    override val debug: String = write
+    override val read: (String) => DataWrapper[Int] = x => IntWrap(Integer.parseInt(x,16))
+  }
+
   case class FloatWrap(override val value:Float) extends DataWrapper[Float] {
 
 

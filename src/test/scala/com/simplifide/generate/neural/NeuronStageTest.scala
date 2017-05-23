@@ -62,7 +62,7 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
     val output  = rout(0).load()
     val output2 = rout1(0).load()
 
-    val plotEnable = false
+    val plotEnable = true
     val plot1 = if (plotEnable) Some(s"$docLocation/results") else None
     val plot2 = if (plotEnable) Some(s"$docLocation/resultse") else None
 
