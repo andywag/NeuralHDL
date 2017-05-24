@@ -11,7 +11,7 @@ import items.MiscParser
 import model.Expression
 import com.simplifide.generate.blocks.basic.misc.Comment
 import com.simplifide.generate.doc.DocumentHolder
-import com.simplifide.generate.project.NewEntityInstance
+import com.simplifide.generate.project.{NewEntity, NewEntityInstance}
 
 /**
  * Trait which allows complex segments to be built using the more descriptive syntax from the module rather than
@@ -52,6 +52,13 @@ object ComplexSegment {
     ->(segment)
     signal(segment.inputs.map(x => x.changeType(OpType.Input)).toList)
     signal(segment.outputs.map(x => x.changeType(OpType.Output)))
+
+    override def createEntity: NewEntity = {
+      this.internalInstances.appendAll(segment.instances)
+      this.signals.appendAll(segment.signals)
+      super.createEntity
+    }
+
   }
   
   /** Class which is used to contain the body of the complex value after the split operation */

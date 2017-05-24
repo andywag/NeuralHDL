@@ -59,6 +59,7 @@ trait NewConstant extends SimpleSegment {
     this match {
       case x:NewConstant.Long   => new NewConstant.Long(x.value,fixed,x.outputType)
       case x:NewConstant.Double => new NewConstant.Double(x.value,fixed)
+      case x:NewConstant.NewLong   => new NewConstant.Long(x.value,fixed,x.outputType)
       case _                    => null
     }
   }

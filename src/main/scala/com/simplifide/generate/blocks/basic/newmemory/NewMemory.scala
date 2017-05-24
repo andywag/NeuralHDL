@@ -6,6 +6,7 @@ import com.simplifide.generate.blocks.basic.misc.Comment
 import com.simplifide.generate.blocks.test.FileLoad
 import com.simplifide.generate.blocks.test.FileLoad.ReadMemH
 import com.simplifide.generate.generator.ComplexSegment
+import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.signal.SignalTrait
 
 /**
@@ -34,6 +35,8 @@ case class NewMemory(override val name:String,
     $initial(new ReadMemH(memory, x))
   }
   )
+
+
 
   override def inputs: Seq[SignalTrait] = input :: input.wrData :: clk.allSignals(INPUT)
   override def outputs:List[SignalTrait] = List(input.rdData)

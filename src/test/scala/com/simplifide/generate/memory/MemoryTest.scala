@@ -35,6 +35,10 @@ class MemoryTest extends BlockScalaTest with BlockTestParser {
   val data = DataFileGenerator.createData(Array(len,1),fileLocation,
     typ)
 
+  dutParser.struct.rdAddress := index
+  dutParser.struct.wrAddress := index
+  dutParser.struct.wrData    := index
+  dutParser.struct.wrVld     := H(1)
 
   override def createBody = {
 
@@ -56,12 +60,12 @@ object MemoryTest {
 
 
     val template = NewMemory("memory",struct)
-    val base = new SegmentEntity[NewMemory](template,s"${name}Base")
+    //val base = new SegmentEntity[NewMemory](template,s"${name}Base")
 
 
-    val sig = ->(MemoryBank(base,struct2,Some(dataLocation)))
+    val sig = ->(MemoryBank(struct2,Some(dataLocation)))
 
-    internalInstances.appendAll(sig.instances)
+    //internalInstances.appendAll(sig.instances)
     signals.appendAll(sig.signals)
 
     override def document = sig.document

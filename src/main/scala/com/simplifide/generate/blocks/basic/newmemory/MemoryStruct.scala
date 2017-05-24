@@ -1,5 +1,9 @@
 package com.simplifide.generate.blocks.basic.newmemory
 
+import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
+import com.simplifide.generate.generator.SimpleSegment
+import com.simplifide.generate.parser.items.ConstantParser
 import com.simplifide.generate.signal.sv.Struct
 import com.simplifide.generate.signal.{FixedType, OpType, SignalTrait}
 
@@ -7,7 +11,7 @@ import com.simplifide.generate.signal.{FixedType, OpType, SignalTrait}
   * Created by andy on 5/9/17.
   */
 case class MemoryStruct(override val name:String, override val opType:OpType, memoryRepeat:Array[Int],
-                        dimensions:Array[Int]) extends Struct {
+                        dimensions:Array[Int]) extends Struct with ConstantParser {
 
   val memoryWidth = memoryRepeat.foldLeft(1)(_*_)
   val memoryDepth  = dimensions.foldLeft(1)(_*_)
@@ -24,6 +28,11 @@ case class MemoryStruct(override val name:String, override val opType:OpType, me
   val wrData     = SignalTrait(appendName("wr_data")   ,opType ,dataWidth)
   val rdData     = SignalTrait(appendName("rd_data")   ,opType.reverseType ,dataWidth)
 
+
+  def createEntity(implicit clk:ClockControl) = {
+    val name = s"memory_${memoryWidth}_${memoryDepth}"
+    new SegmentEntity(NewMemory(name,this),name)
+  }
 
   override val packed: Boolean = true
   override val typeName: String = s"${name}_${memoryWidth}_${memoryDepth}"
