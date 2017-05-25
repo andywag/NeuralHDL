@@ -1,5 +1,6 @@
 package com.simplifide.generate.blocks.basic.typ
 
+import com.simplifide.generate.blocks.basic.newmemory.MemoryStruct
 import com.simplifide.generate.blocks.basic.typ.Expressable.SeqExpressable
 import com.simplifide.generate.generator.{BasicSegments, SimpleSegment}
 import com.simplifide.generate.parser.SegmentHolder
@@ -12,12 +13,43 @@ import com.simplifide.generate.parser.model.Expression
   */
 trait Assignable[T] {
   val value: T
+
   def :=[S](input: Expressable[S])(implicit scope: SegmentHolder): SimpleSegment
   def ::=[S](input: Expressable[S]): SimpleSegment
+
+  def !:=[S](input: Expressable[S])(implicit scope: SegmentHolder): SimpleSegment = := (input)
+  def !::=[S](input: Expressable[S]): SimpleSegment = ::= (input)
+
 }
 
 object Assignable {
   implicit val creator = CreationFactory.Hardware
+
+
+  class AssignableMem(override val value: MemoryStruct) extends Assignable[MemoryStruct] {
+
+    // FIXME : Should convert := and ::= to same function
+    // FIXME : Should make this a general operation for structure
+    def :=[S](input: Expressable[S])(implicit scope: SegmentHolder) = {
+      input match {
+        case x:MemoryStruct => {
+          new AssignableSeq(value.inputSignals ::: x.outputSignals) :=
+            new SeqExpressable(x.inputSignals ::: value.outputSignals)
+        }
+        case _              => ???
+      }
+
+    }
+    def ::=[S](input: Expressable[S]) = {
+      input match {
+        case x:MemoryStruct => {
+          new AssignableSeq(value.inputSignals ::: x.outputSignals) ::=
+            new SeqExpressable(x.inputSignals ::: value.outputSignals)
+        }
+        case _              => ???
+      }
+    }
+  }
 
 
   class AssignableSeq(override val value: Seq[Expression]) extends Assignable[Seq[Expression]] {
@@ -32,8 +64,6 @@ object Assignable {
       }
       result
     }
-
-
 
     def :=[S](input: Expressable[S])(implicit scope: SegmentHolder) = {
       val out = createStatement(input).create

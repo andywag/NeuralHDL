@@ -28,6 +28,9 @@ case class MemoryStruct(override val name:String, override val opType:OpType, me
   val wrData     = SignalTrait(appendName("wr_data")   ,opType ,dataWidth)
   val rdData     = SignalTrait(appendName("rd_data")   ,opType.reverseType ,dataWidth)
 
+  val inputSignals  = List(wrVld, wrAddress, rdVld, rdAddress, wrData)
+  val outputSignals = List(rdData)
+
 
   def createEntity(implicit clk:ClockControl) = {
     val name = s"memory_${memoryWidth}_${memoryDepth}"
