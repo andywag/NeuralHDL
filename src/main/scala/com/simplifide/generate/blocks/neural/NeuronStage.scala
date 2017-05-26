@@ -1,14 +1,14 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.basic.typ.OutputAssignable
+import com.simplifide.generate.newparser.typ.OutputAssignable
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.parser.model.Expression
 import com.simplifide.generate.signal.{OpType, SignalTrait}
 import com.simplifide.generate.util.PathUtilities
-import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+import com.simplifide.generate.newparser.typ.SegmentParser._
 import com.simplifide.generate.doc.MdGenerator._
 import scala.concurrent.Future
 
@@ -91,26 +91,26 @@ dataOut        := internalSignal plus bias
   val dataOutDelay    = seq(dataOut(0).newSignal(name = "outLine"),REG)(numberOfNeurons)
   val validD          = Seq.tabulate(2)(x => signal(valid.newSignal(name = s"valid$x",REG)))
 
-  import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+  import com.simplifide.generate.newparser.typ.SegmentParser._
 
   //val a = valid := valid ? valid :: valid
   /- ("Delay the Input Valid")
-  Seq(validD(0),validD(1)) := Seq(valid,validD(0)) at (clk)
+  Seq(validD(0),validD(1)) !:= Seq(valid,validD(0)) at (clk)
 
   /- ("Select the inputs to the Neuron\n")
   for (i <- 0 until depth) {
     val biasInput = if (i == depth-1) biasIn(0) else biasInputDelay(depth-2-i)
-    neuronAccumIn(i) := validD(0) ? biasInput :: neuronOut(i)
+    neuronAccumIn(i) !:= validD(0) ? biasInput :: neuronOut(i)
 
   }
 
 
 
   /- ("Create the output Delay Line\n")
-  dataOutDelay := ($if (validD(0)) $then neuronOut $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
+  dataOutDelay !:= ($if (validD(0)) $then neuronOut $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
 
   /- ("Assign the outputs")
-  dataOutPre(0) := dataOutDelay(0)
+  dataOutPre(0) !:= dataOutDelay(0)
 
 
   val neuronInput = biasIn.map(x => signal(x.newSignal(name = x.appendName("_input"),opType=OpType.Logic)))

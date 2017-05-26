@@ -1,7 +1,7 @@
 package com.simplifide.generate.float
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.basic.typ.NumberType
+import com.simplifide.generate.newparser.typ.NumberType
 import com.simplifide.generate.blocks.float.FloatMult
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.NewEntity
@@ -26,7 +26,7 @@ class FloatMultRandomTest extends BlockScalaTest with BlockTestParser  {
 
 object FloatMultRandomTest {
   class Dut(val name:String)(implicit val clk:ClockControl) extends EntityParser  {
-    import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+    import com.simplifide.generate.newparser.typ.SegmentParser._
 
 
     signal(clk.allSignals(INPUT))

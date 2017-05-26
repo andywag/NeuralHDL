@@ -1,7 +1,7 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.basic.typ.NumberType
+import com.simplifide.generate.newparser.typ.NumberType
 import com.simplifide.generate.generator._
 import com.simplifide.generate.parser.{ConditionParser, SignalParser}
 import com.simplifide.generate.signal.{OpType, SignalTrait}
@@ -15,7 +15,7 @@ case class Neuron(dataOut:SignalTrait,
                   taps:SignalTrait,
                   bias:SignalTrait)(implicit val clk:ClockControl) extends ComplexSegment  {
 
-  import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+  import com.simplifide.generate.newparser.typ.SegmentParser._
   import com.simplifide.generate.doc.MdGenerator._
 
   def createBody = {}

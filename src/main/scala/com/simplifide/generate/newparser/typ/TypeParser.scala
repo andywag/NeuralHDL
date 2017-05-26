@@ -1,4 +1,4 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 /**
   * Created by andy on 5/9/17.

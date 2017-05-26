@@ -58,3 +58,7 @@ trait SegmentHolder extends SignalHolder{
 
 
 }
+
+object SegmentHolder {
+  object Impl extends SegmentHolder
+}

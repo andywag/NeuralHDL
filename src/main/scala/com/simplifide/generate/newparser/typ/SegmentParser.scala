@@ -1,10 +1,12 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 import com.simplifide.generate.blocks
 import com.simplifide.generate.blocks.basic
-import com.simplifide.generate.blocks.basic.typ
-import com.simplifide.generate.blocks.basic.typ.ConditionType.Open
-import com.simplifide.generate.blocks.basic.typ.NumberType.NumberLike.{NumberLikeFloatSignal, NumberLikeSignal}
+import com.simplifide.generate.blocks.basic.newmemory.MemoryStruct
+import com.simplifide.generate.newparser.typ
+import com.simplifide.generate.newparser.typ.Assignable.{AssignableMem, AssignableSingle}
+import com.simplifide.generate.newparser.typ.ConditionType.Open
+import com.simplifide.generate.newparser.typ.NumberType.NumberLike.{NumberLikeFloatSignal, NumberLikeSignal}
 import com.simplifide.generate.parser.model.Expression
 import com.simplifide.generate.signal.{FloatSignal, RegisterTrait, SignalTrait}
 
@@ -18,8 +20,14 @@ object SegmentParser {
 
   implicit def seqToExpressable(input:Expression) = new typ.Expressable.SeqExpressable(Seq(input))
   implicit def seqToExpressable(input:Seq[Expression]) = new typ.Expressable.SeqExpressable(input)
-  implicit def seqToAssignable(input:Expression) = new basic.typ.Assignable.AssignableSeq(Seq(input))
-  implicit def seqToAssignable(input:Seq[Expression]) = new basic.typ.Assignable.AssignableSeq(input)
+
+  implicit def seqToAssignable(input:Expression) = input match {
+    case x:MemoryStruct => new AssignableMem(x)
+    case _              => new AssignableSingle(input)
+  }
+
+
+  implicit def seqToAssignable(input:Seq[Expression]) = new com.simplifide.generate.newparser.typ.Assignable.AssignableSeq(input)
 
   implicit def flopToOutputAssignable[T](input:OutputAssignable.AtFlop[T]) =
     new OutputAssignable.AtFlopAssignable(input)
@@ -28,7 +36,7 @@ object SegmentParser {
     new OutputAssignable.ConditionAssignable[T](input)
 
   implicit def outputAssignableToExpressable[T](input:OutputAssignable[T]) =
-    new blocks.basic.typ.Expressable.OutAssExpressable[T](input)
+    new com.simplifide.generate.newparser.typ.Expressable.OutAssExpressable[T](input)
 
 
 

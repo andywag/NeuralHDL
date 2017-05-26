@@ -3,7 +3,7 @@ package com.simplifide.generate.blocks.float
 import com.simplifide.generate.blocks.basic.fixed.MultiplySegment
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.operator.Operators
-import com.simplifide.generate.blocks.basic.typ.{NumberType, TypeParser}
+import com.simplifide.generate.newparser.typ.{NumberType, TypeParser}
 import com.simplifide.generate.generator.{CodeWriter, ComplexSegment, SegmentReturn, SimpleSegment}
 import com.simplifide.generate.parser.factory.CreationFactory
 import com.simplifide.generate.parser.{ConditionParser, EntityParser, SignalParser}

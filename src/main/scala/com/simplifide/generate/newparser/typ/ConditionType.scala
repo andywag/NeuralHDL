@@ -1,4 +1,4 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 import com.simplifide.generate.blocks.basic.condition.ConditionStatement
 import com.simplifide.generate.generator.{CodeWriter, SegmentReturn, SimpleSegment}
@@ -25,7 +25,7 @@ object ConditionType {
     private def createInternalSegment[S](index:Int, output:Option[Assignable[S]])(implicit creator:CreationFactory) = {
       def resultStatement = {
         output match {
-          case Some(x) => (x ::= result)
+          case Some(x) => (x !::= result)
           case _       => result.expression.create
         }
       }

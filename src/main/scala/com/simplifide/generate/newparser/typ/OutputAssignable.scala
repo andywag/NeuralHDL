@@ -1,4 +1,4 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 import com.simplifide.generate.blocks.basic.flop.{ClockControl, SimpleFlopSegment}
 import com.simplifide.generate.generator.{BasicSegments, SimpleSegment}
@@ -22,7 +22,7 @@ import com.simplifide.generate.parser.model.Expression
 
     case class AtFlopAssignable[T](override val value:AtFlop[T]) extends OutputAssignable[AtFlop[T]] {
       override def createStatement[S](out: Assignable[S]): SimpleSegment = {
-        val s = (out ::= value.input)
+        val s = (out !::= value.input)
         new SimpleFlopSegment(value.clk,s)
       }
     }

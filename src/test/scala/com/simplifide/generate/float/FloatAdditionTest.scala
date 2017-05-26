@@ -1,7 +1,7 @@
 package com.simplifide.generate.float
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.basic.typ.NumberType
+import com.simplifide.generate.newparser.typ.NumberType
 import com.simplifide.generate.blocks.float.{FloatAddition, FloatMult}
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.NewEntity
@@ -33,7 +33,7 @@ object FloatAdditionRandomTest {
   class Dut(val name:String)(implicit val clk:ClockControl) extends EntityParser {
 
 
-    import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+    import com.simplifide.generate.newparser.typ.SegmentParser._
 
     signal(clk.allSignals(INPUT))
     val in1   = signal(FloatSignal("in1",INPUT))

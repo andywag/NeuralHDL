@@ -1,4 +1,4 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.float.{FloatAddition, FloatMult}

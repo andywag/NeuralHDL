@@ -3,10 +3,11 @@ package com.simplifide.generate.blocks.neural
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.newmemory.{MemoryBank, MemoryStruct, NewMemory}
 import com.simplifide.generate.blocks.neural
-import com.simplifide.generate.blocks.neural.NeuralMemory.{Dimensions}
+import com.simplifide.generate.blocks.neural.NeuralMemory.Dimensions
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.project.NewEntityInstance
+import com.simplifide.generate.signal.OpType.Logic
 import com.simplifide.generate.signal.{OpType, SignalTrait}
 
 /**
@@ -53,7 +54,7 @@ case class NeuralMemory(override val name:String,
 
 
   val select     = signal("select")
-  val controller = new NeuralMemory.Controller("control",select,
+  val controller = new NeuralMemory.Controller("memControl",select,
     tapStructW,biasStructW,dataStructW, tapStruct,biasStruct,dataStruct)
   val controllerSegment = new SegmentEntity(controller,"control").createEntity
   instances.append(NewEntityInstance(controllerSegment,"control"))
@@ -73,7 +74,7 @@ case class NeuralMemory(override val name:String,
 }
 
 object NeuralMemory {
-  import com.simplifide.generate.blocks.basic.typ.SegmentParser._
+  import com.simplifide.generate.newparser.typ.SegmentParser._
 
   case class Dimensions(tapDim:(Int,Int), neuronDepth:Int, dataDepth:Int, memWidth:Int=32)
 
@@ -85,9 +86,38 @@ object NeuralMemory {
     /** Defines the body in the block */
     override def createBody: Unit = {}
 
-    tapOut  !:= select ? tapIn(0) :: tapIn(1)
-    dataOut !:= select ? dataIn(0) :: dataIn(1)
-    biasOut !:= select ? biasIn(0) :: biasIn(1)
+    override def inputs = {
+      val clkSignals   = clk.allSignals(INPUT)
+      val readSignals  = List(select,tapOut.rdData,biasOut.rdData,dataOut.rdData)
+      val inputSignals      = tapIn.toList ::: biasIn.toList ::: dataIn.toList
+      val inputWriteSignals = tapIn.map(_.wrData).toList ::: biasIn.map(_.wrData).toList ::: dataIn.map(_.wrData).toList
+      clkSignals ::: readSignals ::: inputSignals ::: inputWriteSignals
+    }
+
+
+    override def outputs = {
+      val rdSignals = tapIn.map(_.rdData).toList ::: biasIn.map(_.rdData).toList ::: dataIn.map(_.rdData).toList
+      val wrSignals = List(tapOut.wrData,dataOut.wrData,biasOut.wrData)
+      val outputSignals = List(tapOut,biasOut,dataOut)
+
+      rdSignals ::: outputSignals ::: wrSignals
+
+    }
+
+    $always_star(
+      $iff (select) $then (
+        tapOut  !::= tapIn(0),
+        dataOut !::= dataIn(0),
+        biasOut !::= biasIn(0)
+      ) $else (
+        tapOut  !::= tapIn(1),
+        dataOut !::= dataIn(1),
+        biasOut !::= biasIn(1)
+      )
+    )
+
   }
+
+
 
 }

@@ -1,4 +1,4 @@
-package com.simplifide.generate.blocks.basic.typ
+package com.simplifide.generate.newparser.typ
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.generator.{BasicSegments, SimpleSegment}
@@ -36,14 +36,16 @@ object Expressable {
   implicit val creator = CreationFactory.Hardware
 
 
-  class SeqExpressable(override val value: Seq[Expression]) extends Expressable[Seq[Expression]] {
-
+  case class SeqExpressable(override val value: Seq[Expression]) extends Expressable[Seq[Expression]] {
     override def op(input: Expressable[Seq[Expression]], f: (Expression, Expression) => Expression) = {
       val result = (value zip input.value).map(x => f(x._1, x._2))
       new SeqExpressable(result)
     }
     def expression = if (value.length == 1) value(0) else BasicSegments.ListExpression(value.toList)
   }
+
+
+
 
   class OutAssExpressable[T](override val value:OutputAssignable[T]) extends Expressable[OutputAssignable[T]] {
     override def expression: Expression = ???
