@@ -97,5 +97,7 @@ object FixedType {
   object UnSigned extends Signing
   object Control extends Signing
 
+  val BIT = unsigned(1,0)
+
 
 }

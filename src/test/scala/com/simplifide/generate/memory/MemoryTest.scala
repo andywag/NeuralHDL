@@ -25,7 +25,9 @@ class MemoryTest extends BlockScalaTest with BlockTestParser {
   val len  = dims.foldLeft(1)(_*_)
   val width = 32
 
-  val dutParser = new MemoryTest.Dut(blockName,fileLocation,width,dims)
+  val struct2  = new MemoryStruct("mem_int", Array(width,32), dims)
+
+  val dutParser = MemoryBank("memory",struct2,Some(fileLocation))
   override val dut: NewEntity = dutParser.createEntity
 
 
@@ -35,10 +37,10 @@ class MemoryTest extends BlockScalaTest with BlockTestParser {
   val data = DataFileGenerator.createData(Array(len,1),fileLocation,
     typ)
 
-  dutParser.struct.rdAddress := index
-  dutParser.struct.wrAddress := index
-  dutParser.struct.wrData    := index
-  dutParser.struct.wrVld     := H(1)
+  dutParser.input.ctrl.rdAddress := index
+  dutParser.input.ctrl.wrAddress := index
+  dutParser.input.wrData         := index
+  dutParser.input.ctrl.wrVld     := H(1)
 
   override def createBody = {
 
@@ -46,6 +48,7 @@ class MemoryTest extends BlockScalaTest with BlockTestParser {
 }
 
 object MemoryTest {
+  /*
   class Dut(val name:String,
             dataLocation:String,
            width:Int,
@@ -59,9 +62,6 @@ object MemoryTest {
     signal(struct2.wrData)
 
 
-    val template = NewMemory("memory",struct)
-    //val base = new SegmentEntity[NewMemory](template,s"${name}Base")
-
 
     val sig = ->(MemoryBank(struct2,Some(dataLocation)))
 
@@ -71,4 +71,5 @@ object MemoryTest {
     override def document = sig.document
 
   }
+  */
 }

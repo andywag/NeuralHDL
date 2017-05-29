@@ -18,14 +18,14 @@ case class NewMemory(override val name:String,
   /** Defines the body in the block */
 
   val memory     = signal(name + "_memory",REG,input.dataWidth,input.memoryDepth)
-  val readDelay  = signal(name + "_read_address",REG, input.rdAddress.fixed)
+  val readDelay  = signal(name + "_read_address",REG, input.ctrl.rdAddress.fixed)
 
   override def createBody: Unit = {}
 
   /- ("Read Address Input Data")
-  readDelay := input.rdAddress $at(clk)
+  readDelay := input.ctrl.rdAddress $at(clk)
   /- ("Write Data")
-  memory(input.wrAddress) := $iff(input.wrVld) $then input.wrData $at(clk.withOutReset)
+  memory(input.ctrl.wrAddress) := $iff(input.ctrl.wrVld) $then input.wrData $at(clk.withOutReset)
   /- ("Read Operation")
   input.rdData            := memory(readDelay) $at(clk)
 
@@ -38,8 +38,8 @@ case class NewMemory(override val name:String,
 
 
 
-  override def inputs: Seq[SignalTrait] = input :: input.wrData :: clk.allSignals(INPUT)
-  override def outputs:List[SignalTrait] = List(input.rdData)
+  override def inputs: Seq[SignalTrait]  = clk.allSignals(INPUT) ::: input.signals.filter(_.isInput)
+  override def outputs:List[SignalTrait] = input.signals.filter(_.isOutput)
 }
 
 object NewMemory {

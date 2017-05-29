@@ -85,9 +85,10 @@ trait SignalTrait extends SimpleSegment with DescriptionHolder with SignalCreato
 
   /** Changes the type for a testbench addition */
   def changeTestType:SignalTrait = {
+    def clockName(in:String) = (this.name.startsWith("clk") || this.name.startsWith("reset"))
     this match {
       case x:Struct => x.copyStruct(this.name,OpType.Struct)
-      case _        => SignalTrait(this.name,this.opType.testType,this.fixed)
+      case _        => if (clockName(this.name)) this else SignalTrait(this.name,this.opType.testType,this.fixed)
     }
   }
   /** Changes the type of the signal. Mainly used for Input Output Changes during connections */

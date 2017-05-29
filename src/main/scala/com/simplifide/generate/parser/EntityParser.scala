@@ -15,6 +15,8 @@ import items.InstanceParser
 
 trait EntityParser extends ModuleParser with FunctionHolder with InstanceParser with DocumentHolder {
 
+  def appendName(iname:String) =
+    (this.name.replace(".","_") + s"_$iname").replace("__","_")
 
 
   val location:Option[java.io.File] = None

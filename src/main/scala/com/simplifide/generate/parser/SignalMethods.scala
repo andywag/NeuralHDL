@@ -65,13 +65,13 @@ trait SignalMethods extends SignalParser {
   }
 
   /** Convenience Method for Creating a Signed Type */
-  def S(width:Int,fraction:Int)        = signed(width,fraction)
+  def S(width:Int,fraction:Int=0)        = signed(width,fraction)
   /** Convenience Method for Creating a UnSigned Type */
-  def U(width:Int,fraction:Int)        = unsigned(width,fraction)
+  def U(width:Int,fraction:Int=0)        = unsigned(width,fraction)
    /** Convenience Method for Creating a Signed Type */
-  def signed(width:Int,fraction:Int)   = FixedType.signed(width,fraction)
+  def signed(width:Int,fraction:Int=0)   = FixedType.signed(width,fraction)
   /** Convenience Method for Creating a UnSigned Type */
-  def unsigned(width:Int,fraction:Int) = FixedType.unsigned(width,fraction)
+  def unsigned(width:Int,fraction:Int=0) = FixedType.unsigned(width,fraction)
 
   /*
   /** Convenience method for creating a Bus */

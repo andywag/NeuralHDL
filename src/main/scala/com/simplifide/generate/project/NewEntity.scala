@@ -85,7 +85,16 @@ trait NewEntity extends PathProvider {
     inputPassRoot.outputPass(None)
   }
   
-  private def containsOutput(signal:SignalTrait,outputs:List[SignalTrait]) = outputs.filter(_.name.equalsIgnoreCase(signal.name)).size > 0
+  private def containsOutput(signal:SignalTrait,outputs:List[SignalTrait]) = {
+    def checkName(input:String, compare:String) = {
+      if (input.equalsIgnoreCase(compare)) true
+      else {
+        val prefix = compare.split("\\.")
+        input.startsWith(prefix(0))
+      }
+    }
+    outputs.filter(x => checkName(signal.name,x.name)).size > 0
+  }
   
   private def convertOutput(signal:SignalTrait) = if (signal.isReg) signal.asOutput else signal
   
@@ -150,7 +159,7 @@ object NewEntity {
   
 
   
-  class Impl (
+  case class Impl (
     val name:String, 
     override val base:Option[EntityParser],
     val signals:List[SignalTrait],

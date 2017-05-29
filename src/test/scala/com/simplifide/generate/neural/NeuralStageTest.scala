@@ -1,42 +1,36 @@
 package com.simplifide.generate.neural
 
-import com.simplifide.generate.blocks.neural.{Neuron, NeuronStage, Sigmoid}
+import com.simplifide.generate.blocks.neural.{NeuralStage, Neuron, NeuronStage, Sigmoid}
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.model.{DataFileGenerator, NdDataSet, NdUtils}
 import com.simplifide.generate.plot.PlotUtility
 import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
-import com.simplifide.generate.test2.data.DataGenParser.RANDOM
 import com.simplifide.generate.util.PathUtilities
 import org.nd4j.linalg.api.buffer.DataBuffer
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.ops.transforms.Transforms
 
-
-
 /**
-  * Created by andy on 5/8/17.
+  * Created by andy on 5/28/17.
   */
-class NeuronStageTest extends BlockScalaTest with BlockTestParser {
+class NeuralStageTest extends BlockScalaTest with BlockTestParser {
 
   import org.nd4s.Implicits._
   import collection.JavaConverters._
   import com.simplifide.generate.model.NdArrayWrap._
 
-  def blockName:String = "neuronStage"
+  def blockName:String = "neural_stage"
   val depth = 8
   val share = 1
 
   val start = (math.log10(depth)/math.log10(2.0)).toInt
 
-  val valid        = SignalTrait("valid",INPUT)
-  val dataIn       = Seq.tabulate(share)(x => FloatSignal(s"dataIn_$x",INPUT))
-  val biasIn       = Seq.tabulate(share)(x => FloatSignal(s"biasIn_$x",INPUT))
-  val tapIn        = Seq.tabulate(depth)(x => FloatSignal(s"tapIn_$x",INPUT))
-  val dataOut      = Seq.tabulate(share)(x => FloatSignal(s"dataOut_$x",OUTPUT))
-  val dataOutPre   = Seq.tabulate(share)(x => FloatSignal(s"dataOutPre_$x",OUTPUT))
+  val dutParser = new NeuralStage(blockName,depth)
+  override val dut: NewEntity = dutParser.createEntity
+
 
 
   val delayIndex = signal(SignalTrait("d_index",WIRE,U(31,0)))
@@ -46,16 +40,16 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   val vectors = this.createDataSet(testLength/depth,this.dataLocation)
 
   /- ("Create a valid pulse")
-  valid := (index(start-1,0) === (depth-2))
+  dutParser.valid := (index(start-1,0) === (depth-2))
   /- ("Delay the bias to line up the data")
   delayIndex := index - (depth-2);
 
-  val dataInD   = List.tabulate(share) {x => dataIn(x) <-- (vectors.input,Some(delayIndex))}
-  val tapInD    = List.tabulate(depth) {x => tapIn(x)  <-- (vectors.taps(x),Some(delayIndex))}
-  val biasInD   = List.tabulate(share) {x => biasIn(x) <-- vectors.bias}
+  val dataInD   = List.tabulate(share) {x => dutParser.dataIn(x) <-- (vectors.input,Some(delayIndex))}
+  val tapInD    = List.tabulate(depth) {x => dutParser.tapIn.s(x)  <-- (vectors.taps(x),Some(delayIndex))}
+  val biasInD   = List.tabulate(share) {x => dutParser.biasIn(x) <-- vectors.bias}
 
-  val rout  = List.tabulate(share) {x => dataOutPre(x) ---> (s"$dataLocation/rout", None, "Stage Output",8)}
-  val rout1 = List.tabulate(share) {x => dataOut(x) ---> (s"$dataLocation/rout1", None, "Sigmoid Output",8)}
+  val rout  = List.tabulate(share) {x => dutParser.dataOutPre(x) ---> (s"$dataLocation/rout", None, "Stage Output",8)}
+  val rout1 = List.tabulate(share) {x => dutParser.dataOut(x) ---> (s"$dataLocation/rout1", None, "Sigmoid Output",8)}
 
 
   override def postRun = {
@@ -80,23 +74,7 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   }
 
 
-  val neuron    = new Neuron(dataOut(0),dataIn(0),tapIn(0),biasIn(0))
 
-  /* FIXME : 1. Need generic copy of signal
-             2. Need better way to pass a generic typ for creation (probably pass the segment down rather than isntance)
-  */
-  val sigmoid   = new Sigmoid.AlawFloat2("sigmoid", dataOut(0), dataOutPre(0))
-
-
-  val entity    = new ComplexSegment.SegmentEntity(neuron, "neuron")
-  val sigEntity = new ComplexSegment.SegmentEntity(sigmoid, "sigmoid")
-
-  val dutParser = new NeuronStage(blockName,valid,dataIn,tapIn,biasIn,
-    dataOut, dataOutPre, depth, entity, sigEntity)
-
-
-
-  override val dut: NewEntity = dutParser.createEntity
 
 
 
@@ -161,6 +139,7 @@ has the same number of MAC units as neurons and an equal number of inputs and ou
 
 }
 
-object NeuronStageTest {
+object NeuralStageTest {
 
 }
+

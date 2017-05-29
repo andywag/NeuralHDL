@@ -17,7 +17,10 @@ import com.simplifide.generate.util.PathUtilities
 class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
   def blockName:String = "neuralMemory"
 
-  val dutParser = new NeuronMemoryTest.Dut(blockName)
+  val dims = NeuralMemory.Dimensions((128,128),32,16)
+  val nueralMemory = NeuralMemory(blockName,dims)
+
+  val dutParser = nueralMemory
   override val dut: NewEntity = dutParser.createEntity
 
 
@@ -32,13 +35,6 @@ class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
 }
 
 object NeuronMemoryTest {
-  class Dut(val name:String)(implicit val clk:ClockControl) extends EntityParser {
-    val dims = NeuralMemory.Dimensions((128,128),32,16)
-    val nueralMemory = NeuralMemory(name,dims)
 
-    val sig = ->(nueralMemory)
-    internalInstances.appendAll(sig.instances)
-    signals.appendAll(sig.signals)
-  }
 
 }

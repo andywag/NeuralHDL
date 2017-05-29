@@ -35,7 +35,7 @@ trait TestEntityParser extends EntityParser with TestParser with InitialParser w
 
     head(new BasicBlocks.TimeScale("10ns","1ns"))
 
-    appendSignals(clk.allSignals(INPUT))
+    //appendSignals(clk.allSignals(INPUT))
 
     /- ("Counter to Index Test")
 
@@ -51,8 +51,13 @@ trait TestEntityParser extends EntityParser with TestParser with InitialParser w
   }
 
   override def createEntity:NewEntity  ={
+
     this.createTestBody
-    super.createEntity
+    val result = super.createEntity.connect
+    val newSignals = result.signals.map(_.changeTestType)
+    val temp = result.newEntity(signals = newSignals)
+    temp
+
   }
   
 }

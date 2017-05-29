@@ -103,7 +103,8 @@ class SignalDeclaration(val signal:SignalTrait) extends SimpleSegment{
   }
 
   override def createCode(implicit writer:CodeWriter):SegmentReturn = {
-    this.signal.allSignalChildren.map(createItem(_)).reduceLeft(_+_)
+    val result = this.signal.allSignalChildren.map(createItem(_)).reduceLeft(_+_)
+    result
   }
 
 

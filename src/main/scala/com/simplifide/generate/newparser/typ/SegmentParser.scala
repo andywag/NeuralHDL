@@ -1,13 +1,16 @@
 package com.simplifide.generate.newparser.typ
 
-import com.simplifide.generate.blocks
+import com.simplifide.generate
+import com.simplifide.generate.{blocks, newparser}
 import com.simplifide.generate.blocks.basic
 import com.simplifide.generate.blocks.basic.newmemory.MemoryStruct
 import com.simplifide.generate.newparser.typ
-import com.simplifide.generate.newparser.typ.Assignable.{AssignableMem, AssignableSingle}
+import com.simplifide.generate.newparser.typ.Assignable.{AssignableInterface, AssignableSingle}
 import com.simplifide.generate.newparser.typ.ConditionType.Open
+import com.simplifide.generate.newparser.typ.Expressable.ExpressableInterface
 import com.simplifide.generate.newparser.typ.NumberType.NumberLike.{NumberLikeFloatSignal, NumberLikeSignal}
 import com.simplifide.generate.parser.model.Expression
+import com.simplifide.generate.signal.sv.SignalInterface
 import com.simplifide.generate.signal.{FloatSignal, RegisterTrait, SignalTrait}
 
 /**
@@ -22,9 +25,10 @@ object SegmentParser {
   implicit def seqToExpressable(input:Seq[Expression]) = new typ.Expressable.SeqExpressable(input)
 
   implicit def seqToAssignable(input:Expression) = input match {
-    case x:MemoryStruct => new AssignableMem(x)
     case _              => new AssignableSingle(input)
   }
+  implicit def interfaceToAssignable(input:SignalInterface) = new AssignableInterface(input)
+  implicit def interfaceToExpressable(input:SignalInterface) = new ExpressableInterface(input)
 
 
   implicit def seqToAssignable(input:Seq[Expression]) = new com.simplifide.generate.newparser.typ.Assignable.AssignableSeq(input)

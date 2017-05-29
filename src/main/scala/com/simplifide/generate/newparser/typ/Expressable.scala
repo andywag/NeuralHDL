@@ -9,6 +9,7 @@ import com.simplifide.generate.parser.factory.CreationFactory
 import com.simplifide.generate.parser.items.RegisterAtParser
 import com.simplifide.generate.parser.model.Expression
 import com.simplifide.generate.parser.operator.BinaryParserOperator
+import com.simplifide.generate.signal.sv.SignalInterface
 
 /**
   * Created by andy on 5/12/17.
@@ -45,11 +46,16 @@ object Expressable {
   }
 
 
-
-
   class OutAssExpressable[T](override val value:OutputAssignable[T]) extends Expressable[OutputAssignable[T]] {
     override def expression: Expression = ???
     override def op(input: Expressable[OutputAssignable[T]], f: (Expression, Expression) => Expression): Expressable[OutputAssignable[T]] = ???
+  }
+
+  case class ExpressableInterface(override val value: SignalInterface) extends Expressable[SignalInterface] {
+    override def op(input: Expressable[SignalInterface], f: (Expression, Expression) => Expression) = {
+      ???
+    }
+    def expression = BasicSegments.ListExpression(value.signals)
   }
 
 }

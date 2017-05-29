@@ -18,7 +18,7 @@ trait BlockTestParser extends TestEntityParser{
 
 
   override implicit val clk: ClockControl = ClockControl("clk","reset")
-  implicit val testLength = 50000
+  implicit val testLength = 20000
 
   val dutParser:EntityParser
 
@@ -41,12 +41,7 @@ trait BlockTestParser extends TestEntityParser{
   def docLocation:String =
     project.projectStructure.docDirectory.getAbsolutePath
 
-  def create = {
-    val project = new BlockProject(this)
-    //project.
-    project.createProject
-    project
-  }
+
 
   def postRun() = {}
 

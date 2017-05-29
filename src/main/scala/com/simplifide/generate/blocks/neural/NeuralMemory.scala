@@ -3,11 +3,13 @@ package com.simplifide.generate.blocks.neural
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.newmemory.{MemoryBank, MemoryStruct, NewMemory}
 import com.simplifide.generate.blocks.neural
-import com.simplifide.generate.blocks.neural.NeuralMemory.Dimensions
+import com.simplifide.generate.blocks.neural.NeuralMemory.{Dimensions, Internal}
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
+import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.NewEntityInstance
 import com.simplifide.generate.signal.OpType.Logic
+import com.simplifide.generate.signal.sv.SignalInterface
 import com.simplifide.generate.signal.{OpType, SignalTrait}
 
 /**
@@ -16,12 +18,15 @@ import com.simplifide.generate.signal.{OpType, SignalTrait}
 case class NeuralMemory(override val name:String,
                         dimensions:Dimensions
                        )
-                       (implicit clk:ClockControl) extends ComplexSegment {
+                       (implicit clk:ClockControl) extends EntityParser {
 
 
   override def createBody() {}
 
-  val memoryStruct = MemoryStruct(appendName("int"),INPUT,Array(dimensions.memWidth),Array(1))
+  //signal(clk.allSignals(INPUT))
+  //signal()
+
+  val memoryStruct = MemoryStruct(appendName("int"),Array(dimensions.memWidth),Array(1))
   val memoryBase = NewMemory(appendName("mem_base"),memoryStruct)
   val memoryBaseEnt = new SegmentEntity(memoryBase, memoryBase.name)
 
@@ -29,46 +34,19 @@ case class NeuralMemory(override val name:String,
   val tapWidth  = Array(dimensions.memWidth,dimensions.neuronDepth)
   val tapDim    = Array(dimensions.tapDim._1,dimensions.tapDim._2/dimensions.neuronDepth)
 
-  val tapStruct  = Seq.tabulate(2){x => MemoryStruct(s"tap_int_$x",INPUT,tapWidth,tapDim)}
-  val biasStruct = Seq.tabulate(2){x => MemoryStruct(s"bias_int_$x",INPUT,Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))}
-  val dataStruct = Seq.tabulate(2){x => MemoryStruct(s"data_int_$x",INPUT,Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))}
+  val tapStructW  = MemoryStruct("tap_int",tapWidth,tapDim)
+  val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))
+  val dataStructW = MemoryStruct("data_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))
 
-  val tapStructW  = MemoryStruct("tap_int",WIRE,tapWidth,tapDim)
-  val biasStructW = MemoryStruct("bias_int",WIRE,Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))
-  val dataStructW = MemoryStruct("data_int",WIRE,Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))
+  val tapBank = MemoryBank(appendName("tap"),tapStructW)
+  val biasBank = MemoryBank(appendName("bias"),biasStructW)
+  val dataBank = MemoryBank(appendName("data"),dataStructW)
 
-
-  val tapBank = MemoryBank(tapStruct(0))
-  val biasBank = MemoryBank(biasStruct(0))
-  val dataBank = MemoryBank(dataStruct(0))
-
-
-  val tapEntity = new SegmentEntity(tapBank,"tapMem").createEntity
-  instances.append(NewEntityInstance(tapEntity,"tapMem"))
-
-  val biasEntity = new SegmentEntity(biasBank,"biasMem").createEntity
-  instances.append(NewEntityInstance(biasEntity,"biasMem"))
-
-  val dataEntity = new SegmentEntity(dataBank,"dataMem").createEntity
-  instances.append(NewEntityInstance(dataEntity,"dataMem"))
+  instance(tapBank)
+  instance(biasBank)
+  instance(dataBank)
 
 
-  val select     = signal("select")
-  val controller = new NeuralMemory.Controller("memControl",select,
-    tapStructW,biasStructW,dataStructW, tapStruct,biasStruct,dataStruct)
-  val controllerSegment = new SegmentEntity(controller,"control").createEntity
-  instances.append(NewEntityInstance(controllerSegment,"control"))
-
-  override def inputs: Seq[SignalTrait] = {
-    val clkSignals   = clk.allSignals(OpType.Input)
-    val inputSignals:List[SignalTrait] = List(tapStruct(0), biasStruct(0), dataStruct(0), tapStruct(0).wrData,
-     dataStruct(0).wrData,  biasStruct(0).wrData)
-    clkSignals ::: inputSignals
-  }
-
-  override def outputs:List[SignalTrait] = List(tapStruct(0).rdData,dataStruct(0).rdData,biasStruct(0).rdData)
-
-  //instances.append(NewEntityInstance(entity,instanceName,con))
 
 
 }
@@ -77,42 +55,47 @@ object NeuralMemory {
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
   case class Dimensions(tapDim:(Int,Int), neuronDepth:Int, dataDepth:Int, memWidth:Int=32)
+  case class Internal(val name:String,
+                      tap:MemoryStruct,
+                      bias:MemoryStruct,
+                      data:MemoryStruct) extends SignalInterface {
+    override val interfaces = List(tap,bias,data)
+  }
 
   case class Controller(override val name:String,
-    select:SignalTrait,
-    tapOut:MemoryStruct,biasOut:MemoryStruct,dataOut:MemoryStruct,
-    tapIn:Seq[MemoryStruct], biasIn:Seq[MemoryStruct], dataIn:Seq[MemoryStruct]
-  )(implicit clk:ClockControl) extends ComplexSegment{
+                        dimensions: Dimensions,
+                        internal:Internal
+                       )(implicit clk:ClockControl) extends EntityParser {
     /** Defines the body in the block */
     override def createBody: Unit = {}
 
-    override def inputs = {
-      val clkSignals   = clk.allSignals(INPUT)
-      val readSignals  = List(select,tapOut.rdData,biasOut.rdData,dataOut.rdData)
-      val inputSignals      = tapIn.toList ::: biasIn.toList ::: dataIn.toList
-      val inputWriteSignals = tapIn.map(_.wrData).toList ::: biasIn.map(_.wrData).toList ::: dataIn.map(_.wrData).toList
-      clkSignals ::: readSignals ::: inputSignals ::: inputWriteSignals
-    }
+    val tapWidth  = Array(dimensions.memWidth,dimensions.neuronDepth)
+    val tapDim    = Array(dimensions.tapDim._1,dimensions.tapDim._2/dimensions.neuronDepth)
 
 
-    override def outputs = {
-      val rdSignals = tapIn.map(_.rdData).toList ::: biasIn.map(_.rdData).toList ::: dataIn.map(_.rdData).toList
-      val wrSignals = List(tapOut.wrData,dataOut.wrData,biasOut.wrData)
-      val outputSignals = List(tapOut,biasOut,dataOut)
+    signal(clk.allSignals(INPUT))
+    val select     = signal("select",INPUT)
+    signal(internal.reverse)
 
-      rdSignals ::: outputSignals ::: wrSignals
 
-    }
+
+    val tapIn  = Seq.tabulate(2){x => MemoryStruct(s"tap_int_$x",tapWidth,tapDim)}
+    val biasIn = Seq.tabulate(2){x => MemoryStruct(s"bias_int_$x",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))}
+    val dataIn = Seq.tabulate(2){x => MemoryStruct(s"data_int_$x",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))}
+
+    signal(tapIn.flatMap(_.signals).toList);
+    signal(biasIn.flatMap(_.signals).toList);
+    signal(dataIn.flatMap(_.signals).toList);
 
     $always_star(
       $iff (select) $then (
-        tapOut  !::= tapIn(0),
-        dataOut !::= dataIn(0),
-        biasOut !::= biasIn(0)
+        internal.tap  !::= tapIn(0),
+        internal.data !::= dataIn(0),
+        internal.bias !::= biasIn(0)
       ) $else (
-        tapOut  !::= tapIn(1),
-        dataOut !::= dataIn(1),
-        biasOut !::= biasIn(1)
+        internal.tap  !::= tapIn(1),
+        internal.data !::= dataIn(1),
+        internal.bias !::= biasIn(1)
       )
     )
 

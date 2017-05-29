@@ -58,7 +58,7 @@ trait Project extends SignalHolder{
     val signals = entities.flatMap(x => x.signals)
     val types1 = signals.flatMap(getType(_)).map(x => (x.typeName,x)).toMap
     val types  = types1.values.toSeq
-    types
+    types.sortBy(x => x.typeName)
 
   }
 
