@@ -23,7 +23,7 @@ class FloatAddition(override val name:String,
 
   val internalSig  = signal(FloatSignal(appendName("int"),OpType.Register,in1.signalWidth, in1.expWidth))
 
-  val delta_exp       = signal(SignalTrait(appendName("del"),OpType.Signal,U(in1.expWidth,0)))
+  val delta_exp       = signal(SignalTrait(appendName("del"),OpType.Signal,U(in1.expWidth+1,0)))
   val choose_exp       = signal(SignalTrait(appendName("exp"),OpType.Signal,U(in1.expWidth,0)))
   val sel_exp         = signal(SignalTrait(appendName("sgn"),OpType.Signal,U(1,0)))
   val shift           = signal(SignalTrait(appendName("shift"),OpType.Signal,U(in1.expWidth,0)))
@@ -92,7 +92,10 @@ class FloatAddition(override val name:String,
   }
   def condition(index:Int) = Some(abs_out(abs_out.width-index-1))
 
-  val conds = List.tabulate(in1.signalWidth-1)(x => new IfStatement(condition(x+1),states(x+1,shiftWidth,in1.signalWidth)))
+  val levels = 12
+  val first = new IfStatement(Some(choose_exp < 10),BasicExpressions.List(List(internalSig.exp ::= 0,internalSig.man ::= 0)))
+  val last  = new IfStatement(None,BasicExpressions.List(List(internalSig.exp ::= choose_exp + 1-levels,internalSig.man ::= 0)))
+  val conds = first :: List.tabulate(levels)(x => new IfStatement(condition(x+1),states(x+1,shiftWidth,in1.signalWidth))) ::: List(last)
   val cconds = conds.zipWithIndex.map(x => x._1.createSegment(x._2))
 
   $always_star(

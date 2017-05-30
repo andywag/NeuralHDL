@@ -1,7 +1,7 @@
 package com.simplifide.generate.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.neural.{NeuralMemory, Neuron}
+import com.simplifide.generate.blocks.neural.{NeuralMemory, NeuralStageTop, Neuron}
 import com.simplifide.generate.memory.MemoryTest
 import com.simplifide.generate.model.DataFileGenerator
 import com.simplifide.generate.parser.EntityParser
@@ -18,7 +18,9 @@ class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
   def blockName:String = "neuralMemory"
 
   val dims = NeuralMemory.Dimensions((128,128),32,16)
-  val nueralMemory = NeuralMemory(blockName,dims)
+  val information = NeuralStageTop.Info((128,128),128,10,128,dataLocation)
+
+  val nueralMemory = NeuralMemory(blockName,dims, information)
 
   val dutParser = nueralMemory
   override val dut: NewEntity = dutParser.createEntity

@@ -34,10 +34,13 @@ trait DataGenParser {
       case _             => FloatData.randomList(signal,length)
     }
 
-    def <--(data:NdDataSet, index:Option[SignalTrait]=None)(implicit testLength:Int, parser:TestEntityParser) = {
+    def <--(data:NdDataSet, index:Option[SignalTrait]=None, len:Int=0)(implicit testLength:Int, parser:TestEntityParser) = {
       parser.->(new DataGenerator(this.signal,data,index.getOrElse(parser.index)))
     }
 
+    def <---(data:NdDataSet, index:Option[SignalTrait]=None,length:Int)(parser:TestEntityParser) = {
+      parser.->(new DataGenerator(this.signal,data,index.getOrElse(parser.index)))
+    }
 
     def --->(name:String,compare:Option[NdDataSet]=None, title:String="",
              offset:Int = 0)(implicit clk:ClockControl,scope:TestEntityParser) = {
@@ -117,7 +120,7 @@ object DataGenParser {
     def createBody = {
       /-(s"Load ${signal.name}")
       val res = ->(new FileLoad(signal, data.resultLocation, data.data.length()))
-      signal := res.memory(index)
+      signal := index.sign ? 0 :: res.memory(index)
 
     }
   }

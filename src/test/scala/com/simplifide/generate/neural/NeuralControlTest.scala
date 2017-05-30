@@ -28,7 +28,7 @@ class NeuralControlTest extends BlockScalaTest with BlockTestParser {
   inRdy.vld := 1
   inRdy.value.exp := this.index
 
-  override val dutParser = NeuronControl(blockName,null,dimension, inRdy, null)
+  override val dutParser = NeuronControl(blockName,null, inRdy,inRdy,null,null,null)
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
@@ -36,7 +36,7 @@ class NeuralControlTest extends BlockScalaTest with BlockTestParser {
   dutParser.dataLength  := 1023
   dutParser.biasLength  := 127
   dutParser.stateLength := 63
-  dutParser.dataDepth   := 9
+  dutParser.loadDepth   := 9
 }
 
 object NeuralControlTest {

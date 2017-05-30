@@ -12,6 +12,8 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.data.xy.{XYDataset, XYSeries, XYSeriesCollection}
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 
 
 object PlotUtility {
@@ -54,6 +56,14 @@ object PlotUtility {
     val chart1 = ChartFactory.createLineChart("Error","input","value",errorSet,PlotOrientation.VERTICAL,false,true,false)
     ChartUtilities.saveChartAsJPEG(new File(s"${file}e.jpg"),chart1,500,300)
 
+
+  }
+
+  def plotErrors(input:INDArray, ref:INDArray, file:Option[String]=None,
+                delay:Int=0, ignore:Int=0) = {
+    val in1  = Nd4j.toFlattened('f',input).data().asDouble()
+    val ref1 = Nd4j.toFlattened('f',ref).data().asDouble()
+    plotError(in1,ref1,file,delay,ignore)
 
   }
 

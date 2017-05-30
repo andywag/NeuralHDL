@@ -13,68 +13,88 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
   * Created by andy on 5/26/17.
   */
 case class NeuronControl[T](override val name:String,
-                           info:NeuralStageTop.Info,
-                          dimension:NeuronControl.Dimension,
-                          dataIn:ReadyValidInterface[T],
-                           parent:NeuralStageTop[T]
+                            info:NeuralStageTop.Info,
+                            dataIn:ReadyValidInterface[T],
+                            tapIn:ReadyValidInterface[T],
+                            dataOut:ReadyValidInterface[T],
+                            dataOutPre:ReadyValidInterface[T],
+                            parent:NeuralStageTop[T]
                         )(implicit clk:ClockControl) extends EntityParser{
 
   override def createBody() {}
 
   signal(clk.allSignals(INPUT))
   signal(dataIn.signals)
+  signal(tapIn.signals)
+  signal(dataOut.reverse)
+  signal(dataOutPre.reverse)
+
   signal(parent.memory.dataBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.memory.biasBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.stage.interface.reverse)
 
-  val dataLength    = signal("load_length",INPUT,U(info.dataAddressWidth,0))
-  val dataDepth     = signal("load_depth",INPUT,U(info.dataAddressWidth,0))
-  val dataAddress   = signal("load_address",OUTPUT,U(info.dataAddressWidth,0))
-  val dataDone      = signal("load_finish",  WIRE, U(1,0))
+  val dataLength       = signal("load_length",INPUT,U(info.dataSingleWidth,0))
+  val loadDepth        = signal("load_depth",INPUT,U(info.dataFillWidth,0))
+  val loadFinish       = signal("load_finish",  WIRE, U(1,0))
+  val loadInputCount   = signal("load_input_count",REG,U(info.dataSingleWidth,0))
+  val loadInputDone    = signal("load_input_done")
+  val loadDataWrite    = signal("load_data_write", REG,U(info.dataFillWidth))
+
+  val dataAddress      = signal("data_address",WIRE,U(info.dataSingleWidth,0))
+
+
+  val fifoEmpty           = signal("fifo_empty")
+  val fifoEmptyReg        = signal("fifo_empty_reg",REG)
+
+  val currentInputDepth   = signal("current_input_depth",  REG,U(info.dataFillWidth))
 
   val stateLength   = signal("state_length",INPUT,U(info.stateWidth,0))
   val stateAddress  = signal("state_address",WIRE,stateLength.fixed)
 
   val tapAddress    = signal("tap_address",OUTPUT,U(info.tapAddressWith,0))
 
-  val biasLength    = signal("bias_length",INPUT,U(dimension.biasAddWidth,0))
+  val biasLength    = signal("bias_length",INPUT,U(info.biasAddressWith,0))
 
 
-  val biasAddress   = signal("bias_address",OUTPUT,U(dimension.biasAddWidth,0))
+  val biasAddress   = signal("bias_address",OUTPUT,U(info.biasAddressWith,0))
 
-  val stateDone     = signal("state_finish", WIRE, U(1,0))
+  val stateDone     = signal("state_done", WIRE, U(1,0))
   val biasStart     = signal("bias_start",   WIRE, U(1,0))
   val biasEnable    = signal("bias_enable",  WIRE, U(1,0))
 
 
+  /- ("Control for Tap Loading")
+
+
+
+  val currentDataRead  = signal("current_data_read",  REG,U(info.dataFillWidth))
+
+  fifoEmpty    := (currentDataRead == loadDataWrite)
+  fifoEmptyReg := fifoEmpty $at clk.createEnable(stateDone)
 
   /- ("Control for Input Data")
-
-  val currentDataWrite = signal("current_data_write", REG,U(info.dataFillWidth))
-  val currentDataRead  = signal("current_data_read",  REG,U(info.dataFillWidth))
-  val dataInputDepth   = signal("current_input_depth",  REG,U(info.dataFillWidth))
-
-  val dataInputCount   = signal("data_count",REG,U(info.dataSingleWidth,0))
-
-  val inputDone = signal("data_input_done")
-  inputDone := (dataInputCount === dataLength)
+  loadInputDone := (loadInputCount === dataLength)
   /- ("Data Input Burst Counter")
-  dataInputCount   := $iff (inputDone) $then 0 $else_if (dataIn.rdy & dataIn.vld) $then dataInputCount + 1 $at clk
-  currentDataWrite := $iff (dataInputCount === dataLength) $then currentDataWrite + 1 $at clk
-  dataInputDepth   := $iff (inputDone) $then dataInputDepth + 1 $at clk
+  loadInputCount   := $iff (loadInputDone) $then 0 $else_if (dataIn.rdy & dataIn.vld) $then loadInputCount + 1 $at clk
+  loadDataWrite := $iff (loadInputCount === dataLength) $then loadDataWrite + 1 $at clk
+
+  currentInputDepth   := $iff (loadInputDone & 0) $then
+    currentInputDepth $else_if (loadInputDone) $then
+    currentInputDepth + 1 $else_if (0) $then currentInputDepth - 1  $at clk
+
   /- ("Data Input Memory Control")
-  dataIn.rdy     := (dataInputDepth < dataDepth)
+  dataIn.rdy     := (currentInputDepth < loadDepth)
   val dataMem = parent.memory.dataBank.input
   dataMem.wrData         := dataIn.value.exp
-  dataMem.ctrl.wrAddress := Operators.Concat(currentDataWrite,dataInputCount)
+  dataMem.ctrl.wrAddress := Operators.Concat(loadDataWrite,loadInputCount)
   dataMem.ctrl.wrVld     := dataIn.rdy & dataIn.vld
   /- ("Data Output Memory Control")
   val data_read_start       = register("data_start",WIRE)(3)
   val data_read_active      = signal("data_active",WIRE)
 
-  data_read_start(0)   := (inputDone) & (dataInputDepth >= 0)
-  data_read_active  := (dataInputDepth > 0)
+  data_read_start(0)   := (loadFinish | loadInputDone) & (currentInputDepth >= 0)
+  data_read_active  := (currentInputDepth > 0) & ~fifoEmptyReg
   currentDataRead := $iff (stateDone) $then currentDataRead + 1 $at clk
 
   dataMem.ctrl.rdAddress := Operators.Concat(currentDataRead, dataAddress)
@@ -88,25 +108,29 @@ case class NeuronControl[T](override val name:String,
   biasMem.ctrl.rdAddress := biasAddress
   biasMem.ctrl.rdVld     := biasEnable
   /- ("Output Driving Control")
-  parent.stage.valid       := data_read_start(3)
+  parent.stage.first       := data_read_start(3)
   parent.stage.dataIn(0)   := parent.memory.dataBank.input.rdData
   parent.stage.biasIn(0)   := parent.memory.biasBank.input.rdData
   for (i <- 0 until info.numberNeurons) {
     val index = ((i+1)*info.memoryWidth-1,info.memoryWidth*i)
     parent.stage.tapIn.s(i)  := parent.memory.tapBank.input.rdData(index)
   }
+  /- ("Final Output Control")
+  dataOut.value.signals(0)    := parent.stage.dataOut
+  dataOutPre.value.signals(0) := parent.stage.dataOutPre
 
   /- ("Counter Controls")
-  dataDone     := (dataAddress === dataLength)
-  stateDone    := (stateAddress === stateLength)
-  biasStart    := dataDone & (stateAddress === 0)
+  loadFinish     := (dataAddress === dataLength)
+  stateDone    := (stateAddress === stateLength) & (loadFinish)
+  biasStart    := loadFinish & (stateAddress === 0)
   biasEnable   := (dataAddress <= biasLength) & (dataAddress > 0)
 
 
   /- ("Internal Counter for which state the operation is in")
-  stateAddress := $iff (stateDone) $then 0 $else_if (dataDone) $then stateAddress + 1 $at clk
+  // FIXME : Needs proper counter reset if not multiple of 2
+  stateAddress := $iff (loadFinish) $then stateAddress + 1 $at clk
   /- ("Data Address")
-  dataAddress  := $iff (data_read_start | dataDone) $then 0 $else_if (data_read_active) $then dataAddress + 1 $at clk
+  dataAddress  := $iff (data_read_start | loadFinish) $then 0 $else_if (data_read_active) $then dataAddress + 1 $at clk
   /- ("Tap Address")
   tapAddress   := $iff (stateDone) $then 0 $else_if (data_read_active) $then (tapAddress + 1) $at clk
   /- ("Bias Address")

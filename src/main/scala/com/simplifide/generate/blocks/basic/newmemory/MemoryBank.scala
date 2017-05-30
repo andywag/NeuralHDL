@@ -52,7 +52,7 @@ case class MemoryBank(name:String,
 
     file.map(x => {
       /-(s"Optional Memory Load for Memory $x")
-      $initial(new ReadMemHName(s"${instanceName}.${entityParser.segment.memory.name}", s"$x.hex"))
+      $initial(new ReadMemHName(s"${instanceName}.${entityParser.segment.memory.name}", s"${x}_${i}.hex"))
     })
 
   }

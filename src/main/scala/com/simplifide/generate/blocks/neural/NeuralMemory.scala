@@ -16,7 +16,8 @@ import com.simplifide.generate.signal.{OpType, SignalTrait}
   * Created by andy on 5/22/17.
   */
 case class NeuralMemory(override val name:String,
-                        dimensions:Dimensions
+                        dimensions:Dimensions,
+                        info:NeuralStageTop.Info
                        )
                        (implicit clk:ClockControl) extends EntityParser {
 
@@ -38,13 +39,14 @@ case class NeuralMemory(override val name:String,
   val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))
   val dataStructW = MemoryStruct("data_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))
 
-  val tapBank = MemoryBank(appendName("tap"),tapStructW)
+  val tapBank = MemoryBank(appendName("tap"),tapStructW, Some(s"${info.dataLocation}/init_taps"))
   val biasBank = MemoryBank(appendName("bias"),biasStructW)
   val dataBank = MemoryBank(appendName("data"),dataStructW)
 
   instance(tapBank)
   instance(biasBank)
   instance(dataBank)
+
 
 
 
@@ -62,6 +64,7 @@ object NeuralMemory {
     override val interfaces = List(tap,bias,data)
   }
 
+  /*
   case class Controller(override val name:String,
                         dimensions: Dimensions,
                         internal:Internal
@@ -101,6 +104,6 @@ object NeuralMemory {
 
   }
 
-
+*/
 
 }

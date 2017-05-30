@@ -17,6 +17,8 @@ import collection.JavaConverters._
 case class NdDataSet(location:String, data:INDArray) {
   val resultLocation = s"${location}.hex"
 
+  def transpose = NdDataSet(location,data.transpose())
+
   def createResultLocation(x:String) = s"${location}.hex"
 
   lazy val proto = data.data().dataType() match {

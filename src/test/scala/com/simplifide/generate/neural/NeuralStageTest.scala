@@ -22,9 +22,14 @@ class NeuralStageTest extends BlockScalaTest with BlockTestParser {
   import collection.JavaConverters._
   import com.simplifide.generate.model.NdArrayWrap._
 
+
+
   def blockName:String = "neural_stage"
-  val depth = 8
-  val share = 1
+  lazy val depth = 16
+  lazy val share = 1
+
+  override def getTestLength = depth*256
+
 
   val start = (math.log10(depth)/math.log10(2.0)).toInt
 
@@ -33,42 +38,52 @@ class NeuralStageTest extends BlockScalaTest with BlockTestParser {
 
 
 
-  val delayIndex = signal(SignalTrait("d_index",WIRE,U(31,0)))
+  val delayIndex = signal(SignalTrait("d_index",WIRE,U(32,0)))
+  val delayIndex2 = signal(SignalTrait("d_index2",WIRE,U(32,0)))
 
-  case class InputData(input:NdDataSet, taps:Seq[NdDataSet], bias:NdDataSet, output:NdDataSet, output2:NdDataSet)
+  case class InputData(input:NdDataSet, taps:Seq[NdDataSet], bias:NdDataSet, output:NdDataSet, output1:NdDataSet, output2:NdDataSet)
 
   val vectors = this.createDataSet(testLength/depth,this.dataLocation)
 
   /- ("Create a valid pulse")
-  dutParser.valid := (index(start-1,0) === (depth-2))
+  dutParser.first := (index(start-1,0) === 0)
   /- ("Delay the bias to line up the data")
-  delayIndex := index - (depth-2);
 
-  val dataInD   = List.tabulate(share) {x => dutParser.dataIn(x) <-- (vectors.input,Some(delayIndex))}
-  val tapInD    = List.tabulate(depth) {x => dutParser.tapIn.s(x)  <-- (vectors.taps(x),Some(delayIndex))}
-  val biasInD   = List.tabulate(share) {x => dutParser.biasIn(x) <-- vectors.bias}
+  delayIndex2 := index - (depth +2);
 
-  val rout  = List.tabulate(share) {x => dutParser.dataOutPre(x) ---> (s"$dataLocation/rout", None, "Stage Output",8)}
-  val rout1 = List.tabulate(share) {x => dutParser.dataOut(x) ---> (s"$dataLocation/rout1", None, "Sigmoid Output",8)}
+  val delayIndex3 = signal(SignalTrait("d_index3",WIRE,U(32,0)))
+  delayIndex3(start-1,0) := index(start-1,0)
+
+  def createTap(x:Int) = dutParser.tapIn.s(x)  <-- (vectors.taps(x),Some(delayIndex3))
+
+  val dataInD   = List.tabulate(share) {x => dutParser.dataIn(x) <-- (vectors.input)}
+  val tapInD    = List.tabulate(depth) {x => createTap(x)}
+  val biasInD   = List.tabulate(share) {x => dutParser.biasIn(x) <-- (vectors.bias,Some(delayIndex2))}
+
+  val rout  = List.tabulate(share) {x => dutParser.dataOutPre   ---> (s"$dataLocation/rout", None, "Stage Output",8)}
+  val rout1  = List.tabulate(share) {x => dutParser.dataOutBias ---> (s"$dataLocation/rout1", None, "Stage Output",8)}
+  val rout2 = List.tabulate(share) {x => dutParser.dataOut      ---> (s"$dataLocation/rout2", None, "Sigmoid Output",8)}
 
 
   override def postRun = {
     val output  = rout(0).load()
-    val output2 = rout1(0).load()
+    val output1 = rout1(0).load()
+    val output2 = rout2(0).load()
 
-    val plotEnable = true
+    val plotEnable = false
     val plot1 = if (plotEnable) Some(s"$docLocation/results") else None
-    val plot2 = if (plotEnable) Some(s"$docLocation/resultse") else None
+    val plot2 = if (plotEnable) Some(s"$docLocation/results1") else None
+    val plot3 = if (plotEnable) Some(s"$docLocation/results2") else None
 
-    val error = PlotUtility.plotError(output.data().asDouble(),
-      vectors.output.data.data().asDouble(),plot1)
+    // Check the Matrix Multiple Output
+    val error = PlotUtility.plotErrors(output, vectors.output.data,plot1,depth+2,0)
     this.checkMaxError(error,.001)
-
-
-    val error2 = PlotUtility.plotError(output2.data().asDouble(),
-      vectors.output2.data.data().asDouble(),plot2,1,2*depth)
-    this.checkMaxError(error2,.06)
-    //assert(error2.max._1 < .06)
+    // Check the Matrix Multiply Plus Bias Addition
+    val error2 = PlotUtility.plotErrors(output1, vectors.output1.data,plot2,depth+3,0)
+    this.checkMaxError(error2,.001)
+    // Check the Sigmoid result
+    val error3 = PlotUtility.plotErrors(output2, vectors.output2.data,plot3,depth+4,0)
+    this.checkMaxError(error3,.06)
 
 
   }
@@ -81,29 +96,28 @@ class NeuralStageTest extends BlockScalaTest with BlockTestParser {
   def createDataSet(length:Int, location:String) = {
     Nd4j.setDataType(DataBuffer.Type.FLOAT);
 
-    val tapData   = Nd4j.randn(Array(length,depth,depth))
-    val taps   = DataFileGenerator.createSlices(s"$location/tap",tapData)
+    val tapData   = Nd4j.randn(Array(depth,depth))
+    val taps      = List.tabulate(depth)(x => DataFileGenerator.createFlatten(s"$dataLocation/taps_$x",tapData.slice(x,0)))
 
-    val slicedTaps = Seq.tabulate(depth)(x => new NdDataSet(s"$location/tap$x",tapData.slice(x,2)))
+    //val slicedTaps = Seq.tabulate(depth)(x => new NdDataSet(s"$location/tap$x",tapData.slice(x,2)))
 
-    val data = DataFileGenerator.createData(Array(length,depth,share),s"$dataLocation/data",DataFileGenerator.RANDOM)
-    val bias = DataFileGenerator.createData(Array(length,depth,share),s"$dataLocation/bias",DataFileGenerator.RANDOM)
+    val data = DataFileGenerator.createData(Array(length,depth),s"$dataLocation/data",DataFileGenerator.CONST(1.0,1)).transpose
+    val bias = DataFileGenerator.createData(Array(length,depth),s"$dataLocation/bias",DataFileGenerator.RANDOM).transpose
 
-    val zeros = Array.tabulate(length*depth*share)(x => 0.0.toFloat).mkNDArray(Array(length,depth,share))
+    val result1 = tapData dot data.data
+    val result2 = result1 + bias.data
+    val result3 = Transforms.sigmoid(result2,true)
 
-    val operation:(Int)=>INDArray = x => (tapData.slice(x).transpose() dot data.data.slice(x)) + bias.data.slice(x).transpose()
-    val operation2:(Int)=>INDArray = x => Transforms.sigmoid(operation(x))
+    //val fa = Nd4j.toFlattened('f',result2)
+    //val fl = Nd4j.toFlattened('f',result3)
 
-    val dataOut = NdUtils.vectorOp3(operation,length.toInt,data.data.shape()).d(2)
-    val dataOut2 = NdUtils.vectorOp3(operation2,length.toInt,data.data.shape()).d(2)
-
-
-    val outFile = DataFileGenerator.createFlatten(s"$location/out",dataOut)
-    val outFile2 = DataFileGenerator.createFlatten(s"$location/out2",dataOut2)
-
+    val outFile  = DataFileGenerator.createFlatten2(s"$location/out",result1)
+    val outFile1 = DataFileGenerator.createFlatten2(s"$location/out1",result2)
+    val outFile2 = DataFileGenerator.createFlatten2(s"$location/out2",result3)
 
 
-    new InputData(data,slicedTaps,bias,outFile, outFile2)
+
+    new InputData(data,taps,bias,outFile, outFile1,outFile2)
 
   }
 

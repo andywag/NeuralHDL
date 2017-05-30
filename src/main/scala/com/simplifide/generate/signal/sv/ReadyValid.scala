@@ -15,9 +15,10 @@ trait ReadyValid[T] {
 }
 
 object ReadyValid {
-  case class ReadyValidInterface[T](value:ReadyValid[T], opType:OpType=OpType.Input) extends SignalInterface {
+  case class ReadyValidInterface[T](value:ReadyValid[T]) extends SignalInterface {
 
     override val name = value.name
+    val opType = OpType.Input
 
     val vld     = SignalTrait(appendName("vld"),opType ,FixedType.BIT)
     val fst     = SignalTrait(appendName("fst"),opType ,FixedType.BIT)

@@ -81,6 +81,12 @@ object DataFileGenerator {
     createHexFile(location,data,order)
   }
 
+  def createFlatten2(location:String, data:INDArray) = {
+    val output = Nd4j.toFlattened('f',data)
+    createHexFile(location,output,x => Array(x))
+  }
+
+
   // FIXME : This should return a slice of data but is only returnign teh original data
   def createSlices(location:String, data:INDArray) = {
     val shape = data.shape()
@@ -93,10 +99,16 @@ object DataFileGenerator {
     result
   }
 
+  def createSlice2(location:String, data:INDArray, index:Int, dim:Int) = {
+    val result = data.slice(index,dim)
+    createFlatten(location,result)
+  }
+
   trait DataGenType
   object RANDOM extends DataGenType
   object ZEROS extends DataGenType
   object ONES extends DataGenType
+  case class CONST(value:Double, period:Int) extends DataGenType
   case class Ramp(min:Double, max:Double) extends DataGenType
   case class Random(min:Double, max:Double) extends DataGenType
 
@@ -107,6 +119,7 @@ object DataFileGenerator {
       case Random(mi,ma) => Nd4j.rand(size,mi,ma,Nd4j.getRandom)
       case ONES          => Array.tabulate(len)(x => 1.0.toFloat).mkNDArray(size)
       case ZEROS         => Array.tabulate(len)(x => 0.0.toFloat).mkNDArray(size)
+      case CONST(v,p)    => Array.tabulate(len)(x => if (x % p == 0) Nd4j.getRandom.nextFloat() else 0.0).mkNDArray(size)
       case Ramp(mi,ma)   => {
         val slope = (ma - mi).toFloat/len.toFloat
         Array.tabulate(len)(x => (mi + x.toFloat*slope)).mkNDArray(size)

@@ -11,23 +11,24 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
   */
 class NeuralStageTop[T](val name:String,
                        info:NeuralStageTop.Info,
-                     dimension:NeuronControl.Dimension,
                      val dataIn:ReadyValidInterface[T],
-                     val dataOut:ReadyValidInterface[T])(implicit clk:ClockControl) extends EntityParser {
+                     val tapIn:ReadyValidInterface[T],
+                     val dataOut:ReadyValidInterface[T],
+                     val dataPreOut:ReadyValidInterface[T])(implicit clk:ClockControl) extends EntityParser {
 
   signal(clk.allSignals(INPUT))
   signal(dataIn.signals)
   signal(dataOut.reverse)
-
+  signal(dataPreOut.reverse)
 
   val stage = new NeuralStage(appendName("st"),info.numberNeurons)
   instance(stage)
 
   val memorySize = NeuralMemory.Dimensions(info.tapDimension,info.numberNeurons,info.dataFill)
-  val memory = new NeuralMemory(appendName("mem"),memorySize)
+  val memory = new NeuralMemory(appendName("mem"),memorySize, info)
   instance(memory)
 
-  val control    = new NeuronControl[T](appendName("ctrl"),info,dimension, dataIn, this)
+  val control    = new NeuronControl[T](appendName("ctrl"),info, dataIn, tapIn, dataOut,dataPreOut, this)
   instance(control)
 
 
@@ -39,7 +40,8 @@ object NeuralStageTop {
   case class Info(tapDimension:(Int,Int),
                   dataLength:Int,
                   dataFill:Int,
-                  numberNeurons:Int
+                  numberNeurons:Int,
+                  dataLocation:String
                  ) {
 
     def logWidth(input:Int) = math.ceil(math.log(input)/math.log(2)).toInt
@@ -49,10 +51,11 @@ object NeuralStageTop {
     // Width of Data Address
     val dataAddressWidth =  dataSingleWidth + dataFillWidth
     // Width of number of passes of data required for this run
-    val stateLength      = tapDimension._1/numberNeurons
+    val stateLength      = tapDimension._2/numberNeurons
     val stateWidth       = logWidth(stateLength)
     // Width of tap address
-    val tapAddressWith   = logWidth((tapDimension._1*tapDimension._2)/numberNeurons)
+    val tapAddressLength = (tapDimension._1*tapDimension._2)/numberNeurons
+    val tapAddressWith   = logWidth(tapAddressLength)
     // Width of Bias
     val biasLength       = numberNeurons
     val biasAddressWith  = dataSingleWidth

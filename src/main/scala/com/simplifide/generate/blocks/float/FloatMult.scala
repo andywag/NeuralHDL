@@ -31,6 +31,8 @@ class FloatMult(override val name:String,
   val internal  = signal(FloatSignal(appendName("int"),OpType.Register,in1.signalWidth, in1.expWidth))
   val reg       = signal(FloatSignal(appendName("reg"),OpType.Register,in1.signalWidth, in1.expWidth))
 
+  val totalExp  = signal(appendName("tot_exp"),OpType.Signal,in1.exp.fixed)
+
   val res1      = SignalTrait(appendName("_man1"),OpType.Signal,U(in1.signalWidth+1,0))
 
   man1 := Operators.Concat(List(Constant(1.0,U(1,0)),in1.man))
@@ -38,9 +40,17 @@ class FloatMult(override val name:String,
   res := man1*man2
 
 
-  ->($always_star(
+  totalExp := in1.exp+in2.exp
+
+  $always_star(
     internal.sgn ::= in1.sgn ^ in2.sgn,
-    $iff (res(res.width-1)) $then (
+    $iff ( (totalExp) <= 128) $then (
+      shift        ::= 0,
+      internal.sgn ::= 0,
+      internal.exp ::= 0,
+      internal.man ::= 0
+    )
+    $else_if (res(res.width-1)) $then (
       shift        ::= 0,
       internal.exp ::= in1.exp + in2.exp -126,
       internal.man ::= res(res.width-2,res.width-1-in1.signalWidth)+res(res.width-2-in1.signalWidth)
@@ -55,7 +65,7 @@ class FloatMult(override val name:String,
       internal.exp ::= in1.exp + in2.exp - 128,
       internal.man ::= res(res.width-4,res.width-3-in1.signalWidth)+res(res.width-4-in1.signalWidth)
     )
-  ).create)
+  )
   reg := internal $at (clk)
 
 

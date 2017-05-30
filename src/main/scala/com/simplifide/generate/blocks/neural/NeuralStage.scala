@@ -1,12 +1,13 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.neural.NeuralStage.Interface
+import com.simplifide.generate.blocks.neural.NeuralStage.{Interface, StageAdder}
 import com.simplifide.generate.doc.MdGenerator._
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.parser.EntityParser
-import com.simplifide.generate.signal.sv.{SignalArray, SignalInterface}
+import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
+import com.simplifide.generate.signal.sv.{ReadyValid, SignalArray, SignalInterface}
 import com.simplifide.generate.signal.{FloatSignal, OpType, SignalTrait, sv}
 import com.simplifide.generate.util.PathUtilities
 
@@ -20,7 +21,8 @@ case class NeuralStage(override val name:String,
   import SignalArray._
 
   // Create the I/O signals for the block
-  val valid  = signal("valid",INPUT)
+  val first  = signal("first",INPUT)
+
   val dataIn = Seq(signal(FloatSignal(appendName("data"),INPUT))) // FIXME : Generalize to Generic Number Type
   //val tapIn  = Seq.tabulate(numberOfNeurons)(x => signal(FloatSignal(appendName(s"tap_${x}"),INPUT))) // FIXME : Generalize to Generic Number Type
   // FIXME : Add support for arrays :
@@ -28,13 +30,14 @@ case class NeuralStage(override val name:String,
 
   val biasIn = Seq(signal(FloatSignal(appendName("bias"),INPUT))) // FIXME : Generalize to Generic Number Type
 
-  val dataOutPre = Seq(signal(FloatSignal(appendName("data_pre"),OUTPUT)))
-  val dataOut = Seq(signal(FloatSignal(appendName("out"),OUTPUT)))
+  val dataOutPre   = signal(FloatSignal(appendName("data_out_pre"),OUTPUT))
+  val dataOutBias  = signal(FloatSignal(appendName("data_out_bias"),OUTPUT))
+  val dataOut      = signal(FloatSignal(appendName("data_out"),OUTPUT))
 
   val interface = new Interface(this.name, this)
 
-  val neuronBlock    = new Neuron(dataOut(0),dataIn(0),tapIn.input.value,biasIn(0))
-  val sigmoidBlock   = new Sigmoid.AlawFloat2("sigmoid", dataOut(0), dataOutPre(0))
+  val neuronBlock    = new Neuron(dataOut,dataIn(0),tapIn.input.value,biasIn(0))
+  val sigmoidBlock   = new Sigmoid.AlawFloat2("sigmoid", dataOut, dataOutPre)
 
 
   val neuron    = new ComplexSegment.SegmentEntity(neuronBlock, "neuron")
@@ -58,7 +61,7 @@ operation is as follows.
 
 
 ## Input/Output
-* output ${dataOut(0).document} : Output of the block following the equal to dataIn*taps + bias
+* output ${dataOut.document} : Output of the block following the equal to dataIn*taps + bias
 
 * input ${dataIn(0).document}   : Data Input of the Block
 * input ${tapIn(0).document}     : Neural Tap input of the Block
@@ -89,38 +92,37 @@ dataOut        := internalSignal plus bias
   val share  = dataIn.length
   val depth  = tapIn.length
 
-  def inputs = tapIn :: valid :: clk.allSignals(INPUT) ::: dataIn.toList  ::: biasIn.toList
+  def inputs = tapIn :: first :: clk.allSignals(INPUT) ::: dataIn.toList  ::: biasIn.toList
 
   sigs(inputs.map(_.changeType(OpType.Input)))
-  sigs(dataOut.map(_.changeType(OpType.Output)))
-  sigs(dataOutPre.map(_.changeType(OpType.Output)))
+  signal(dataOut.changeType(OpType.Output))
+  signal(dataOutBias.changeType(OpType.Output))
+  signal(dataOutPre.changeType(OpType.Output))
 
 
-  val biasInputDelay = register(biasIn(0))(depth)(clk).allSignalChildren.toSeq
-  val neuronOut      = seq(dataOut(0).newSignal(name = "wireOut"))(numberOfNeurons)
+  //val biasInputDelay = register(biasIn(0))(depth)(clk).allSignalChildren.toSeq
+  val neuronOut      = seq(dataOut.newSignal(name = "wireOut"))(numberOfNeurons)
   val neuronAccumIn  = seq(biasIn(0))(numberOfNeurons)
 
-  val dataOutDelay    = seq(dataOut(0).newSignal(name = "outLine"),REG)(numberOfNeurons)
-  val validD          = Seq.tabulate(2)(x => signal(valid.newSignal(name = s"valid$x",REG)))
+  val dataOutDelay    = seq(dataOut.newSignal(name = "outLine"),REG)(numberOfNeurons)
+  val firstD          = Seq.tabulate(2)(x => signal(first.newSignal(name = s"first$x",REG)))
 
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
   //val a = valid := valid ? valid :: valid
   /- ("Delay the Input Valid")
-  Seq(validD(0),validD(1)) !:= Seq(valid,validD(0)) at (clk)
+  Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
 
   /- ("Select the inputs to the Neuron\n")
   for (i <- 0 until depth) {
-    val biasInput = if (i == depth-1) biasIn(0) else biasInputDelay(depth-2-i)
-    neuronAccumIn(i) !:= validD(0) ? biasInput :: neuronOut(i)
+    //val biasInput = if (i == depth-1) biasIn(0) else biasInputDelay(depth-2-i)
+    neuronAccumIn(i) !:= firstD(0) ? 0 :: neuronOut(i)
   }
 
-
   /- ("Create the output Delay Line\n")
-  dataOutDelay !:= ($if (validD(0)) $then neuronOut $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
+  dataOutDelay !:= ($if (firstD(0)) $then neuronOut $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
 
-  /- ("Assign the outputs")
-  dataOutPre(0) !:= dataOutDelay(0)
+
 
 
   val neuronInput = biasIn.map(x => signal(x.newSignal(name = x.appendName("_input"),opType=OpType.Logic)))
@@ -137,7 +139,15 @@ dataOut        := internalSignal plus bias
     instance(neuronEntity,s"neuron$i",connection)
   }
 
-  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> dataOutDelay(0))
+  val adderOut       = neuronOut(0).newSignal(appendName("adder"))
+  val adderBlock     = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasIn(0))
+  instance(adderBlock)
+
+  /- ("Assign the outputs")
+  dataOutPre  !:= dataOutDelay(0)
+  dataOutBias !:= adderOut
+
+  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut)
   instance(nonlinearity.createEntity,s"sigmoid",connect)
 
 
@@ -145,8 +155,17 @@ dataOut        := internalSignal plus bias
 
 object NeuralStage {
   class Interface(override val name:String, stage:NeuralStage) extends SignalInterface {
-    override val inputs = List(stage.valid, stage.dataIn(0), stage.biasIn(0),stage.tapIn)
-    override val outputs = List(stage.dataOutPre(0), stage.dataOut(0))
-
+    override val inputs = List(stage.first, stage.dataIn(0), stage.biasIn(0),stage.tapIn)
+    override val outputs = List(stage.dataOutPre, stage.dataOut)
   }
+
+  class StageAdder(val name:String, val out:SignalTrait, val in1:SignalTrait, in2:SignalTrait)(implicit clk:ClockControl) extends EntityParser {
+    import com.simplifide.generate.newparser.typ.SegmentParser._
+    signal(clk.allSignals(INPUT))
+    signal(in1.asInput)
+    signal(in2.asInput)
+    signal(out.asOutput)
+    out        := (in1 plus in2)
+  }
+
 }
