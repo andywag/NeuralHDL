@@ -54,6 +54,12 @@ The example below is a fully connected neural network stage. This is the most ba
 
 [Neural Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/neuronStage/doc/neuronStage_proj.md)
 
+### Neural Stage with Memory and Control
+
+The example below is a fully connected neural stage which contains the memory and control for dealing with both I/O and interfacing with an external block. It is fully programmable like the other designs. 
+
+[Neural Complete Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/stage/doc/stage_proj.mdmd)
+
 ## Background
 I have been attempting to automate signal processing hardware design for longer than I would like to admit. Through these years there have been many commercial tools to solve this problem but have all suffered from the same inherent flaw in having the tools automate architeture.  
 
