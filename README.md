@@ -54,7 +54,7 @@ The example below is a basic building block for the design. It is actually a MAC
 
 The example below is a fully connected neural network stage. This is the most basic example where the number of MAC units available is the same as the input and output but the block itself is programmable to handle generic configurations. 
 
-[Neural Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/neuronStage/doc/neuronStage_proj.md)
+[Neural Stage](https://github.com/andywag/NeuralHDL/blob/master/tests/neural_stage/doc/neural_stage_proj.md)
 
 ### Neural Stage with Memory and Control
 
