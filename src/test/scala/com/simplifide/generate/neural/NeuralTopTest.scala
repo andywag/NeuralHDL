@@ -13,6 +13,7 @@ import org.nd4s.Implicits._
 import collection.JavaConverters._
 import com.simplifide.generate.model.NdArrayWrap._
 import com.simplifide.generate.plot.PlotUtility
+import com.simplifide.generate.util.PathUtilities
 import org.nd4j.linalg.ops.transforms.Transforms
 
 /**
@@ -20,7 +21,7 @@ import org.nd4j.linalg.ops.transforms.Transforms
   */
 class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   /** Clock for the testbench */
-  override def blockName: String = "st"
+  override def blockName: String = "stage"
 
   lazy val dataLength    = 6
   lazy val outputLength  = 12
@@ -28,10 +29,11 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val biasLength    = 12
   val numberNeurons = 6
   val dataFill      = 8
+  val errorFill     = 4
 
   override def getTestLength = tapLength*12
 
-  val information = NeuralStageTop.Info((dataLength,outputLength),dataLength,dataFill,numberNeurons,dataLocation)
+  val information = NeuralStageTop.Info((dataLength,outputLength),dataLength,dataFill,numberNeurons,errorFill,dataLocation)
   //val dimension   = NeuronControl.Dimension(10,6,7,dataFill)
 
   val dataIn      = FloatSignal("data_in",INPUT)
@@ -46,19 +48,14 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val tapIn       = FloatSignal("tap_in",INPUT)
   val tapRdy      = new ReadyValidInterface(tapIn)
 
-
-
   // Create the Data set to load the taps
+  // Most of this complexity is due to matrix manipulation due to the repeated inputs
+  // It is somewhat complicated and not required for understanding of the operation
   val tapData   = Nd4j.randn(Array(information.tapAddressLength,information.numberNeurons)) //.mul(1/outputLength.toFloat)
   val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
   val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
   val cSlices   = nSlices.map(x => x._2.map(_._1))
   cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))
-
-  //DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps",tslices)
-
-
-  //List.tabulate(numberNeurons)(x => DataFileGenerator.createFlatten3(s"$dataLocation/init_taps_$x",tapData.slice(x,0),'c'))
 
   val dataData  = NeuralTopTest.getTraining
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
@@ -105,9 +102,46 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
     val error2 = PlotUtility.plotErrors(output2, fin.data,plot2)
     this.checkMaxError(error2,.06)
     //assert(error2.max._1 < .06)
-
-
   }
+
+  override def document =
+    s"""
+This module is a block test wrapper for the a fully connected neuron stage with control and memories. The block
+is currently configured to operate with
+
+* 6  inputs
+* 12 outputs
+* 6  neurons
+
+This configuration was selected for a simple test case with a 6 input, 6 output test case. The plan was to put another
+12x12 hidden layer and a 12x6 output layer to complete the test. This test might be simplified to a more simple test
+to verify the convergence of a single stage with a simple transfer function.
+
+##
+
+This test matches the output stage versus a model of the system defined in this module using Nd4j. The match is not perfect
+due to quantization effects especially due to the sigmoid approximation with a maximum error of .048. Given this error the block
+should definitely be done in fixed point.
+
+```scala
+
+val result      = tapData dot dataData._1
+val finalResult = Transforms.sigmoid(result)
+
+```
+
+## Reference Code for Test
+* [Testbench (Verilog)](../test/${name}.v)
+* [Test Wrapper (C++)](../test/${name}.cpp)
+* [Test Generator](${PathUtilities.nueralTestPath}/NeuralTopTest.scala)
+* [Code Generator](${PathUtilities.nueralPath}/NeuralStageTop.scala)
+* [Test Directory](../test/)
+* [Design Directory](../design/)
+* [Docs Directory](../doc/)
+
+"""
+
+
 
 
 }

@@ -18,7 +18,7 @@ class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
   def blockName:String = "neuralMemory"
 
   val dims = NeuralMemory.Dimensions((128,128),32,16)
-  val information = NeuralStageTop.Info((128,128),128,10,128,dataLocation)
+  val information = NeuralStageTop.Info((128,128),128,10,4,128,dataLocation)
 
   val nueralMemory = NeuralMemory(blockName,dims, information)
 
