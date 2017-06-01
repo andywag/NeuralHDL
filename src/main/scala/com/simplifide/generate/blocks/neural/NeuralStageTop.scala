@@ -44,10 +44,21 @@ object NeuralStageTop {
                   dataLocation:String
                  ) {
 
-    def logWidth(input:Int) = math.ceil(math.log(input)/math.log(2)).toInt
+    def logWidth(input:Int) = {
+      val c = math.ceil(math.log(input)/math.log(2)).toInt
+      val f = math.floor(math.log(input)/math.log(2)).toInt
+      if (f == c) c + 1 else c
+      c
+    }
+
+    def logWidth2(input:Int) = {
+      val c = math.ceil(math.log(input)/math.log(2)).toInt
+      val f = math.floor(math.log(input)/math.log(2)).toInt
+      if (f == c) (c + 1) else c
+    }
 
     val dataSingleWidth  = logWidth(dataLength)
-    val dataFillWidth    = logWidth(dataFill)
+    val dataFillWidth    = logWidth2(dataFill)
     // Width of Data Address
     val dataAddressWidth =  dataSingleWidth + dataFillWidth
     // Width of number of passes of data required for this run

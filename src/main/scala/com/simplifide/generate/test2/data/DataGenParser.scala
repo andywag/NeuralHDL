@@ -44,12 +44,16 @@ trait DataGenParser {
 
     def --->(name:String,compare:Option[NdDataSet]=None, title:String="",
              offset:Int = 0)(implicit clk:ClockControl,scope:TestEntityParser) = {
-
       val dataSet = NdDataSet.empty(name)
-      //val rlocation = s"${name}"
       scope->(DisplayDump2(s"${name}.hex",signal))
       compare.map(x => scope.compare(dataSet,x,title,offset))
       dataSet
+    }
+
+    def ---->(name:String,cl:ClockControl, compare:Option[NdDataSet]=None, title:String="",
+             offset:Int = 0)(implicit scope:TestEntityParser) = {
+      implicit val clk = cl
+      --->(name,compare,title,offset)
     }
 
 

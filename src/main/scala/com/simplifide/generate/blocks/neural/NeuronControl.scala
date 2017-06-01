@@ -77,32 +77,32 @@ case class NeuronControl[T](override val name:String,
   loadInputDone := (loadInputCount === dataLength)
   /- ("Data Input Burst Counter")
   loadInputCount   := $iff (loadInputDone) $then 0 $else_if (dataIn.rdy & dataIn.vld) $then loadInputCount + 1 $at clk
-  loadDataWrite := $iff (loadInputCount === dataLength) $then loadDataWrite + 1 $at clk
+  loadDataWrite    := $iff (loadInputCount === dataLength) $then loadDataWrite + 1 $at clk
 
   currentInputDepth   := $iff (loadInputDone & 0) $then
     currentInputDepth $else_if (loadInputDone) $then
     currentInputDepth + 1 $else_if (0) $then currentInputDepth - 1  $at clk
 
   /- ("Data Input Memory Control")
-  dataIn.rdy     := (currentInputDepth < loadDepth)
+  dataIn.rdy     := (currentInputDepth <= loadDepth)
   val dataMem = parent.memory.dataBank.input
   dataMem.wrData         := dataIn.value.exp
   dataMem.ctrl.wrAddress := Operators.Concat(loadDataWrite,loadInputCount)
   dataMem.ctrl.wrVld     := dataIn.rdy & dataIn.vld
   /- ("Data Output Memory Control")
   val data_read_start       = register("data_start",WIRE)(3)
-  val data_read_active      = signal("data_active",WIRE)
+  val data_read_active      = register("data_active",WIRE)(info.dataLength + 6)
 
   data_read_start(0)   := (loadFinish | loadInputDone) & (currentInputDepth >= 0)
-  data_read_active  := (currentInputDepth > 0) & ~fifoEmptyReg
+  data_read_active(0)  := (currentInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty)
   currentDataRead := $iff (stateDone) $then currentDataRead + 1 $at clk
 
   dataMem.ctrl.rdAddress := Operators.Concat(currentDataRead, dataAddress)
-  dataMem.ctrl.rdVld     := data_read_active
+  dataMem.ctrl.rdVld     := data_read_active(0) | data_read_active(info.dataLength)
   /- ("Tap Output Memory Control")
   val tapMem = parent.memory.tapBank.input
   tapMem.ctrl.rdAddress  := tapAddress
-  tapMem.ctrl.rdVld      := data_read_active
+  tapMem.ctrl.rdVld      := data_read_active(0) | data_read_active(info.dataLength)
   /- ("Bias Output Memory Control")
   val biasMem = parent.memory.biasBank.input
   biasMem.ctrl.rdAddress := biasAddress
@@ -117,7 +117,10 @@ case class NeuronControl[T](override val name:String,
   }
   /- ("Final Output Control")
   dataOut.value.signals(0)    := parent.stage.dataOut
+  dataOut.vld                 := data_read_active(info.dataLength + 6)
+
   dataOutPre.value.signals(0) := parent.stage.dataOutPre
+  dataOutPre.vld              := data_read_active(info.dataLength + 4)
 
   /- ("Counter Controls")
   loadFinish     := (dataAddress === dataLength)
@@ -130,9 +133,9 @@ case class NeuronControl[T](override val name:String,
   // FIXME : Needs proper counter reset if not multiple of 2
   stateAddress := $iff (loadFinish) $then stateAddress + 1 $at clk
   /- ("Data Address")
-  dataAddress  := $iff (data_read_start | loadFinish) $then 0 $else_if (data_read_active) $then dataAddress + 1 $at clk
+  dataAddress  := $iff (data_read_start | loadFinish) $then 0 $else_if (data_read_active| data_read_active(info.dataLength)) $then dataAddress + 1 $at clk
   /- ("Tap Address")
-  tapAddress   := $iff (stateDone) $then 0 $else_if (data_read_active) $then (tapAddress + 1) $at clk
+  tapAddress   := $iff (stateDone) $then 0 $else_if (data_read_active | data_read_active(info.dataLength)) $then (tapAddress + 1) $at clk
   /- ("Bias Address")
   biasAddress  := $iff (biasStart) $then 0 $else_if (biasEnable) $then biasAddress + 1 $at clk
 

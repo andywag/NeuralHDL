@@ -19,8 +19,9 @@ case class MemoryStruct(val name:String,
   val opType = OpType.Input
 
   val memoryWidth = memoryRepeat.foldLeft(1)(_*_)
-  val memoryDepth  = dimensions.foldLeft(1)(_*_)
-  val addressSize  = math.ceil(math.log(memoryDepth)/math.log(2.0)).toInt
+  val memoryDepth1  = dimensions.foldLeft(1)(_*_)
+  val addressSize  = math.ceil(math.log(memoryDepth1)/math.log(2.0)).toInt
+  val memoryDepth  = math.pow(2.0,addressSize).toInt
 
   val dataWidth    = FixedType.unsigned(memoryWidth,0)
   val addressWidth = FixedType.unsigned(addressSize,0)
