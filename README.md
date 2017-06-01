@@ -32,7 +32,9 @@ To get started, download this project and import into Intellij or run using the 
 
 ## Examples
 
-The examples shown below are not full level examples of neural networks but show the method and structure which is used for creating and testing the building blocks. Higher level functionallity will be added as the building block development progresses. 
+The examples shown below are not full level examples of neural networks but show the method and structure which is used for creating and testing the building blocks. This is not the planned API for the end user but give an example of the underlying structures which will be built upon to create that API. 
+
+Higher level functionallity will be added as the building block development progresses so less hardare savvy designers can create architectures by specifying parameters.  
 
 As a starting point most of the operations are done using floating point. The reason for this is avoid quantization and numerical issues in the development. Floating point operations were added for this specific purpose as the initial language design was completely fixed point. The designs will be generalized to any number system as a second step. The language chooses operations internally based on the signal type so it should be a simple exercise.
 
