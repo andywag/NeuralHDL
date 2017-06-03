@@ -14,6 +14,7 @@ object NumberType {
     def value:T
     def times[S](in2:NumberLike[S])(implicit clk:ClockControl):Expression
     def plus[S](in2:NumberLike[S])(implicit clk:ClockControl):Expression
+    def minus[S](in2:NumberLike[S])(implicit clk:ClockControl):Expression
 
   }
 
@@ -32,6 +33,12 @@ object NumberType {
           case _                   => new FloatAddition("",value,null,false)
         }
       }
+      def minus[S](in2:NumberLike[S])(implicit clk:ClockControl) = {
+        in2 match {
+          case x:NumberLikeFloatSignal => new FloatAddition("",value,x.value,true)
+          case _                   => new FloatAddition("",value,null,true)
+        }
+      }
     }
 
     class NumberLikeSignal(val value:SignalTrait) extends NumberLike[SignalTrait] {
@@ -45,6 +52,11 @@ object NumberType {
         in2 match {
           //case x:NumberLikeFloatSignal => new FloatAddition("",value,x.value,false)
           case _                   => new FloatAddition("",null,null,false)
+        }
+      }
+      def minus[S](in2:NumberLike[S])(implicit clk:ClockControl) = {
+        in2 match {
+          case _                   => new FloatAddition("",null,null,true)
         }
       }
 

@@ -6,7 +6,7 @@ import com.simplifide.generate.generator.{ComplexSegment, SimpleSegment}
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.{Connection, NewEntityInstance}
-import com.simplifide.generate.signal.SignalTrait
+import com.simplifide.generate.signal.{FixedType, SignalTrait}
 
 /**
   * Created by andy on 5/22/17.
@@ -25,18 +25,30 @@ case class MemoryBank(name:String,
   val width = input.memoryRepeat(0)
   val number = input.memoryRepeat(1)
 
-
   val entityParser = input.createEntity
   val entity = entityParser.createEntity
+
+  val writeArray = signal("write_sub",WIRE,FixedType.unsigned(number,1))
+
 
   val insts    = for (i <- 0 until number) {
     // Signals
     val rd = signal(s"read_$i",SIGNAL,U(width,0))
     val wr = signal(s"write_$i",SIGNAL,U(width,0))
+
     // Slice values for signal
     val slice = (width*(i+1)-1,width*i)
+    if (number > 1) {
+      writeArray((i,i)) := (input.ctrl.subAddress === i)
+      wr := writeArray((i,i)) ? input.ctrl.subData :: input.wrData(slice) // Select either the single line or the array
+    }
+    else  {
+      wr := input.wrData(slice)
+    }
     // Attaching signals to slices
-    wr := input.wrData(slice)
+
+
+
     input.rdData(slice) := rd
     // Connection Creation
     val connection:Map[SignalTrait,SimpleSegment] = Map(

@@ -31,8 +31,8 @@
 
   reg                   [31:0]  counter           ;  // <32,0>
   reg                           first             ;  // <1,0>
-  reg                   [31:0]  neural_stage_bias_mem[0:4096];  // <32,0>
-  reg                   [31:0]  neural_stage_data_mem[0:4096];  // <32,0>
+  reg                   [31:0]  neural_stage_bias_mem[0:65536];  // <32,0>
+  reg                   [31:0]  neural_stage_data_mem[0:65536];  // <32,0>
   reg                   [31:0]  rout1_fptr        ;  // <32,0>
   reg                   [31:0]  rout2_fptr        ;  // <32,0>
   reg                   [31:0]  rout_fptr         ;  // <32,0>
@@ -86,7 +86,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd4096)) begin
+    if ((counter == 'd65536)) begin
       $finish;
     end
   end

@@ -17,7 +17,7 @@ import com.simplifide.generate.signal.{OpType, SignalTrait}
   */
 case class NeuralMemory(override val name:String,
                         dimensions:Dimensions,
-                        info:NeuralStageTop.Info
+                        info:NeuralStageInfo
                        )
                        (implicit clk:ClockControl) extends EntityParser {
 

@@ -13,19 +13,23 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
   * Created by andy on 5/26/17.
   */
 case class NeuronControl[T](override val name:String,
-                            info:NeuralStageTop.Info,
-                            dataIn:ReadyValidInterface[T],
-                            tapIn:ReadyValidInterface[T],
-                            dataOut:ReadyValidInterface[T],
-                            dataOutPre:ReadyValidInterface[T],
+                            info:NeuralStageInfo,
+                            interface:NeuralStageTop.Interface[T],
                             parent:NeuralStageTop[T]
                         )(implicit clk:ClockControl) extends EntityParser{
 
   override def createBody() {}
 
+  val dataIn = interface.inRdy
+  val tapIn  = interface.tapRdy
+  val errorIn = interface.errorRdy
+  val dataOut = interface.outRdy
+  val dataOutPre = interface.outPreRdy
+
   signal(clk.allSignals(INPUT))
   signal(dataIn.signals)
   signal(tapIn.signals)
+  signal(errorIn.signals)
   signal(dataOut.reverse)
   signal(dataOutPre.reverse)
 
@@ -53,12 +57,10 @@ case class NeuronControl[T](override val name:String,
   val biasAddress   = signal("bias_address",OUTPUT,U(info.biasAddressWidth,0))
   val biasStart     = signal("bias_start",   WIRE, U(1,0))
   val biasEnable    = signal("bias_enable",  WIRE, U(1,0))
-
   // Control signals for sharing if the number of outputs is greater than the number of neurons
   val stateLength   = signal("state_length",INPUT,U(info.stateWidth,0))
   val stateAddress  = signal("state_address",WIRE,stateLength.fixed)
   val stateDone     = signal("state_done", WIRE, U(1,0))
-
   // Fifo Control Signals
   val fifoEmpty           = signal("fifo_empty")
   val fifoEmptyReg        = signal("fifo_empty_reg",REG)
@@ -95,8 +97,18 @@ case class NeuronControl[T](override val name:String,
   dataMem.ctrl.rdAddress := Operators.Concat(readDataDepth, readDataAddress)
   dataMem.ctrl.rdVld     := data_read_active(0) | data_read_active(info.dataLength)
 
-  /- ("Tap Output Memory Control")
   val tapMem = parent.memory.tapBank.input
+  /- ("Tap Input Memmory Control")
+  val errorCount = signal("errorCount",REG,U(info.tapDimension._2,0))
+  errorCount := (errorCount + 1).$at(clk.createEnable(errorIn.vld))
+  this.tapMem.ctrl.wrAddress  := info.tapAddressLength
+
+  this.tapMem.ctrl.wrVld      := errorIn.vld
+  this.tapMem.ctrl.subVld     := errorIn.vld
+  this.tapMem.ctrl.subAddress := errorCount
+  this.tapMem.ctrl.subData    := errorIn.value.value
+
+  /- ("Tap Output Memory Control")
   tapMem.ctrl.rdAddress  := tapAddress
   tapMem.ctrl.rdVld      := data_read_active(0) | data_read_active(info.dataLength)
 

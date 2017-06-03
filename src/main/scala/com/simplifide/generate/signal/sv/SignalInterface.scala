@@ -1,6 +1,6 @@
 package com.simplifide.generate.signal.sv
 
-import com.simplifide.generate.signal.SignalTrait
+import com.simplifide.generate.signal.{OpType, SignalTrait}
 
 /**
   * Created by andy on 5/27/17.
@@ -9,10 +9,12 @@ trait SignalInterface {
   val name:String
   val inputs:Seq[SignalTrait]         = Seq()
   val outputs:Seq[SignalTrait]        = Seq()
-  val interfaces:Seq[SignalInterface] = Seq()
 
-  def allInputs:Seq[SignalTrait]  = inputs.toList ::: interfaces.flatMap(_.allInputs).toList
-  def allOutputs:Seq[SignalTrait] = outputs.toList ::: interfaces.flatMap(_.allOutputs).toList
+  val interfaces:Seq[SignalInterface] = Seq()
+  val outputInterfaces:Seq[SignalInterface] = Seq()
+
+  def allInputs:Seq[SignalTrait]  = inputs.toList ::: interfaces.flatMap(_.allInputs).toList ::: outputInterfaces.flatMap(_.allOutputs).toList
+  def allOutputs:Seq[SignalTrait] = outputs.toList ::: interfaces.flatMap(_.allOutputs).toList ::: outputInterfaces.flatMap(_.allInputs).toList
 
 
   // FIXME : Cut and pasted all over

@@ -16,15 +16,18 @@
   input                 [31:0]  bias_int_rd_data,
   input                 [2:0]   bias_length,
   input                         clk,
-  input float_24_8              data_in,
-  input                         data_in_fst,
-  input                         data_in_vld,
   input                 [31:0]  data_int_rd_data,
-  input                         data_out_pre_rdy,
-  input                         data_out_rdy,
   input                 [3:0]   load_depth,
   input                 [2:0]   load_length,
   input                         reset,
+  input float_24_8              st_data,
+  input                         st_data_fst,
+  input                         st_data_out_pre_rdy,
+  input                         st_data_out_rdy,
+  input                         st_data_vld,
+  input float_24_8              st_error,
+  input                         st_error_fst,
+  input                         st_error_vld,
   input float_24_8              stage_st_data_out,
   input float_24_8              stage_st_data_out_pre,
   input                         state_length,
@@ -35,16 +38,17 @@
   output                [2:0]   bias_address,
   output bias_int_32_3          bias_int,
   output                [31:0]  bias_int_wr_data,
-  output                        data_in_rdy,
   output data_int_32_6          data_int,
   output                [31:0]  data_int_wr_data,
-  output float_24_8             data_out,
-  output                        data_out_fst,
-  output float_24_8             data_out_pre,
-  output                        data_out_pre_fst,
-  output                        data_out_pre_vld,
-  output                        data_out_vld,
   output                        first,
+  output float_24_8             st_data_out,
+  output                        st_data_out_fst,
+  output float_24_8             st_data_out_pre,
+  output                        st_data_out_pre_fst,
+  output                        st_data_out_pre_vld,
+  output                        st_data_out_vld,
+  output                        st_data_rdy,
+  output                        st_error_rdy,
   output float_24_8             stage_st_bias,
   output float_24_8             stage_st_data,
   output                [3:0]   tap_address,
@@ -88,6 +92,7 @@
   reg                           data_start_r1     ;  // <1,0>
   reg                           data_start_r2     ;  // <1,0>
   reg                           data_start_r3     ;  // <1,0>
+  reg                   [11:0]  errorCount        ;  // <12,0>
   reg                           fifo_empty_reg    ;  // <1,0>
   reg                   [3:0]   fifo_input_depth  ;  // <4,0>
   reg                   [3:0]   load_data_write   ;  // <4,0>
@@ -181,7 +186,7 @@ always @(posedge clk) begin
     if (load_input_done) begin
       load_input_count <= 3'd0;
     end
-    else if ((data_in_rdy & data_in_vld)) begin 
+    else if ((st_data_rdy & st_data_vld)) begin 
       load_input_count <= load_input_count[2:0] + 3'd1;
     end
   end
@@ -198,10 +203,10 @@ always @(posedge clk) begin
 end
 
 // Data Input Memory Control
-assign data_in_rdy = (fifo_input_depth <= load_depth);
-assign data_int_wr_data = data_in;
+assign st_data_rdy = (fifo_input_depth <= load_depth);
+assign data_int_wr_data = st_data;
 assign data_int.wr_address = {load_data_write,load_input_count};
-assign data_int.wr_vld = (data_in_rdy & data_in_vld);
+assign data_int.wr_vld = (st_data_rdy & st_data_vld);
 
 // Data Output Memory Control
 assign data_start = ((load_finish | load_input_done) & (fifo_input_depth >= 'd0));
@@ -218,6 +223,21 @@ always @(posedge clk) begin
 end
 assign data_int.rd_address = {read_data_depth,read_data_address};
 assign data_int.rd_vld = (data_active | data_active_r6);
+
+// Tap Input Memmory Control
+always @(posedge clk) begin
+  if (reset) begin
+    errorCount <= 12'd0;
+  end
+  else if (st_error_vld) begin 
+    errorCount <= errorCount[11:0] + 12'd1;
+  end
+end
+assign tap_int.wr_address = 4'd12;
+assign tap_int.wr_vld = st_error_vld;
+assign tap_int.sub_vld = st_error_vld;
+assign tap_int.sub_addr = errorCount;
+assign tap_int.sub_data = st_error;
 
 // Tap Output Memory Control
 assign tap_int.rd_address = tap_address;
@@ -239,10 +259,10 @@ assign taps.v4 = tap_int_rd_data[159:128];
 assign taps.v5 = tap_int_rd_data[191:160];
 
 // Final Output Control
-assign data_out = stage_st_data_out;
-assign data_out_vld = data_active_r12;
-assign data_out_pre = stage_st_data_out_pre;
-assign data_out_pre_vld = data_active_r10;
+assign st_data_out = stage_st_data_out;
+assign st_data_out_vld = data_active_r12;
+assign st_data_out_pre = stage_st_data_out_pre;
+assign st_data_out_pre_vld = data_active_r10;
 
 // Counter Controls
 assign load_finish = (read_data_address == load_length);

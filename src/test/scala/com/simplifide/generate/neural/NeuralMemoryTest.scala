@@ -14,6 +14,7 @@ import com.simplifide.generate.util.PathUtilities
 /**
   * Created by andy on 5/23/17.
   */
+/*
 class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
   def blockName:String = "neuralMemory"
 
@@ -35,6 +36,8 @@ class NeuronMemoryTest extends BlockScalaTest with BlockTestParser  {
 
 
 }
+
+*/
 
 object NeuronMemoryTest {
 

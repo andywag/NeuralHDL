@@ -27,6 +27,7 @@
 
   wire                  [31:0]  read_0            ;  // <32,0>
   wire                  [31:0]  write_0           ;  // <32,0>
+  wire                          write_sub         ;  // <1,1>
 
 
 // Registers 

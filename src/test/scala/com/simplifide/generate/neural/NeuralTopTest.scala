@@ -1,10 +1,11 @@
 package com.simplifide.generate.neural
 
-import com.simplifide.generate.blocks.neural.{NeuralStageTop, NeuronControl}
+import com.simplifide.generate.blocks.neural
+import com.simplifide.generate.blocks.neural.{NeuralStageInfo, NeuralStageTop, NeuronControl}
 import com.simplifide.generate.model.DataFileGenerator
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.NewEntity
-import com.simplifide.generate.signal.FloatSignal
+import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
 import org.nd4j.linalg.factory.Nd4j
@@ -30,19 +31,14 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val numberNeurons = 6
   val dataFill      = 8
   val errorFill     = 4
+  val outputFill    = 4
 
   override def getTestLength = tapLength*12
 
-  val information = NeuralStageTop.Info((dataLength,outputLength),dataLength,dataFill,numberNeurons,errorFill,dataLocation)
+  val information = NeuralStageInfo((dataLength,outputLength),dataLength,dataFill,
+    numberNeurons,errorFill,outputFill,dataLocation)
   //val dimension   = NeuronControl.Dimension(10,6,7,dataFill)
-
-  val dataIn      = FloatSignal("data_in",INPUT)
-  val dataOut     = FloatSignal("data_out",OUTPUT)
-  val dataOutPre     = FloatSignal("data_out_pre",OUTPUT)
-
-  val inRdy          = new ReadyValidInterface(dataIn)
-  val outRdy         = new ReadyValidInterface(dataOut)
-  val outPreRdy      = new ReadyValidInterface(dataOutPre)
+  val interface   = new neural.NeuralStageTop.Interface("st",FloatSignal("a",INPUT))
 
   // Tap Load Interface - Not currently implemented : Direct load of memory for now
   val tapIn       = FloatSignal("tap_in",INPUT)
@@ -66,14 +62,16 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val out    = DataFileGenerator.createFlatten3(s"$dataLocation/pre_data",result,'f')
   val fin    = DataFileGenerator.createFlatten3(s"$dataLocation/out_data",finalResult,'f')
 
-  override val dutParser = new NeuralStageTop(blockName, information,inRdy, tapRdy, outRdy, outPreRdy)
+  override val dutParser = new NeuralStageTop(blockName, information,
+    interface)
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
-  inRdy.vld := 1
-  inRdy.value.value             <-- (input)
-  val rOut  = outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(outRdy.vld), None, "Stage Output",8)
-  val rpOut = outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(outPreRdy.vld), None, "Stage Pre Non",8)
+  interface.inRdy.vld := 1
+  interface.inRdy.value.value             <-- (input)
+  val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
+  val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
+
 
   dutParser.control.dataLength  := information.dataLength-1
   dutParser.control.loadDepth   := information.dataFill-1
@@ -82,6 +80,14 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
 
   dutParser.control.loadDepth  := 8 -1
 
+  this.createErrorCalculator
+
+  def createErrorCalculator = {
+    import com.simplifide.generate.newparser.typ.SegmentParser._
+    val mem     = signal("expected_memory",REG,U(32,0),128)
+    val expected = signal(FloatSignal("expected",WIRE))
+    interface.errorIn !:= expected minus interface.dataOut
+  }
 
   override def postRun = {
     val output  = rpOut.load()

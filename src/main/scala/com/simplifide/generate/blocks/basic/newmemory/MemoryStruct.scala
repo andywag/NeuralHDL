@@ -51,7 +51,8 @@ object MemoryStruct {
 
     val memoryWidth = memoryRepeat.foldLeft(1)(_*_)
     val memoryDepth  = dimensions.foldLeft(1)(_*_)
-    val addressSize  = math.ceil(math.log(memoryDepth)/math.log(2.0)).toInt
+    val addressSize     = math.ceil(math.log(memoryDepth)/math.log(2.0)).toInt
+
 
     val dataWidth    = FixedType.unsigned(memoryWidth,0)
     val addressWidth = FixedType.unsigned(addressSize,0)
@@ -62,9 +63,24 @@ object MemoryStruct {
     val rdAddress  = SignalTrait(createName("rd_address"),opType ,addressWidth)
     val rdVld      = SignalTrait(createName("rd_vld")    ,opType ,FixedType.unsigned(1,0))
 
+
+    val subVld     = SignalTrait(createName("sub_vld"),opType)
+
+    val addressSubSize  = if (memoryRepeat.length > 1) math.ceil(math.log(memoryRepeat(1)/math.log(2.0))).toInt else 1
+    val subAddress = SignalTrait(createName("sub_addr"),opType,FixedType.unsigned(addressSubSize,0))
+    val subData    = SignalTrait(createName("sub_data"),opType,FixedType.unsigned(memoryRepeat(0),0))
+
+
+    //override val signals: List[SignalTrait] = if (memoryDepth <= 1) List(rdAddress, wrVld, wrAddress, rdVld)
+    //else List(rdAddress, wrVld, wrAddress, rdVld, subVld, subAddress, subData)
+
+    override val signals: List[SignalTrait] =List(subVld, subAddress, subData, rdAddress, wrVld, wrAddress, rdVld)
+
     override val packed: Boolean = true
     override val typeName: String = s"${name}_${memoryWidth}_${addressSize}"
-    override val signals: List[SignalTrait] = List(rdAddress, wrVld, wrAddress, rdVld)
+
+    //override val signals: List[SignalTrait] = List(rdAddress, wrVld, wrAddress, rdVld)
+
 
     /** Kind of a kludge need a better way to copy objects (shapeless maybe) */
     override def copyStruct(n: String, o: OpType): SignalTrait = {

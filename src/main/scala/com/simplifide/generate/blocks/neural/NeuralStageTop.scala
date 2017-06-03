@@ -1,21 +1,21 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.parser.EntityParser
-import com.simplifide.generate.signal.SignalTrait
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
+import com.simplifide.generate.signal.sv.SignalInterface
+import com.simplifide.generate.signal.{FloatSignal, OpType}
 import com.simplifide.generate.util.PathUtilities
 
 /**
   * Created by andy on 5/26/17.
   */
+
+// FIXME : Convert the I/O to a single structure
 class NeuralStageTop[T](val name:String,
-                       info:NeuralStageTop.Info,
-                     val dataIn:ReadyValidInterface[T],
-                     val tapIn:ReadyValidInterface[T],
-                     val dataOut:ReadyValidInterface[T],
-                     val dataPreOut:ReadyValidInterface[T])(implicit clk:ClockControl) extends EntityParser {
+                        info:NeuralStageInfo,
+                        interface:NeuralStageTop.Interface[T]
+                       )(implicit clk:ClockControl) extends EntityParser {
 
 
   override def document =
@@ -37,11 +37,11 @@ This stage is configurable and the control parameters are specified in `info`. T
 the size and shape of this stage.
 
 ## Input/Output
-* output ${dataOut.value.signals(0)}    : Output of the block following the equal to dataIn*taps + bias
-* output ${dataPreOut.value.signals(0)} : Output of the block before the non-linearity (for testing)
+* output ${interface.outRdy.value.signals(0)}    : Output of the block following the equal to dataIn*taps + bias
+* output ${interface.outPreRdy.value.signals(0)} : Output of the block before the non-linearity (for testing)
 
-* input ${dataIn}   : Data Input of the Block
-* input ${tapIn}     : Neural Tap input of the Block
+* input ${interface.inRdy}   : Data Input of the Block
+* input ${interface.tapRdy}     : Neural Tap input of the Block
 * Various other input controls are input to this block to configure the lengths used for controlling the
 * MAC units
 
@@ -62,9 +62,9 @@ This block contains 3 major subblocks
 """
 
   signal(clk.allSignals(INPUT))
-  signal(dataIn.signals)
-  signal(dataOut.reverse)
-  signal(dataPreOut.reverse)
+  signal(interface.inRdy.signals)
+  signal(interface.outRdy.reverse)
+  signal(interface.outPreRdy.reverse)
 
   val stage = new NeuralStage(appendName("st"),info.numberNeurons)
   instance(stage)
@@ -73,7 +73,7 @@ This block contains 3 major subblocks
   val memory = new NeuralMemory(appendName("mem"),memorySize, info)
   instance(memory)
 
-  val control    = new NeuronControl[T](appendName("ctrl"),info, dataIn, tapIn, dataOut,dataPreOut, this)
+  val control    = new NeuronControl[T](appendName("ctrl"),info, interface, this)
   instance(control)
 
 
@@ -83,53 +83,27 @@ This block contains 3 major subblocks
 
 object NeuralStageTop {
 
-  /**
-    *
-    * @param tapDimension    : Size of the Matrix Multiplication
-    * @param dataLength      : Length of the Input Data (Column of Matrix)
-    * @param dataFill        : Amount of memory for Data storage
-    * @param errorFill       : Amount of extra tap storage used to contain the errors
-    * @param numberNeurons   : Number of MAC Units for this Stage
-    * @param dataLocation    : Location where the initial taps are stored for test
-    */
-  case class Info(tapDimension:(Int,Int),
-                  dataLength:Int,
-                  dataFill:Int,
-                  numberNeurons:Int,
-                  errorFill:Int,
-                  dataLocation:String
-                 ) {
-
-    def logWidth(input:Int) = {
-      math.ceil(math.log(input)/math.log(2)).toInt
-    }
 
 
-    def logWidthPlus1(input:Int) = {
-      val c = math.ceil(math.log(input)/math.log(2)).toInt
-      val f = math.floor(math.log(input)/math.log(2)).toInt
-      if (f == c) (c + 1) else c
-    }
+  case class Interface[T](name:String, proto:T) extends SignalInterface {
+    val dataIn         = FloatSignal(appendName("data"),OpType.Input)
+    val inRdy          = new ReadyValidInterface(dataIn)
 
-    // Size of the data memory address
-    val dataSingleWidth  = logWidth(dataLength)
-    // Depth of the memory address
-    val dataFillWidth    = logWidthPlus1(dataFill)
-    // Width of Data Address (NxK)
-    val dataAddressWidth =  dataSingleWidth + dataFillWidth
+    val errorIn        = FloatSignal(appendName("error"),OpType.Input)
+    val errorRdy       = new ReadyValidInterface(errorIn)
 
-    // Number of passes through the input data required for each stage
-    val stateLength      = tapDimension._2/numberNeurons
-    val stateWidth       = logWidth(stateLength)
-    // Width of tap address
-    val tapAddressLength = (tapDimension._1*tapDimension._2)/numberNeurons
-    val tapAddressWidth   = logWidth(tapAddressLength)
-    // Width of Bias
-    val biasLength       = numberNeurons
-    val biasAddressWidth  = dataSingleWidth
+    val dataOut        = FloatSignal(appendName("data_out"),OpType.Output)
+    val outRdy         = new ReadyValidInterface(dataOut)
 
-    // FIXME : Need generic
-    val memoryWidth = 32;
+    val dataOutPre     = FloatSignal(appendName("data_out_pre"),OpType.Output)
+    val outPreRdy      = new ReadyValidInterface(dataOutPre)
 
+    override val interfaces       = List(inRdy,errorRdy)
+    override val outputInterfaces = List(outRdy, outPreRdy)
+
+    // Tap Load Interface - Not currently implemented : Direct load of memory for now
+    val tapIn       = FloatSignal("tap_in",OpType.Input)
+    val tapRdy      = new ReadyValidInterface(tapIn)
   }
+
 }

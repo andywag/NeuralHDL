@@ -28,7 +28,7 @@ class NeuralStageTest extends BlockScalaTest with BlockTestParser {
   lazy val depth = 16
   lazy val share = 1
 
-  override def getTestLength = depth*256
+  override def getTestLength = depth*4096
 
 
   val start = (math.log10(depth)/math.log10(2.0)).toInt

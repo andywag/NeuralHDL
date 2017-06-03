@@ -18,8 +18,8 @@ This stage is configurable and the control parameters are specified in `info`. T
 the size and shape of this stage.
 
 ## Input/Output
-* output data_out    : Output of the block following the equal to dataIn*taps + bias
-* output data_out_pre : Output of the block before the non-linearity (for testing)
+* output st_data_out    : Output of the block following the equal to dataIn*taps + bias
+* output st_data_out_pre : Output of the block before the non-linearity (for testing)
 
 * input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@2c383e33)   : Data Input of the Block
 * input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@74a195a4)     : Neural Tap input of the Block

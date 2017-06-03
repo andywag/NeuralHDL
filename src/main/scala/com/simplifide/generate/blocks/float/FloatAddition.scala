@@ -54,7 +54,13 @@ class FloatAddition(override val name:String,
   (sel_exp     := delta_exp.sign)
   (choose_exp := delta_exp.sign ? in2.exp :: in1.exp)
   (add_in1     := in1.sgn ? -extend(in1.man) :: extend(in1.man))
-  (add_in2     := in2.sgn ? -extend(in2.man) :: extend(in2.man))
+
+  if (negative)
+    (add_in2     := in2.sgn ? extend(in2.man) :: -extend(in2.man))
+  else
+    (add_in2     := in2.sgn ? -extend(in2.man) :: extend(in2.man))
+
+
   (nshift_in   := sel_exp  ? add_in2 :: add_in1)
   shift_in1    := sel_exp  ? add_in1  :: add_in2
   shift_in     := Operators.Concat(shift_in1,PAD)
@@ -63,8 +69,9 @@ class FloatAddition(override val name:String,
 
   nshift_out  := Operators.Concat(nshift_in,PAD)
   // FIXME : Need to keep signs straight since reordered
-  if (negative) add_out     := shift_out - nshift_out//+ shift_out(0)
-  else          add_out     := shift_out + nshift_out// + shift_out(0)
+  //if (negative) add_out     := shift_out - nshift_out//+ shift_out(0)
+  //else          add_out     := shift_out + nshift_out// + shift_out(0)
+  add_out     := shift_out + nshift_out
   abs_out      := add_out.sign ? -add_out :: add_out
 
 

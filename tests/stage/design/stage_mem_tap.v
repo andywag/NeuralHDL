@@ -37,6 +37,7 @@
   wire                  [31:0]  write_3           ;  // <32,0>
   wire                  [31:0]  write_4           ;  // <32,0>
   wire                  [31:0]  write_5           ;  // <32,0>
+  wire                  [5:0]   write_sub         ;  // <6,1>
 
 
 // Registers 
@@ -113,7 +114,8 @@ memory_32_4 stage_mem_tap_5 (
     .m_wr_data(write_5),
     .reset(reset));
 
-assign write_0 = tap_int_wr_data[31:0];
+assign write_sub[0] = (tap_int.sub_addr == 'd0);
+assign write_0 = write_sub[0] ? tap_int.sub_data : tap_int_wr_data[31:0];
 assign tap_int_rd_data[31:0] = read_0;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
@@ -121,7 +123,8 @@ initial begin
   $readmemh("/home/andy/projects/NeuralHDL/tests/stage/data/init_taps_0.hex",stage_mem_tap_0.memory_32_4_memory);
 end
 
-assign write_1 = tap_int_wr_data[63:32];
+assign write_sub[1] = (tap_int.sub_addr == 'd1);
+assign write_1 = write_sub[1] ? tap_int.sub_data : tap_int_wr_data[63:32];
 assign tap_int_rd_data[63:32] = read_1;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
@@ -129,7 +132,8 @@ initial begin
   $readmemh("/home/andy/projects/NeuralHDL/tests/stage/data/init_taps_1.hex",stage_mem_tap_1.memory_32_4_memory);
 end
 
-assign write_2 = tap_int_wr_data[95:64];
+assign write_sub[2] = (tap_int.sub_addr == 'd2);
+assign write_2 = write_sub[2] ? tap_int.sub_data : tap_int_wr_data[95:64];
 assign tap_int_rd_data[95:64] = read_2;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
@@ -137,7 +141,8 @@ initial begin
   $readmemh("/home/andy/projects/NeuralHDL/tests/stage/data/init_taps_2.hex",stage_mem_tap_2.memory_32_4_memory);
 end
 
-assign write_3 = tap_int_wr_data[127:96];
+assign write_sub[3] = (tap_int.sub_addr == 'd3);
+assign write_3 = write_sub[3] ? tap_int.sub_data : tap_int_wr_data[127:96];
 assign tap_int_rd_data[127:96] = read_3;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
@@ -145,7 +150,8 @@ initial begin
   $readmemh("/home/andy/projects/NeuralHDL/tests/stage/data/init_taps_3.hex",stage_mem_tap_3.memory_32_4_memory);
 end
 
-assign write_4 = tap_int_wr_data[159:128];
+assign write_sub[4] = (tap_int.sub_addr == 'd4);
+assign write_4 = write_sub[4] ? tap_int.sub_data : tap_int_wr_data[159:128];
 assign tap_int_rd_data[159:128] = read_4;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
@@ -153,7 +159,8 @@ initial begin
   $readmemh("/home/andy/projects/NeuralHDL/tests/stage/data/init_taps_4.hex",stage_mem_tap_4.memory_32_4_memory);
 end
 
-assign write_5 = tap_int_wr_data[191:160];
+assign write_sub[5] = (tap_int.sub_addr == 'd5);
+assign write_5 = write_sub[5] ? tap_int.sub_data : tap_int_wr_data[191:160];
 assign tap_int_rd_data[191:160] = read_5;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/stage/data/init_taps
