@@ -30,6 +30,8 @@
 // Registers 
 
   reg                   [31:0]  counter           ;  // <32,0>
+  reg                           error_first       ;  // <1,0>
+  reg                           error_mode        ;  // <1,0>
   reg                           first             ;  // <1,0>
   reg                   [31:0]  neural_stage_bias_mem[0:65536];  // <32,0>
   reg                   [31:0]  neural_stage_data_mem[0:65536];  // <32,0>
@@ -70,6 +72,8 @@
 
 neural_stage neural_stage (
     .clk(clk),
+    .error_first(error_first),
+    .error_mode(error_mode),
     .first(first),
     .neural_stage_bias(neural_stage_bias),
     .neural_stage_data(neural_stage_data),

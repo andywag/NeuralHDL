@@ -15,6 +15,10 @@ case class MemoryBank(name:String,
                       input:MemoryStruct,
                       file:Option[String]=None)(implicit clk:ClockControl) extends EntityParser{
 
+  import com.simplifide.generate.newparser.typ.SegmentParser._
+
+
+
   override def createBody() {}
   //override val instances = struct.createEntity
 
@@ -30,6 +34,9 @@ case class MemoryBank(name:String,
 
   val writeArray = signal("write_sub",WIRE,FixedType.unsigned(number,1))
 
+  val memCtrl1     = List.tabulate(number)(x => signal(input.ctrl.copyStruct(s"mem_int_$x",WIRE)))
+  val memCtrl      = memCtrl1.map(_.asInstanceOf[MemoryStruct.Ctrl])
+
 
   val insts    = for (i <- 0 until number) {
     // Signals
@@ -41,9 +48,14 @@ case class MemoryBank(name:String,
     if (number > 1) {
       writeArray((i,i)) := (input.ctrl.subAddress === i)
       wr := writeArray((i,i)) ? input.ctrl.subData :: input.wrData(slice) // Select either the single line or the array
+      memCtrl(i).rdAddress := input.ctrl.rdAddress
+      memCtrl(i).rdVld     := input.ctrl.rdVld
+      memCtrl(i).wrAddress := input.ctrl.wrAddress
+      memCtrl(i).wrVld     := writeArray((i,i))
     }
     else  {
       wr := input.wrData(slice)
+      memCtrl(i) !:= input.ctrl
     }
     // Attaching signals to slices
 
@@ -52,7 +64,7 @@ case class MemoryBank(name:String,
     input.rdData(slice) := rd
     // Connection Creation
     val connection:Map[SignalTrait,SimpleSegment] = Map(
-      entityParser.segment.input.ctrl   -> input.ctrl,
+      entityParser.segment.input.ctrl   -> memCtrl(i),
       entityParser.segment.input.rdData -> rd,
       entityParser.segment.input.wrData -> wr)
 

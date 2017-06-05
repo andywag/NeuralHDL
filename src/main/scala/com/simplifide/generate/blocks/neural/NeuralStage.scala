@@ -23,10 +23,14 @@ case class NeuralStage(override val name:String,
   // Create the I/O signals for the block
   val first  = signal("first",INPUT)
 
+  val errorMode = signal("error_mode",INPUT)
+  val errorFirst = signal("error_first",INPUT)
+
   val dataIn = Seq(signal(FloatSignal(appendName("data"),INPUT))) // FIXME : Generalize to Generic Number Type
-  //val tapIn  = Seq.tabulate(numberOfNeurons)(x => signal(FloatSignal(appendName(s"tap_${x}"),INPUT))) // FIXME : Generalize to Generic Number Type
   // FIXME : Add support for arrays :
-  val tapIn   = signal(SignalArray.Arr("taps",FloatSignal(appendName(s"tap"),INPUT),numberOfNeurons))
+  val tapIn    = signal(SignalArray.Arr("taps",FloatSignal(appendName(s"tap"),INPUT),numberOfNeurons))
+  val tapLat   = signal(SignalArray.Arr("taps_lat",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
+
 
   val biasIn = Seq(signal(FloatSignal(appendName("bias"),INPUT))) // FIXME : Generalize to Generic Number Type
 
@@ -100,7 +104,6 @@ dataOut        := internalSignal plus bias
   signal(dataOutPre.changeType(OpType.Output))
 
 
-  //val biasInputDelay = register(biasIn(0))(depth)(clk).allSignalChildren.toSeq
   val neuronOut      = seq(dataOut.newSignal(name = "wireOut"))(numberOfNeurons)
   val neuronAccumIn  = seq(biasIn(0))(numberOfNeurons)
 
@@ -109,6 +112,7 @@ dataOut        := internalSignal plus bias
 
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
+  tapLat !:= tapIn $at(clk.createEnable(errorFirst))
   //val a = valid := valid ? valid :: valid
   /- ("Delay the Input Valid")
   Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
@@ -155,7 +159,7 @@ dataOut        := internalSignal plus bias
 
 object NeuralStage {
   class Interface(override val name:String, stage:NeuralStage) extends SignalInterface {
-    override val inputs = List(stage.first, stage.dataIn(0), stage.biasIn(0),stage.tapIn)
+    override val inputs = List(stage.first, stage.dataIn(0), stage.biasIn(0),stage.tapIn,stage.errorMode,stage.errorFirst)
     override val outputs = List(stage.dataOutPre, stage.dataOut)
   }
 

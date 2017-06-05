@@ -57,7 +57,7 @@
   reg                   [31:0]  rtl_out_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:156];  // <32,0>
+  reg                   [31:0]  st_data_mem[0:144];  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>

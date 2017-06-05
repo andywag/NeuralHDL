@@ -51,6 +51,9 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
   // Output Fifo Information
   val outputFifoDepth = tapDimension._2*outputFill
   val outputFifoAddressWidth = logWidth(outputFifoDepth)
+  // Error Fifo Information
+  val errorFillWidth = logWidth(errorFill)
+  val errorTapLength = tapAddressLength
 
   // FIXME : Need generic
   val memoryWidth = 32;

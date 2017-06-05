@@ -4,7 +4,7 @@ import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.newmemory.{MemoryBank, MemoryStruct}
 import com.simplifide.generate.blocks.neural.NeuralError.Ctrl
 import com.simplifide.generate.parser.EntityParser
-import com.simplifide.generate.signal.FloatSignal
+import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 
 /**
@@ -12,9 +12,9 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
   */
 case class NeuralError[T](override val name:String,
                           info:NeuralStageInfo,
-                          outputIn:ReadyValidInterface[T],
-                          dataIn:ReadyValidInterface[T],
-                          errorOut:ReadyValidInterface[T]
+                          outputIn:ReadyValidInterface[_],
+                          dataIn:ReadyValidInterface[_],
+                          errorOut:ReadyValidInterface[_]
                            )(implicit clk:ClockControl) extends EntityParser {
 
   override def createBody() {}
@@ -38,6 +38,7 @@ object NeuralError {
 
     signal(parent.outputIn.signals)
     signal(parent.dataIn.signals)
+
     signal(parent.errorOut.reverse)
     signal(parent.outputInt.reverse)
 

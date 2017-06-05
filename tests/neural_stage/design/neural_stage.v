@@ -14,6 +14,8 @@
 
     module neural_stage(
   input                         clk,
+  input                         error_first,
+  input                         error_mode,
   input                         first,
   input float_24_8              neural_stage_bias,
   input float_24_8              neural_stage_data,

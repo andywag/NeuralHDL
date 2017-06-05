@@ -1,29 +1,23 @@
 package com.simplifide.generate.neural
 
 import com.simplifide.generate.blocks.neural
-import com.simplifide.generate.blocks.neural.{NeuralStageInfo, NeuralStageTop, NeuronControl}
+import com.simplifide.generate.blocks.neural.{NeuralNetwork, NeuralStageTop}
 import com.simplifide.generate.model.DataFileGenerator
-import com.simplifide.generate.parser.EntityParser
+import com.simplifide.generate.plot.PlotUtility
 import com.simplifide.generate.project.NewEntity
-import com.simplifide.generate.signal.{FloatSignal, SignalTrait}
+import com.simplifide.generate.signal.FloatSignal
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
 import org.nd4j.linalg.factory.Nd4j
+import org.nd4j.linalg.ops.transforms.Transforms
 import org.nd4s.Implicits._
 
-import collection.JavaConverters._
-import com.simplifide.generate.model.NdArrayWrap._
-import com.simplifide.generate.plot.PlotUtility
-import com.simplifide.generate.util.PathUtilities
-import org.nd4j.linalg.ops.transforms.Transforms
-
 /**
-  * Created by andy on 5/27/17.
+  * Created by andy on 6/3/17.
   */
-class NeuralTopTest extends BlockScalaTest with BlockTestParser {
+class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   /** Clock for the testbench */
-  override def blockName: String = "stage"
-
+  override def blockName: String = "simple"
 
 
   val information = BasicTestInformation.getInformation(dataLocation)
@@ -40,6 +34,7 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
 
   val dataData  = BasicTestInformation.getTraining
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
+  val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
   val result      = tapData dot dataData._1
   val finalResult = Transforms.sigmoid(result)
@@ -47,23 +42,33 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val out    = DataFileGenerator.createFlatten3(s"$dataLocation/pre_data",result,'f')
   val fin    = DataFileGenerator.createFlatten3(s"$dataLocation/out_data",finalResult,'f')
 
-  override val dutParser = new NeuralStageTop(blockName, information,
-    interface)
+  val expectedData = FloatSignal("expected",INPUT)
+  val expectedRdy  = new ReadyValidInterface(expectedData)
+
+  override val dutParser = new NeuralNetwork(blockName, List(information),
+    interface,expectedRdy)
+
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input)
+
+  expectedRdy.vld := (index < expected.data.length()) ? 1 :: 0
+  expectedRdy.value.value                 <-- (expected)
+
+
   val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
 
 
-  dutParser.control.dataLength  := information.dataLength-1
-  dutParser.control.loadDepth   := information.dataFill-1
-  dutParser.control.stateLength := information.stateLength-1
-  //dutParser.control.biasLength  := information.biasLength-1
+  dutParser.stage.control.dataLength  := information.dataLength-1
+  dutParser.stage.control.loadDepth   := information.dataFill-1
+  dutParser.stage.control.stateLength     := information.stateLength-1
+  //dutParser.stage.control.biasLength      := information.biasLength-1
+  dutParser.stage.control.tapErrorLength  := information.errorTapLength-1
 
-  dutParser.control.loadDepth  := 8 -1
+  dutParser.stage.control.loadDepth  := 8 -1
 
   this.createErrorCalculator
 
@@ -94,49 +99,4 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
     this.checkMaxError(error2,.06)
     //assert(error2.max._1 < .06)
   }
-
-  override def document =
-    s"""
-This module is a block test wrapper for the a fully connected neuron stage with control and memories. The block
-is currently configured to operate with
-
-* 6  inputs
-* 12 outputs
-* 6  neurons
-
-This configuration was selected for a simple test case with a 6 input, 6 output test case. The plan was to put another
-12x12 hidden layer and a 12x6 output layer to complete the test. This test might be simplified to a more simple test
-to verify the convergence of a single stage with a simple transfer function.
-
-##
-
-This test matches the output stage versus a model of the system defined in this module using Nd4j. The match is not perfect
-due to quantization effects especially due to the sigmoid approximation with a maximum error of .048. Given this error the block
-should definitely be done in fixed point.
-
-```scala
-
-val result      = tapData dot dataData._1
-val finalResult = Transforms.sigmoid(result)
-
-```
-
-## Reference Code for Test
-* [Testbench (Verilog)](../test/${name}.v)
-* [Test Wrapper (C++)](../test/${name}.cpp)
-* [Test Generator](${PathUtilities.nueralTestPath}/NeuralTopTest.scala)
-* [Code Generator](${PathUtilities.nueralPath}/NeuralStageTop.scala)
-* [Test Directory](../test/)
-* [Design Directory](../design/)
-* [Docs Directory](../doc/)
-
-"""
-
-
-
-
-}
-
-object NeuralTopTest {
-
 }

@@ -7,6 +7,7 @@ import com.simplifide.generate.parser.SegmentHolder
 import com.simplifide.generate.parser.block.ParserStatement
 import com.simplifide.generate.parser.factory.CreationFactory
 import com.simplifide.generate.parser.model.Expression
+import com.simplifide.generate.signal.SignalTrait
 import com.simplifide.generate.signal.sv.SignalInterface
 
 /**
@@ -20,6 +21,11 @@ trait Assignable[T] {
 
   def !:=[S](input: Expressable[S])(implicit scope: SegmentHolder): SimpleSegment
   def !::=[S](input: Expressable[S]): SimpleSegment
+
+  def !->[S](input:Expressable[S])(implicit scope: SegmentHolder):SignalTrait = {
+    !:=(input)
+    value.asInstanceOf[SignalTrait] // FIXME : Temporary Hack
+  }
 
 }
 
