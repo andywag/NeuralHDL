@@ -23,20 +23,24 @@ case class NeuralStage(override val name:String,
   // Create the I/O signals for the block
   val first  = signal("first",INPUT)
 
-  val errorMode = signal("error_mode",INPUT)
-  val errorFirst = signal("error_first",INPUT)
+  val errorMode = signal("stage_error_mode",INPUT)
+  val errorFirst = signal("stage_error_first",INPUT)
 
   val dataIn = Seq(signal(FloatSignal(appendName("data"),INPUT))) // FIXME : Generalize to Generic Number Type
   // FIXME : Add support for arrays :
   val tapIn    = signal(SignalArray.Arr("taps",FloatSignal(appendName(s"tap"),INPUT),numberOfNeurons))
+  // Latch the tap input data used for error updates
+  val tapConv   = signal(SignalArray.Arr("taps_conv",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
   val tapLat   = signal(SignalArray.Arr("taps_lat",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
-
+  val tapSel   = signal(SignalArray.Arr("taps_select",FloatSignal(appendName(s"tap_lat"),WIRE),numberOfNeurons))
 
   val biasIn = Seq(signal(FloatSignal(appendName("bias"),INPUT))) // FIXME : Generalize to Generic Number Type
 
   val dataOutPre   = signal(FloatSignal(appendName("data_out_pre"),OUTPUT))
   val dataOutBias  = signal(FloatSignal(appendName("data_out_bias"),OUTPUT))
   val dataOut      = signal(FloatSignal(appendName("data_out"),OUTPUT))
+
+  val fullOut      = signal(appendName("tap_out"),OUTPUT,U(numberOfNeurons*32))
 
   val interface = new Interface(this.name, this)
 
@@ -109,18 +113,25 @@ dataOut        := internalSignal plus bias
 
   val dataOutDelay    = seq(dataOut.newSignal(name = "outLine"),REG)(numberOfNeurons)
   val firstD          = Seq.tabulate(2)(x => signal(first.newSignal(name = s"first$x",REG)))
+  val errorD          = register(errorMode)(1)
+  val tapInD          = register(tapIn)(1)
 
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
-  tapLat !:= tapIn $at(clk.createEnable(errorFirst))
-  //val a = valid := valid ? valid :: valid
+  for (i <- 0 until numberOfNeurons) {
+    tapConv.s(i).sgn := ~tapIn.s(i).sgn
+    tapConv.s(i).exp :=  tapIn.s(i).exp - 5 // FIXME : Programmable Gain
+    tapConv.s(i).man :=  tapIn.s(i).man
+  }
+  tapLat !:= tapConv $at(clk.createEnable(errorFirst))
+  tapSel !:= errorMode ? tapLat :: tapIn
+
   /- ("Delay the Input Valid")
   Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
 
   /- ("Select the inputs to the Neuron\n")
   for (i <- 0 until depth) {
-    //val biasInput = if (i == depth-1) biasIn(0) else biasInputDelay(depth-2-i)
-    neuronAccumIn(i) !:= firstD(0) ? 0 :: neuronOut(i)
+    neuronAccumIn(i) !:= errorD(1) ? tapInD :: ((firstD(0)) ? 0 :: neuronOut(i))
   }
 
   /- ("Create the output Delay Line\n")
@@ -130,13 +141,12 @@ dataOut        := internalSignal plus bias
 
 
   val neuronInput = biasIn.map(x => signal(x.newSignal(name = x.appendName("_input"),opType=OpType.Logic)))
-  //List.tabulate(numberOfNeurons)(x => neuronInput(x) := valid ? biasIn(x) :: dataOut(x))
 
   val neuronEntity = neuron.createEntity
   for (i <- 0 until numberOfNeurons) {
     val connection = Map(
       neuron.segment.dataIn  -> dataIn(0),
-      neuron.segment.taps    -> tapIn.s(i),
+      neuron.segment.taps    -> tapSel.s(i),
       neuron.segment.bias    -> neuronAccumIn(i),
       neuron.segment.dataOut -> neuronOut(i)
     )
@@ -154,6 +164,11 @@ dataOut        := internalSignal plus bias
   val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut)
   instance(nonlinearity.createEntity,s"sigmoid",connect)
 
+  /- ("Assign the tap outputs")
+  for (i <- 0 until depth) {
+    val sl = (32*(i+1)-1,32*i)
+    fullOut(sl) := neuronOut(i)
+  }
 
 }
 

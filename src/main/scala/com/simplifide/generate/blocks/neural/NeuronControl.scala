@@ -2,13 +2,15 @@ package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.operator.Operators
-import com.simplifide.generate.blocks.neural.NeuronControl.{DataFifo, ErrorFifo}
+import com.simplifide.generate.blocks.neural.NeuronControl.DataFifo.{DataToOutput, ErrorToData, ErrorToOutput}
+import com.simplifide.generate.blocks.neural.NeuronControl.DataFifo.ErrorToData.{errorUpdateFirst, errorUpdateMode}
+import com.simplifide.generate.blocks.neural.NeuronControl.{DataFifo, ErrorFifo, OutputCtrl}
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.Connection
 import com.simplifide.generate.signal.OpType.Logic
-import com.simplifide.generate.signal.SignalTrait
-import com.simplifide.generate.signal.sv.ReadyValid
+import com.simplifide.generate.signal.{FixedType, OpType, SignalTrait, sv}
+import com.simplifide.generate.signal.sv.{ReadyValid, SignalInterface}
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 
 /**
@@ -25,15 +27,11 @@ case class NeuronControl[T](override val name:String,
   val dataIn = interface.inRdy
   val tapIn  = interface.tapRdy
   val errorIn = interface.errorRdy
-  val dataOut = interface.outRdy
-  val dataOutPre = interface.outPreRdy
 
   signal(clk.allSignals(INPUT))
   signal(dataIn.signals)
   signal(tapIn.signals)
   signal(errorIn.signals)
-  signal(dataOut.reverse)
-  signal(dataOutPre.reverse)
 
   signal(parent.memory.dataBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
@@ -42,135 +40,129 @@ case class NeuronControl[T](override val name:String,
 
   // Datalength of this stage - used to count both input and output
   val dataLength       = signal("load_length",INPUT,U(info.dataSingleWidth,0))
-  // Depth of the FIFO programmable register
   val loadDepth        = signal("load_depth",INPUT,U(info.dataFillWidth,0))
-
-  val stateLength   = signal("state_length",INPUT,U(info.stateWidth,0))
-
-
-
+  val stateLength      = signal("state_length",INPUT,U(info.stateWidth,0))
 
   // Create the Data Input FIFO
   val params = DataFifo.Params(info.dataLength,info.dataFill, info.stateLength,info.tapAddressLength, info.errorFill)
-  val dataFifo = new DataFifo(appendName("data_fifo"),params,this,dataIn)
+  val dataToOutput = new DataToOutput(params)
+  val errorToOutput = new ErrorToOutput(params)
+
+  val dataFifo = new DataFifo(appendName("data_fifo"),params,this,dataToOutput,dataIn)
   val con1 = Map(dataFifo.loadLength -> this.dataLength, dataFifo.loadDepth -> this.loadDepth)
   instance(dataFifo.createEntity,dataFifo.name,con1)
-  val activeNormal        = signal("active_normal",WIRE)
-  val activePre           = signal("active_pre",WIRE)
-  val active              = signal("active",WIRE)
-  val activeStart         = signal("active_start",WIRE)
-  val activeStartD        = signal("active_start_d",WIRE)
-  val dataWriteAdd        = signal("data_write_addr",WIRE,U(params.inputWidth1 + params.inputWidth2))
-  val dataReadAdd         = signal("data_read_addr",WIRE,U(params.inputWidth1 + params.inputWidth2))
-  val dataReady           = signal("data_ready",WIRE)
-  val tapAddress          = signal("tap_address",  WIRE,U(params.inputWidth1 + params.stateWidth))
-  val stateFinish         = signal("state_finish",WIRE)
 
   val errorFifo = new ErrorFifo(appendName("error_fifo"),params,this,errorIn)
   instance(errorFifo.createEntity,errorFifo.name)
 
+  val outputEntity = new OutputCtrl(appendName("out_ctrl"),info,this,dataToOutput,errorToOutput)
+  instance(outputEntity.createEntity,outputEntity.name)
 
-  /- ("Data Input Memory Control")
-  dataIn.rdy     := dataReady//(fifoInputDepth <= loadDepth)
-  val dataMem = parent.memory.dataBank.input
-  dataMem.wrData         := dataIn.value.exp
-  dataMem.ctrl.wrAddress := dataWriteAdd; //Operators.Concat(loadDataWrite,loadInputCount)
-  dataMem.ctrl.wrVld     := dataIn.rdy & dataIn.vld
-
-  /- ("Data Output Memory Control")
-  dataMem.ctrl.rdAddress := dataReadAdd; //Operators.Concat(readDataDepth, readDataAddress)
-  dataMem.ctrl.rdVld     := activeNormal
-
-  /- ("Tap Output Memory Control")
-  val tapMem = parent.memory.tapBank.input
-  tapMem.ctrl.rdAddress  := tapAddress //;this.errorUpdateFirst ? (info.tapAddressLength + errorPhaseRead) :: tapAddress
-  tapMem.ctrl.rdVld      := activeNormal
-
-  /- ("Bias Output Memory Control")
-  // FIXME : Move to subblock
-  //biasStart    := loadFinish & (stateAddress === 0)
-  //biasEnable   := (readDataAddress <= biasLength) & (readDataAddress > 0)
-  //biasAddress  := $iff (biasStart) $then 0 $else_if (biasEnable) $then biasAddress + 1 $at clk
-  //val biasMem = parent.memory.biasBank.input
-  //biasMem.ctrl.rdAddress := biasAddress
-  //biasMem.ctrl.rdVld     := biasEnable
-
-
-  /- ("Tap Input Memmory Control") // Fixme : Needs own module
-  //val errorCount       = signal("error_count",REG,U(info.tapDimension._2,0))
-  //val errorFinishCount = signal("error_finish_count",REG,U(info.tapDimension._2,0))
-
-  //val errorFinish = signal("error_finish",WIRE)
-  //val errorFinishTap = signal("error_finish_tap",WIRE)
-
-  //val errorPhase      = signal("error_phase",REG,U(info.errorFillWidth,0))
-  //val errorPhaseCount = signal("error_phase_count",REG,U(info.errorFillWidth,0))
-  //val errorPhaseRead  = signal("error_phase_read",REG,U(info.errorFillWidth,0))
-
-  //val errorDepth = signal("error_depth",REG,U(info.errorFillWidth,0))
+  // FIXME : I'm not sure why this is here but it is required
   val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
-  //val errorUpdateMode       = signal("error_update_mode",WIRE)
-  //val errorUpdateLatch       = signal("error_update_latch",REG)
-  //val errorUpdateFirst       = signal("error_update_first",WIRE)
-
-  //errorCount := (errorCount + 1).$at(clk.createEnable(errorIn.vld))
-  errorIn.rdy                 := 1
-  this.tapMem.ctrl.wrAddress  := info.tapAddressLength //+ errorPhase
-  this.tapMem.ctrl.wrVld      := errorIn.vld & errorIn.rdy
-  this.tapMem.ctrl.subVld     := errorIn.vld & errorIn.rdy
-  this.tapMem.ctrl.subAddress := 0//errorCount
-  this.tapMem.ctrl.subData    := errorIn.value.value
 
 
 
-
-  /- ("Output Driving Control")
-  parent.stage.first       := activeStartD
-  parent.stage.dataIn(0)   := parent.memory.dataBank.input.rdData
-  parent.stage.biasIn(0)   := parent.memory.biasBank.input.rdData
-  for (i <- 0 until info.numberNeurons) {
-    val index = ((i+1)*info.memoryWidth-1,info.memoryWidth*i)
-    parent.stage.tapIn.s(i)  := parent.memory.tapBank.input.rdData(index)
-  }
-  /- ("Final Output Control")
-  dataOut.value.signals(0)    := parent.stage.dataOut
-  dataOut.vld                 := active
-
-  dataOutPre.value.signals(0) := parent.stage.dataOutPre
-  dataOutPre.vld              := activePre
-
-/*
-  errorFinish  := (errorCount === dataLength)
-  errorFinishTap  := (errorFinishCount === tapErrorLength)
-
-
-  /- ("Error Address")
-  errorCount            := ($iff(errorFinish)    $then 0 $else (errorCount + 1)).$at(clk.createEnable(errorIn.vld))
-  errorFinishCount      := ($iff(errorFinishTap) $then 0 $else (errorFinishCount + 1)).$at(clk.createEnable(errorIn.vld))
-  errorUpdateMode       := errorPhaseCount > 0
-
-  /- ("Error Input Operations")
-  errorPhase      := ($iff (errorPhase === (info.errorFill-1)) $then (errorPhase ::= 0) $else (errorPhase +1)).$at(clk.createEnable(errorFinish))
-  errorPhaseCount := ($iff (errorPhaseCount === (info.errorFill-1)) $then (errorPhaseCount ::= 0) $else (errorPhaseCount +1)).$at(clk.createEnable(errorFinishTap))
-  errorUpdateMode       := errorPhaseCount > 0
-  //errorUpdateLatch      := errorUpdateMode.$at(clk.createEnable(stateDone))
-  //errorUpdateFirst      := (errorUpdateMode & stateDone).$at(clk)
-
-  // FIXME : Created def at (clk,delay)
-  // FIXME : Create Tuple Input for Flop Delay
-  /- ("Error Mode Driving Controls")
-  val dul = signal("dul",REG)
-  val duf = signal("duf",REG)
-  dul := errorUpdateLatch $at clk
-  duf := errorUpdateFirst $at clk
-  parent.stage.errorMode   := dul $at (clk)
-  parent.stage.errorFirst  := duf $at (clk)
-  */
 
 }
 
 object NeuronControl {
   case class Dimension(dataAddWidth:Int, stateAddWidth:Int, biasAddWidth:Int, dataNumber:Int)
+
+  case class OutputCtrl(override val name:String,
+                        info:NeuralStageInfo,
+                        //params:DataFifo.Params,
+                        parent:NeuronControl[_],
+                        dataToOutput:DataToOutput,
+                        errorToOutput:ErrorToOutput)(implicit clk:ClockControl) extends EntityParser {
+
+    import com.simplifide.generate.newparser.typ.SegmentParser._
+
+    signal(clk.allSignals(INPUT))
+    signal(parent.parent.stage.dataOut.asInput)
+    signal(parent.parent.stage.dataOutPre.asInput)
+    signal(parent.parent.stage.fullOut.asInput)
+
+    signal(dataToOutput.signals)
+    signal(errorToOutput.signals)
+
+    signal(parent.interface.outRdy.reverse)
+    signal(parent.interface.outPreRdy.reverse)
+    signal(parent.parent.stage.interface.reverse)
+
+
+    signal(parent.parent.memory.dataBank.input.reverse) // Connect this to the data port of the memory
+    signal(parent.parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
+    signal(parent.parent.memory.biasBank.input.reverse) // Connect this to the data port of the memory
+
+    val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
+
+
+    /- ("Data Input Memory Control")
+    //dataIn.rdy     := dataReady//(fifoInputDepth <= loadDepth)
+    val dataMem = parent.parent.memory.dataBank.input
+    dataMem.wrData         := dataToOutput.dataValue // dataIn.value.exp
+    dataMem.ctrl.wrAddress := dataToOutput.dataWriteAdd //Operators.Concat(loadDataWrite,loadInputCount)
+    dataMem.ctrl.wrVld     := dataToOutput.dataValid //dataIn.rdy & dataIn.vld
+
+    /- ("Data Output Memory Control")
+    dataMem.ctrl.rdAddress := dataToOutput.dataReadAdd; //Operators.Concat(readDataDepth, readDataAddress)
+    dataMem.ctrl.rdVld     := dataToOutput.activeNormal
+
+    /- ("Tap Output Memory Control")
+    val tapMem = parent.parent.memory.tapBank.input
+    tapMem.ctrl.rdAddress  :=  errorUpdateFirst ? (info.tapAddressLength + errorToOutput.errorPhaseRead) :: dataToOutput.tapAddress
+    tapMem.ctrl.rdVld      := dataToOutput.activeNormal
+
+    /- ("Tap Input Update Control")
+    val rdAddressWire     = signal("rd_address_wire",WIRE,U(info.tapAddressWidth)) !-> tapMem.ctrl.rdAddress
+    val rdAddressDelay    = register(rdAddressWire)(4)
+    val rdAddressVldDelay = register(errorUpdateFirst)(6)
+
+
+
+    /- ("Tap Input Memmory Control") // Fixme : Needs own module
+
+    this.tapMem.ctrl.wrAddress  := rdAddressVldDelay(5) ? rdAddressDelay(4) :: info.tapAddressLength + errorToOutput.errorPhase
+    this.tapMem.ctrl.wrVld      := rdAddressVldDelay(5) | errorToOutput.errorValid
+    
+    this.tapMem.ctrl.subVld     := rdAddressVldDelay(5) ? 0 :: errorToOutput.errorValid
+    this.tapMem.ctrl.subAddress := errorToOutput.errorCount
+    this.tapMem.ctrl.subData    := errorToOutput.errorValue
+
+
+
+
+    /- ("Output Driving Control")
+    parent.parent.stage.first       := dataToOutput.activeStartD
+    parent.parent.stage.dataIn(0)   := parent.parent.memory.dataBank.input.rdData
+    parent.parent.stage.biasIn(0)   := parent.parent.memory.biasBank.input.rdData
+    for (i <- 0 until info.numberNeurons) {
+      val index = ((i+1)*info.memoryWidth-1,info.memoryWidth*i)
+      parent.parent.stage.tapIn.s(i)  := parent.parent.memory.tapBank.input.rdData(index)
+    }
+
+    /- ("Final Output Control")
+    val dataOut = parent.interface.outRdy
+    dataOut.value.signals(0)    := parent.parent.stage.dataOut
+    dataOut.vld                 := dataToOutput.active
+
+    val dataOutPre = parent.interface.outPreRdy
+    dataOutPre.value.signals(0) := parent.parent.stage.dataOutPre
+    dataOutPre.vld              := dataToOutput.activePre
+
+    /- ("Bias Output Memory Control")
+    // FIXME : Move to subblock
+    //biasStart    := loadFinish & (stateAddress === 0)
+    //biasEnable   := (readDataAddress <= biasLength) & (readDataAddress > 0)
+    //biasAddress  := $iff (biasStart) $then 0 $else_if (biasEnable) $then biasAddress + 1 $at clk
+    //val biasMem = parent.memory.biasBank.input
+    //biasMem.ctrl.rdAddress := biasAddress
+    //biasMem.ctrl.rdVld     := biasEnable
+
+
+  }
+
 
   case class ErrorFifo(override val name:String,
                        params:DataFifo.Params,
@@ -179,27 +171,38 @@ object NeuronControl {
 
     signal(clk.allSignals(INPUT))
     signal(input.signals)
+    signal(ErrorToData.reverse)
+    signal(parent.errorToOutput.reverse)
+
+    signal(parent.parent.stage.errorMode.changeType(OUTPUT))
+    signal(parent.parent.stage.errorFirst.changeType(OUTPUT))
+
+
+    val errorUpdateMode       = ErrorToData.errorUpdateMode
+
+
     val loadLength       = signal("load_length",INPUT,U(params.inputWidth1))
-    val stateFinish         = signal("state_finish",INPUT)
 
 
     /- ("Tap Input Memmory Control") // Fixme : Needs own module
-    val errorCount       = signal("error_count",REG,U(params.tapWidth,0))
+    val errorCount       = parent.errorToOutput.errorCount //signal("error_count",REG,U(params.tapWidth,0))
     val errorFinish = signal("error_finish",WIRE)
 
     val errorFinishCount = signal("error_finish_count",REG,U(params.tapWidth,0))
     val errorFinishTap = signal("error_finish_tap",WIRE)
 
-    val errorPhase      = signal("error_phase",REG,U(params.errorWidth))
+    val errorPhase      = parent.errorToOutput.errorPhase  //signal("error_phase",REG,U(params.errorWidth))
     val errorPhaseCount = signal("error_phase_count",REG,U(params.errorWidth,0))
-    val errorPhaseRead  = signal("error_phase_read",REG,U(params.errorWidth,0))
+    val errorPhaseRead  = parent.errorToOutput.errorPhaseRead //signal("error_phase_read",REG,U(params.errorWidth,0))
 
     val errorDepth = signal("error_depth",REG,U(params.errorWidth,0))
     val tapErrorLength        = signal("error_tap_length",INPUT,U(params.tapWidth,0))
-    val errorUpdateMode       = signal("error_update_mode",WIRE)
     val errorUpdateLatch       = register("error_update_latch",REG)(2)
-    val errorUpdateFirst       = register("error_update_first",WIRE)(2)
+    val errorUpdateFirst       = register("error_update_first_internal",WIRE)(2)
 
+
+    // Always enable the ready for error signal (temporary)
+    input.rdy := 1
 
     /- ("Finish Conditions")
     errorFinish  := (errorCount === loadLength)
@@ -215,20 +218,21 @@ object NeuronControl {
     errorPhaseCount := ($iff (errorPhaseCount === (params.errorLength-1)) $then (errorPhaseCount ::= 0) $else (errorPhaseCount +1)).$at(clk.createEnable(errorFinishTap))
     errorUpdateMode       := errorPhaseCount > 0
 
-    errorUpdateLatch(0)      := errorUpdateMode.$at(clk.createEnable(stateFinish))
-    errorUpdateFirst(0)      := (errorUpdateMode & stateFinish).$at(clk)
+    errorPhaseRead      := ($iff (errorPhaseRead === (params.errorLength-1)) $then 0 $else (errorPhaseRead +1)).$at(clk.createEnable(ErrorToData.errorUpdateFirst))
+
+    errorUpdateLatch(0)      := errorUpdateMode.$at(clk.createEnable(ErrorToData.stateFinish))
+    errorUpdateFirst(0)      := (errorUpdateMode & ErrorToData.readFinish).$at(clk)
+
+    ErrorToData.errorUpdateFirst  := errorUpdateFirst(0) & errorUpdateLatch(0)
+    parent.errorToOutput.errorValue := input.value.exp
+    parent.errorToOutput.errorValid := input.vld & input.rdy
 
     // FIXME : Created def at (clk,delay)
     // FIXME : Create Tuple Input for Flop Delay
     /- ("Error Mode Driving Controls")
-    /*
-    val dul = signal("dul",REG)
-    val duf = signal("duf",REG)
-    dul := errorUpdateLatch $at clk
-    duf := errorUpdateFirst $at clk
-    parent.parent.stage.errorMode   := dul $at (clk)
-    parent.parent.stage.errorFirst  := duf $at (clk)
-*/
+    parent.parent.stage.errorMode   := errorUpdateLatch(2)
+    parent.parent.stage.errorFirst  := errorUpdateFirst(2) & errorUpdateLatch(2)
+
 
 
   }
@@ -236,32 +240,34 @@ object NeuronControl {
   case class DataFifo(override val name:String,
                       params:DataFifo.Params,
                       parent:NeuronControl[_],
+                      dataToOutput: DataToOutput,
                       input:ReadyValidInterface[_])(implicit clk:ClockControl) extends EntityParser {
 
     import com.simplifide.generate.newparser.typ.SegmentParser._
 
     signal(clk.allSignals(INPUT))
     signal(input.signals)
+    signal(ErrorToData.signals)
+    signal(dataToOutput.reverse)
+
     // Depth of the FIFO programmable register
     val loadLength       = signal("load_length",INPUT,U(params.inputWidth1))
     val loadDepth        = signal("load_depth", INPUT,U(params.inputWidth2))
     val stateLength      = signal("state_length",INPUT,U(params.stateWidth))
 
-    val activeNormal     = signal("active_normal",OUTPUT)
-    val activePre        = signal("active_pre",OUTPUT)
-    val active           = signal("active",OUTPUT)
-    val activeStart      = signal("active_start",OUTPUT)
-    val activeStartD     = signal("active_start_d",OUTPUT)
-    val dataWriteAdd     = signal("data_write_addr",OUTPUT,U(params.inputWidth1 + params.inputWidth2))
-    val dataReadAdd      = signal("data_read_addr",OUTPUT,U(params.inputWidth1 + params.inputWidth2))
     val loadFinish       = signal("load_finish",OUTPUT)
     val dataReady        = signal("data_ready",OUTPUT)
-    val tapAddress       = signal("tap_address",  OUTPUT,U(params.inputWidth1 + params.stateWidth))
     val stateFinish      = signal("state_finish",OUTPUT)
+
+
+    /- ("Ready Valid Input Interface")
+    input.rdy     := dataReady
 
     // Control Parameters for loading the input data and counting
 
     val readDepthCount  = signal("read_depth_count",  REG,U(params.inputWidth2))
+    val readErrorCount  = signal("read_error_count",  REG,U(params.inputWidth2))
+
     //val tapAddress         = signal("tap_address",  REG,U(params.inputWidth1 + params.stateWidth))
 
     // Control signals for the inputs to this block.
@@ -292,33 +298,49 @@ object NeuronControl {
     val readStateCount  = signal("read_state_count",  WIRE,U(params.stateWidth))
 
     /- ("Internal Counter for which state the operation is in")
-    val readFinish       = signal("read_finish",  WIRE, U(1)) !-> (readWidthCount == loadLength)
+    val readFinish       = signal("read_finish",  OUTPUT, U(1)) !-> (readWidthCount == loadLength)
     stateFinish          := (readStateCount === stateLength) & (readFinish)
     val data_start       = register("data_start",WIRE)(3)
     val data_active      = register("data_active",WIRE)(params.inputLength1 + 6)
-    data_start(0)        := (readFinish | loadInputDone) & (fifoInputDepth >= 0)
-    data_active(0)       := (fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty)
+    val outputValid      = register("output_valid",WIRE)(params.inputLength1 + 6)
 
-    val updateCounter    = signal("update_counter",WIRE) !-> (data_active | data_active(params.inputLength1))
+    data_start(0)        := (readFinish | loadInputDone) & (fifoInputDepth >= 0)
+
+    // Data Active is either data is ready or error data is ready
+    data_active(0)       := (fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty) | ErrorToData.errorUpdateMode
+    outputValid(0)       := (fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty)
+
+
+    val full_active      = (data_active | data_active(params.inputLength1))
+
+    val updateCounter    = signal("update_counter",WIRE) !-> full_active & (~ErrorToData.errorUpdateFirst | outputValid(0))
 
     readWidthCount   := $iff (data_start | readFinish) $then 0 $else_if (updateCounter) $then readWidthCount + 1 $at clk
     readStateCount   := $iff (readFinish) $then readStateCount + 1 $at clk
-    readDepthCount   := $iff (stateFinish) $then readDepthCount + 1 $at clk
-    tapAddress       := $iff (stateFinish) $then 0 $else_if (updateCounter) $then (tapAddress + 1) $at clk
+    readDepthCount   := $iff (stateFinish & outputValid(0)) $then readDepthCount + 1 $at clk
+    readErrorCount   := $iff (stateFinish & ~outputValid(0)) $then readErrorCount + 1 $at clk
+
+    dataToOutput.tapAddress       := $iff (stateFinish) $then 0 $else_if (updateCounter) $then (dataToOutput.tapAddress + 1) $at clk
 
     /-("Data Memory Interface and Input Control")
 
     // Convenient Output Declarations
-    activeStart  := data_start
-    activeStartD := data_start(3)
-    activePre    := data_active(params.inputLength1+4)
-    active       := data_active(params.inputLength1+6)
-    activeNormal := (data_active | data_active(params.inputLength1))
+    dataToOutput.activeStart  := data_start
+    dataToOutput.activeStartD := data_start(3)
+    dataToOutput.activePre    := outputValid(params.inputLength1+4)
+    dataToOutput.active       := outputValid(params.inputLength1+6)
+    dataToOutput.activeNormal := (data_active | data_active(params.inputLength1))
 
-    dataWriteAdd := Operators.Concat(loadDepthCount,loadWidthCount)
-    dataReadAdd := Operators.Concat(readDepthCount,readWidthCount)
+    dataToOutput.dataWriteAdd := Operators.Concat(loadDepthCount,loadWidthCount)
+    dataToOutput.dataReadAdd  :=
+      (errorUpdateMode & ~outputValid(0)) ? Operators.Concat(readErrorCount,readWidthCount) :: Operators.Concat(readDepthCount,readWidthCount)
+
     loadFinish  := readFinish
     dataReady   := (fifoInputDepth <= loadDepth)
+
+    /- ("Data Memory Interface")
+    dataToOutput.dataValid := input.rdy & input.vld
+    dataToOutput.dataValue := input.value.signals(0)
 
   }
 
@@ -337,13 +359,68 @@ object NeuronControl {
                       val stateLength:Int,
                      val tapLength:Int,
                      val errorLength:Int) {
+
       val inputWidth1 = logWidth(inputLength1)
       val inputWidth2 = logWidth(inputLength2)
       val stateWidth  = logWidth(stateLength)
       val errorWidth  = logWidth(errorLength)
       val tapWidth  = logWidth(tapLength)
 
+      val dataWidth:Int = 32
+
     }
+
+    case class ErrorToOutput(params:DataFifo.Params) extends SignalInterface{
+      override val name = "error_to_data"
+
+      val errorCount          = SignalTrait("error_count",OpType.RegOutput,FixedType.unsigned(params.tapWidth,0))
+      val errorValid          = SignalTrait("error_valid")
+      val errorValue          = SignalTrait("error_value",OpType.Input,FixedType.unsigned(params.dataWidth,0))
+      val errorPhase          = SignalTrait("error_phase",OpType.RegOutput,FixedType.unsigned(params.dataWidth,0))
+      val errorPhaseRead      = SignalTrait("error_phase_read",OpType.RegOutput,FixedType.unsigned(params.errorWidth,0))
+
+      override val inputs = List(errorCount, errorValid, errorValue, errorPhase, errorPhaseRead,ErrorToData.errorUpdateFirst)
+    }
+
+    case object ErrorToData extends SignalInterface{
+      override val name = "error_to_data"
+      val errorUpdateMode       = SignalTrait("error_update_mode",OpType.Input)
+      val errorUpdateLatch      = SignalTrait("error_update_latch",OpType.Input)
+      val errorUpdateFirst       = SignalTrait("error_update_first",OpType.Input)
+      val stateFinish         = SignalTrait("state_finish",OpType.Output)
+      val readFinish         = SignalTrait("read_finish",OpType.Output)
+
+
+      override val inputs = List(errorUpdateMode, errorUpdateFirst)
+      override val outputs = List(stateFinish, readFinish)
+
+    }
+
+    case class DataToOutput(params:DataFifo.Params) extends SignalInterface {
+      override val name = "data_to_output"
+
+      def U(value: Int) = FixedType.unsigned(value, 0)
+
+      val activeNormal = SignalTrait("active_normal", OpType.Input)
+      val activePre = SignalTrait("active_pre", OpType.Input)
+      val active = SignalTrait("active", OpType.Input)
+      val activeStart = SignalTrait("active_start", OpType.Input)
+      val activeStartD = SignalTrait("active_start_d", OpType.Input)
+      val dataWriteAdd = SignalTrait("data_write_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2))
+      val dataReadAdd = SignalTrait("data_read_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2))
+      val loadFinish = SignalTrait("load_finish", OpType.Input)
+      val dataReady = SignalTrait("data_ready", OpType.Input)
+      val tapAddress = SignalTrait("tap_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
+      val stateFinish = SignalTrait("state_finish", OpType.Input)
+      val readFinish  = SignalTrait("read_finish",  OpType.Input, U(1))
+      val dataValid   = SignalTrait("data_valid")
+      val dataValue   = SignalTrait("data_value",OpType.Input,U(params.dataWidth))
+
+      override val inputs = List(activePre, active, activeNormal, dataValue, dataValid, dataWriteAdd,dataReadAdd,tapAddress,
+        activeStartD, readFinish)
+
+    }
+
   }
 
 

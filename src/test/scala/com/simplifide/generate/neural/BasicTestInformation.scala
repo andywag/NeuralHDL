@@ -21,7 +21,17 @@ object BasicTestInformation {
     numberNeurons,errorFill,outputFill,dataLocation)
 
   val trainingData =
+    """1 0 0 0 0 0 1 0 0 0 0 0
+0 1 0 0 0 0 0 1 0 0 0 0
+0 0 1 0 0 0 0 0 1 0 0 0
+1 0 1 0 0 0 0 0 0 1 0
+1 0 1 0 1 1 0 0 0 1 1"""
+
+  /*
+  val trainingData =
     """1 0 0 0 0 0 0 0 0 0 1
+0 1 0 0 0 0 0 0 0 1 0
+0 0 1 0 0 0 0 0 1 0 0
 1 0 1 0 0 0 0 0 0 1 0
 1 0 1 0 1 1 0 0 0 1 1
 1 1 1 1 0 0 0 0 1 0 0
@@ -45,6 +55,7 @@ object BasicTestInformation {
 1 1 0 0 0 0 1 1 0 1 1
 1 0 0 0 0 1 1 1 1 0 0
 1 1 1 1 0 1 1 1 1 0 1"""
+*/
 
   val trainArray = {
     def hl(input:String) = {
