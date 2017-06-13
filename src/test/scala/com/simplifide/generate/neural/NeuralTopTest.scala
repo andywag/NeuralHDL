@@ -1,7 +1,7 @@
 package com.simplifide.generate.neural
 
 import com.simplifide.generate.blocks.neural
-import com.simplifide.generate.blocks.neural.{NeuralStageInfo, NeuralStageTop, NeuronControl}
+import com.simplifide.generate.blocks.neural.{NeuralStageInfo, NeuralStageTop}
 import com.simplifide.generate.model.DataFileGenerator
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.NewEntity

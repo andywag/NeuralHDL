@@ -1,6 +1,7 @@
-package com.simplifide.generate.blocks.neural
+package com.simplifide.generate.blocks.neural.simple
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.neural.{NeuralError, NeuralStageInfo, NeuralStageInterface, NeuralStageTop}
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.FloatSignal
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
@@ -26,11 +27,13 @@ class NeuralNetwork[T](val name:String,
   outInternalRdy.vld !:= interface.outRdy.vld
   outInternalRdy.value.value !:= interface.outRdy.value.value
 
+  val ctrlRdy   = new ReadyValidInterface(FloatSignal("zctrl",INPUT))
 
   val stage = new NeuralStageTop(appendName("st1"),info,interface)
   instance(stage)
 
-  val error = new NeuralError(appendName("err"),info, expected,outInternalRdy,stage.interface.errorRdy)
+  val error = new NeuralError(appendName("err"),info, expected,outInternalRdy,ctrlRdy,stage.interface.errorRdy)
   instance(error)
+
 
 }

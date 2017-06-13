@@ -1,10 +1,11 @@
 package com.simplifide.generate.blocks.basic.misc
 
-import com.simplifide.generate.blocks.basic.flop.{SimpleFlop,  ClockControl}
+import com.simplifide.generate.blocks.basic.flop.{ClockControl, SimpleFlop}
 import com.simplifide.generate.blocks.basic.operator.BinaryOperator
-import com.simplifide.generate.generator.{SimpleSegment, SegmentReturn, CodeWriter}
+import com.simplifide.generate.generator.{CodeWriter, ComplexSegment, SegmentReturn, SimpleSegment}
 import com.simplifide.generate.blocks.basic.Statement
-import com.simplifide.generate.signal.{NewConstant, Constant, SignalTrait}
+import com.simplifide.generate.parser.model.Expression
+import com.simplifide.generate.signal.{Constant, NewConstant, SignalTrait}
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,5 +29,24 @@ class Counter(val counter:SignalTrait)(implicit clk:ClockControl) extends Simple
 }
 
 object Counter {
+
+  case class Simple(val signal:SignalTrait, val reset:Option[Expression], enable:Option[Expression])(implicit clk:ClockControl) extends ComplexSegment {
+    /** Defines the body in the block */
+    override def createBody: Unit = {}
+
+    val op = reset match {
+      case Some(x) => $iff (x) $then 0 $else (signal + 1)
+      case _       => signal + 1
+    }
+    val cl = enable.map(clk.createEnable(_)).getOrElse(clk)
+    signal := op.$at(cl)
+
+    def end = reset.getOrElse(Constant(1.0))
+
+  }
+
+  def Length(signal:SignalTrait, length:Expression, enable:Option[Expression]=None)(implicit clk:ClockControl) = {
+    new Simple(signal,Some(signal === length),enable)
+  }
 
 }

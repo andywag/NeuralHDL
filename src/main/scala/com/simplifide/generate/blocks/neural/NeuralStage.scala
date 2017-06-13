@@ -40,7 +40,9 @@ case class NeuralStage(override val name:String,
   val dataOutBias  = signal(FloatSignal(appendName("data_out_bias"),OUTPUT))
   val dataOut      = signal(FloatSignal(appendName("data_out"),OUTPUT))
 
-  val fullOut      = signal(appendName("tap_out"),OUTPUT,U(numberOfNeurons*32))
+  val fullOut1      = signal(appendName("tap_out_int"),WIRE,U(numberOfNeurons*32))
+  val fullOut      = signal(appendName("tap_out"),REGOUT,U(numberOfNeurons*32))
+
 
   val interface = new Interface(this.name, this)
 
@@ -119,8 +121,8 @@ dataOut        := internalSignal plus bias
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
   for (i <- 0 until numberOfNeurons) {
-    tapConv.s(i).sgn := ~tapIn.s(i).sgn
-    tapConv.s(i).exp :=  tapIn.s(i).exp - 5 // FIXME : Programmable Gain
+    tapConv.s(i).sgn :=  tapIn.s(i).sgn
+    tapConv.s(i).exp :=  tapIn.s(i).exp - 3 // FIXME : Programmable Gain
     tapConv.s(i).man :=  tapIn.s(i).man
   }
   tapLat !:= tapConv $at(clk.createEnable(errorFirst))
@@ -131,7 +133,7 @@ dataOut        := internalSignal plus bias
 
   /- ("Select the inputs to the Neuron\n")
   for (i <- 0 until depth) {
-    neuronAccumIn(i) !:= errorD(1) ? tapInD :: ((firstD(0)) ? 0 :: neuronOut(i))
+    neuronAccumIn(i) !:= errorD(1) ? tapInD(1).s(i) :: ((firstD(0)) ? 0 :: neuronOut(i))
   }
 
   /- ("Create the output Delay Line\n")
@@ -167,8 +169,9 @@ dataOut        := internalSignal plus bias
   /- ("Assign the tap outputs")
   for (i <- 0 until depth) {
     val sl = (32*(i+1)-1,32*i)
-    fullOut(sl) := neuronOut(i)
+    fullOut1(sl) := neuronOut(i)
   }
+  fullOut := fullOut1 $at(clk)
 
 }
 

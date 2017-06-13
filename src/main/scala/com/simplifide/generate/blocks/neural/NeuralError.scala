@@ -1,6 +1,9 @@
 package com.simplifide.generate.blocks.neural
 
+import com.simplifide.generate.blocks.basic.fifo
+import com.simplifide.generate.blocks.basic.fifo.NewRdyVldFifo
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.basic.misc.Counter
 import com.simplifide.generate.blocks.basic.newmemory.{MemoryBank, MemoryStruct}
 import com.simplifide.generate.blocks.neural.NeuralError.Ctrl
 import com.simplifide.generate.parser.EntityParser
@@ -14,22 +17,31 @@ case class NeuralError[T](override val name:String,
                           info:NeuralStageInfo,
                           outputIn:ReadyValidInterface[_],
                           dataIn:ReadyValidInterface[_],
+                          ctrlOut:ReadyValidInterface[_],
                           errorOut:ReadyValidInterface[_]
                            )(implicit clk:ClockControl) extends EntityParser {
 
   override def createBody() {}
 
+  signal(errorOut.rdy) // FIXME : Not sure why this is needed
+
   val outputInt = MemoryStruct("error_int",Array(info.memoryWidth,1),Array(info.tapDimension._2,info.outputFill))
   val outputBank   = MemoryBank(appendName("output_mem"),outputInt, None)
 
+  //val ctrlOut = errorOut
+
   instance(outputBank)
   instance(new Ctrl(appendName("ctrl"),info,this))
+
+  val fifo = new NewRdyVldFifo(appendName("fifo"),ctrlOut,errorOut,8)
+  instance(fifo)
 
 }
 
 object NeuralError {
 
-  case class Ctrl[T](override val name:String, info:NeuralStageInfo, parent:NeuralError[T])
+  case class Ctrl[T](override val name:String,
+                     info:NeuralStageInfo, parent:NeuralError[T])
                     (implicit clk:ClockControl)extends EntityParser {
 
     import com.simplifide.generate.newparser.typ.SegmentParser._
@@ -39,7 +51,7 @@ object NeuralError {
     signal(parent.outputIn.signals)
     signal(parent.dataIn.signals)
 
-    signal(parent.errorOut.reverse)
+    signal(parent.ctrlOut.reverse)
     signal(parent.outputInt.reverse)
 
     val vldDely = register(parent.dataIn.vld)(3)
@@ -49,18 +61,20 @@ object NeuralError {
     parent.dataIn.rdy   := 1
 
     val inCount = signal("input_counter",REG,U(info.outputFifoAddressWidth,0))
-    inCount := (inCount + 1).$at(clk.createEnable(parent.outputInt.ctrl.wrVld))
-    parent.outputInt.ctrl.wrVld     := parent.outputIn.vld
+    ->(Counter.Length(inCount,info.outputFifoDepth-1,Some(parent.outputIn.enable)))
+    //inCount := (inCount + 1).$at(clk.createEnable(parent.outputInt.ctrl.wrVld))
+    parent.outputInt.ctrl.wrVld     := parent.outputIn.enable
     parent.outputInt.ctrl.wrAddress := inCount
     parent.outputInt.wrData         := parent.outputIn.value.signals(0)
 
     val outCount = signal("output_counter",REG,U(info.outputFifoAddressWidth,0))
-    outCount := (outCount + 1).$at(clk.createEnable(parent.dataIn.vld))
+    ->(Counter.Length(outCount,info.outputFifoDepth-1,Some(parent.dataIn.vld)))
+    //outCount := (outCount + 1).$at(clk.createEnable(parent.dataIn.vld))
     parent.outputInt.ctrl.rdVld     := parent.dataIn.vld
     parent.outputInt.ctrl.rdAddress := outCount
 
 
-    parent.errorOut.vld        := vldDely(3)
+    parent.ctrlOut.vld        := vldDely(3)
 
     /- ("Actual Error Calculation")
     val delayIn = register(parent.dataIn.value.signals(0))(2)
@@ -68,7 +82,7 @@ object NeuralError {
     calcIn := parent.outputInt.rdData // FIXME : Bad Hack to force the signal to the right type for the operation
 
     //parent.errorOut.value.signals(0) !:= parent.dataIn.value.signals(0) minus calcIn
-    parent.errorOut.value.signals(0) !:= calcIn minus delayIn(2)
+    parent.ctrlOut.value.signals(0) !:= calcIn minus delayIn(2)
 
   }
 

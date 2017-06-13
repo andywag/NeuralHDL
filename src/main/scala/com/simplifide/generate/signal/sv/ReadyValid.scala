@@ -12,6 +12,7 @@ trait ReadyValid[T] {
   val name:String
   val signals:List[SignalTrait]
   val exp:Expression
+  val signal:SignalTrait = value.asInstanceOf[SignalTrait]
 }
 
 object ReadyValid {
@@ -23,6 +24,8 @@ object ReadyValid {
     val vld     = SignalTrait(appendName("vld"),opType ,FixedType.BIT)
     val fst     = SignalTrait(appendName("fst"),opType ,FixedType.BIT)
     val rdy     = SignalTrait(appendName("rdy"),opType.reverseType ,FixedType.BIT)
+
+    val enable = rdy & vld
 
     override val inputs = vld :: fst :: value.signals
     override val outputs = List(rdy)

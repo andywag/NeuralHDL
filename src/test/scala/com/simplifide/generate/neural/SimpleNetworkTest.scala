@@ -1,7 +1,8 @@
 package com.simplifide.generate.neural
 
 import com.simplifide.generate.blocks.neural
-import com.simplifide.generate.blocks.neural.{NeuralNetwork, NeuralStageTop}
+import com.simplifide.generate.blocks.neural.NeuralStageTop
+import com.simplifide.generate.blocks.neural.simple.NeuralNetwork
 import com.simplifide.generate.model.DataFileGenerator
 import com.simplifide.generate.plot.PlotUtility
 import com.simplifide.generate.project.NewEntity
@@ -21,12 +22,13 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
 
 
   val information = BasicTestInformation.getInformation(dataLocation)
-  override def getTestLength = BasicTestInformation.tapLength*12
+  override def getTestLength = BasicTestInformation.tapLength*12*8
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
 
-  val tapData   = Nd4j.randn(Array(information.tapAddressLength,information.numberNeurons)) //.mul(1/outputLength.toFloat)
+  //val tapData   = Nd4j.randn(Array(information.tapAddressLength,information.numberNeurons)) //.mul(1/outputLength.toFloat)
+  val tapData   = BasicTestInformation.getInitTaps
   val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
   val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
   val cSlices   = nSlices.map(x => x._2.map(_._1))
@@ -51,11 +53,17 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
+  val inRdyCount = signal("in_rdy_count",REG,U(32,0))
+  inRdyCount := ($iff (inRdyCount === 35) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
+
   interface.inRdy.vld := 1
-  interface.inRdy.value.value             <-- (input)
+  interface.inRdy.value.value             <-- (input,Some(inRdyCount))
+
+  val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
+  expRdyCount := ($iff (expRdyCount === 35) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
 
   expectedRdy.vld := (index < expected.data.length()) ? 1 :: 0
-  expectedRdy.value.value                 <-- (expected)
+  expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
 
   val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
@@ -87,7 +95,7 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
     val plot1 = if (plotEnable) Some(s"$docLocation/results") else None
     val plot2 = if (plotEnable) Some(s"$docLocation/resultse") else None
 
-    val error = PlotUtility.plotError(output.data().asDouble(),
+    val error = PlotUtility.plotErrorRepeat(output.data().asDouble(),
       out.data.data().asDouble(),plot1)
     this.checkMaxError(error,.001)
 

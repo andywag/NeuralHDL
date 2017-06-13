@@ -46,12 +46,12 @@ case class MemoryBank(name:String,
     // Slice values for signal
     val slice = (width*(i+1)-1,width*i)
     if (number > 1) {
-      writeArray((i,i)) := (input.ctrl.subAddress === i)
+      writeArray((i,i)) := (input.ctrl.subAddress === i) & input.ctrl.subVld
       wr := writeArray((i,i)) ? input.ctrl.subData :: input.wrData(slice) // Select either the single line or the array
       memCtrl(i).rdAddress := input.ctrl.rdAddress
       memCtrl(i).rdVld     := input.ctrl.rdVld
       memCtrl(i).wrAddress := input.ctrl.wrAddress
-      memCtrl(i).wrVld     := writeArray((i,i))
+      memCtrl(i).wrVld     := writeArray((i,i)) | (input.ctrl.wrVld & ~input.ctrl.subVld)
     }
     else  {
       wr := input.wrData(slice)

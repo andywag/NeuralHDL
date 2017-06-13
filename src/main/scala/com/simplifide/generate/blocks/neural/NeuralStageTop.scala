@@ -1,6 +1,7 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.neural.simple.NeuronControl
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.signal.sv.SignalInterface
@@ -76,6 +77,7 @@ This block contains 3 major subblocks
   val control    = new NeuronControl[T](appendName("ctrl"),info, interface, this)
   instance(control)
 
+  //memory.tapStructW.wrData := stage.fullOut
 
   //this.createNeuronStage
 

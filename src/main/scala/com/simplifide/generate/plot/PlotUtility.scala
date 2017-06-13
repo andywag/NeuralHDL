@@ -67,6 +67,17 @@ object PlotUtility {
 
   }
 
+
+  def plotErrorRepeat(input:Seq[Double], ref:Seq[Double], file:Option[String]=None,
+                delay:Int=0, ignore:Int=0) = {
+
+    val s1 = input.size; val s2 = ref.size
+    val sm = if (s1 > s2) (input.toList, ref.toList) else (ref.toList,input.toList)
+    val range = if (s1 > s2) math.ceil(s1/s2) else math.ceil(s2/s1)
+    val ext = List.tabulate(range.toInt)(x => sm._2).reduceLeft(_ ::: _)
+    plotError(ext,sm._1,file,delay,ignore)
+  }
+
   def plotError(input:Seq[Double], ref:Seq[Double], file:Option[String]=None,
                 delay:Int=0, ignore:Int=0) = {
     val len = math.min(input.length,ref.length)

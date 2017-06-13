@@ -38,6 +38,7 @@ class NeuralErrorTest extends BlockScalaTest with BlockTestParser {
 
   val outputRdy = new ReadyValidInterface(FloatSignal("out",INPUT))
   val dataRdy   = new ReadyValidInterface(FloatSignal("data",INPUT))
+  val ctrlRdy   = new ReadyValidInterface(FloatSignal("zctrl",INPUT))
   val errorRdy  = new ReadyValidInterface(FloatSignal("error_sig",INPUT))
 
   val outputCnt = signal("outputCnt",WIRE,U(32,0))
@@ -54,7 +55,7 @@ class NeuralErrorTest extends BlockScalaTest with BlockTestParser {
   val err = errorRdy.value.signals(0) ---->(s"$dataLocation/rtl_pre",clk.createEnable(errorRdy.vld), None, "Stage Pre Non",8)
 
 
-  override val dutParser = new NeuralError(blockName, information,outputRdy,dataRdy,errorRdy)
+  override val dutParser = new NeuralError(blockName, information,outputRdy,dataRdy,ctrlRdy,errorRdy)
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
