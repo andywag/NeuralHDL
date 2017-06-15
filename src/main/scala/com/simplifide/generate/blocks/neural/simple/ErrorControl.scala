@@ -46,7 +46,7 @@ case class ErrorControl(override val name:String,
   val errorPhaseRead  = parent.errorToOutput.errorPhaseRead //signal("error_phase_read",REG,U(params.errorWidth,0))
 
   val tapErrorLength        = signal("error_tap_length",INPUT,U(params.tapWidth,0))
-  val errorUpdateLatch       = register("error_update_latch",REG)(2)
+  val errorUpdateLatch       = register("error_update_latch",REG)(6)
   val errorUpdateFirst       = register("error_update_first_internal",WIRE)(4)
   val errorUpdateLast        = register("error_update_last_internal",WIRE)(4)
 
@@ -57,7 +57,7 @@ case class ErrorControl(override val name:String,
   rdAddressVld          :=  ErrorControl.errorUpdateLatch & ~ErrorControl.errorUpdateFirst;
   val rdAddressVldDelay = register(rdAddressVld)(6)
   // Always enable the ready for error signal (temporary)
-  input.rdy := ~rdAddressVldDelay(4) & ~errorFifoFull
+  input.rdy := (~rdAddressVldDelay(4) & ~errorFifoFull) & ~errorUpdateLatch(6)
 
   /- ("Finish Conditions")
   errorFinish     := (errorCount === (tapErrorLength))
@@ -68,6 +68,7 @@ case class ErrorControl(override val name:String,
   errorCount            := ($iff(errorFinish)    $then 0 $else (errorCount + 1)).$at(clk.createEnable(input.enable))
   val wrCount = ->(Counter.Length(errorWriteCount,loadLength,Some(input.enable)))
   ->(Counter.Length(errorPhase,params.errorLength-1,Some(wrCount.end)))
+  ->(Counter.Length(parent.errorToOutput.errorSubAddress,loadLength,Some(input.enable)))
 
   /- ("Error Input Operations")
   //errorPhase      := ($iff (errorPhase === (params.errorLength-1)) $then (errorPhase ::= 0) $else (errorPhase +1)).$at(clk.createEnable(errorFinish))
@@ -110,6 +111,7 @@ object ErrorControl {
   case class ErrorToOutput(params:DataControl.Params) extends SignalInterface{
     override val name = "error_to_data"
 
+    val errorSubAddress     = SignalTrait("error_sub_address",OpType.RegOutput,FixedType.unsigned(params.dataWidth,0))
     val errorCount          = SignalTrait("error_count",OpType.RegOutput,FixedType.unsigned(params.tapWidth,0))
     val errorValid          = SignalTrait("error_valid")
     val errorValue          = SignalTrait("error_value",OpType.Input,FixedType.unsigned(params.dataWidth,0))
@@ -117,7 +119,7 @@ object ErrorControl {
     val errorPhaseRead      = SignalTrait("error_phase_read",OpType.RegOutput,FixedType.unsigned(params.errorWidth,0))
 
     override val inputs = List(errorCount, errorValid, errorValue,
-      errorPhase, errorPhaseRead, errorUpdateLatch, errorUpdateFirst)
+      errorPhase, errorPhaseRead, errorUpdateLatch, errorUpdateFirst, errorSubAddress)
   }
 
   case object ErrorToData extends SignalInterface{

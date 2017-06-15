@@ -60,6 +60,7 @@ trait DataGenParser {
 
 
 
+
     def <-- (typ:DataGenParser.TestType)(implicit testLength:Int, parser:TestEntityParser) = {
       val dataSet = signal match {
         case x:FloatSignal => FloatData.randomList(signal,testLength)

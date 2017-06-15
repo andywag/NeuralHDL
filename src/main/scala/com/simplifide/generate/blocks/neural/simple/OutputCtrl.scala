@@ -70,7 +70,7 @@ case class OutputCtrl(override val name:String,
   this.tapMem.ctrl.wrVld      := errorToOutput.errorValid | rdAddressVldDelay(5)
 
   this.tapMem.ctrl.subVld     := rdAddressVldDelay(5) ? 0 :: errorToOutput.errorValid
-  this.tapMem.ctrl.subAddress := errorToOutput.errorCount
+  this.tapMem.ctrl.subAddress := errorToOutput.errorSubAddress
   this.tapMem.ctrl.subData    := errorToOutput.errorValue
   this.tapMem.wrData          := parent.parent.stage.fullOut
 

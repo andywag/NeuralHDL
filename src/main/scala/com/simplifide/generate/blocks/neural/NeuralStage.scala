@@ -122,7 +122,7 @@ dataOut        := internalSignal plus bias
 
   for (i <- 0 until numberOfNeurons) {
     tapConv.s(i).sgn :=  tapIn.s(i).sgn
-    tapConv.s(i).exp :=  tapIn.s(i).exp - 3 // FIXME : Programmable Gain
+    tapConv.s(i).exp :=  tapIn.s(i).exp - 6 // FIXME : Programmable Gain
     tapConv.s(i).man :=  tapIn.s(i).man
   }
   tapLat !:= tapConv $at(clk.createEnable(errorFirst))

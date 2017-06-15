@@ -33,7 +33,7 @@ case class NeuralError[T](override val name:String,
   instance(outputBank)
   instance(new Ctrl(appendName("ctrl"),info,this))
 
-  val fifo = new NewRdyVldFifo(appendName("fifo"),ctrlOut,errorOut,8)
+  val fifo = new NewRdyVldFifo(appendName("fifo"),ctrlOut,errorOut,16)
   instance(fifo)
 
 }

@@ -128,7 +128,9 @@ The code used to generate this code is relatively complex
 
     intOut.sgn := 0
 
-    dataOut    := intOut $at clk
+    // Temporary Bypass of Sigmoid operation
+    //dataOut    := intOut $at clk
+    dataOut    := dataIn $at clk
 
     override def createBody = {}
     override def inputs: Seq[SignalTrait] = dataIn :: clk.allSignals(INPUT)

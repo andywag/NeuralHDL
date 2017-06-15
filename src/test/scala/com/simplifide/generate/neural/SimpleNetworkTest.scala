@@ -22,7 +22,7 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
 
 
   val information = BasicTestInformation.getInformation(dataLocation)
-  override def getTestLength = BasicTestInformation.tapLength*12*8
+  override def getTestLength = BasicTestInformation.tapLength*12*48
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
@@ -69,14 +69,16 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
 
+  val errOut = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
 
-  dutParser.stage.control.dataLength  := information.dataLength-1
-  dutParser.stage.control.loadDepth   := information.dataFill-1
-  dutParser.stage.control.stateLength     := information.stateLength-1
+
+  dutParser.mStage.control.dataLength  := information.dataLength-1
+  dutParser.mStage.control.loadDepth   := information.dataFill-1
+  dutParser.mStage.control.stateLength     := information.stateLength-1
   //dutParser.stage.control.biasLength      := information.biasLength-1
-  dutParser.stage.control.tapErrorLength  := information.errorTapLength-1
+  dutParser.mStage.control.tapErrorLength  := information.errorTapLength-1
 
-  dutParser.stage.control.loadDepth  := 8 -1
+  dutParser.mStage.control.loadDepth  := 8 -1
 
   this.createErrorCalculator
 

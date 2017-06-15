@@ -12,6 +12,7 @@ import com.simplifide.generate.signal._
 import com.simplifide.generate.parser.model.Expression
 import com.simplifide.generate.parser.factory.CreationFactory
 import com.simplifide.generate.blocks.basic.flop.ClockControl.Impl
+import com.simplifide.generate.parser.factory.CreationFactory.Hardware
 
 /**
  * Class which defines how a register will operate.
@@ -46,7 +47,7 @@ trait ClockControl extends SimpleSegment with com.simplifide.generate.parser.mod
   
   def withOutReset = this.copy(reset = None)
   /** Create a new version of the clock control with an enable */
-  def createEnable(enable:Expression)(implicit creator:CreationFactory) = this.copy(enable = Some(new Clocks.Enable(enable.create)))
+  def createEnable(enable:Expression)(implicit creator:CreationFactory=Hardware) = this.copy(enable = Some(new Clocks.Enable(enable.create)))
   def createEnable(enable:SimpleSegment) = this.copy(enable = Some(new Clocks.Enable(enable)))
 
 

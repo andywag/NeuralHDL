@@ -29,11 +29,11 @@ class NeuralNetwork[T](val name:String,
 
   val ctrlRdy   = new ReadyValidInterface(FloatSignal("zctrl",INPUT))
 
-  val stage = new NeuralStageTop(appendName("st1"),info,interface)
-  instance(stage)
+  val mStage = new NeuralStageTop(appendName("st1"),info,interface)
+  val iStage  = instance(mStage)
 
-  val error = new NeuralError(appendName("err"),info, expected,outInternalRdy,ctrlRdy,stage.interface.errorRdy)
-  instance(error)
+  val mError = new NeuralError(appendName("err"),info, expected,outInternalRdy,ctrlRdy,mStage.interface.errorRdy)
+  val iError = instance(mError)
 
 
 }
