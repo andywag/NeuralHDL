@@ -17,7 +17,7 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
                            dataFill:Int,
                            numberNeurons:Int,
                            errorFill:Int,
-                           outputFill:Int,
+                           expectedFill:Int,
                            dataLocation:String
                           ) {
 
@@ -49,8 +49,8 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
   val biasLength       = numberNeurons
   val biasAddressWidth  = dataSingleWidth
   // Output Fifo Information
-  val outputFifoDepth = tapDimension._2*outputFill
-  val outputFifoAddressWidth = logWidth(outputFifoDepth)
+  val expectedFifoDepth = tapDimension._2*expectedFill
+  val expectedFifoAddressWidth = logWidth(expectedFifoDepth)
   // Error Fifo Information
   val errorFillWidth = logWidth(errorFill)
   val errorTapLength = tapAddressLength

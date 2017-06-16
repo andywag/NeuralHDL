@@ -67,26 +67,26 @@ This block contains 3 major subblocks
   signal(interface.outRdy.reverse)
   signal(interface.outPreRdy.reverse)
 
+
+  // Instantiate the neural stage which is a group of neurons
+  // Currently instantiated in block but could be converted to use external neurons/macs
   val stage = new NeuralStage(appendName("st"),info.numberNeurons)
   instance(stage)
+  // FIXME : Not sure why this is required to pass data through the stage
+  signal(stage.dataOutBias.changeType(WIRE))
 
+  // Instantiate the main memory for this block
+  // Contains separate memory for the taps, data and bias
   val memorySize = NeuralMemory.Dimensions(info.tapDimension,info.numberNeurons,info.dataFill)
   val memory = new NeuralMemory(appendName("mem"),memorySize, info)
   instance(memory)
 
+  // Control for the block. Contains all the controls for the memory and stages
   val control    = new NeuronControl[T](appendName("ctrl"),info, interface, this)
   instance(control)
 
-  //memory.tapStructW.wrData := stage.fullOut
-
-  //this.createNeuronStage
-
-}
-
-object NeuralStageTop {
-
-
-
 
 
 }
+
+

@@ -20,30 +20,25 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   /** Clock for the testbench */
   override def blockName: String = "simple"
 
-
+  // Get test information from a shared location
+  // Contains training data and initial taps
   val information = BasicTestInformation.getInformation(dataLocation)
-  override def getTestLength = BasicTestInformation.tapLength*12*48
+  // Set the test length
+  override def getTestLength = BasicTestInformation.tapLength*12*16
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
 
-  //val tapData   = Nd4j.randn(Array(information.tapAddressLength,information.numberNeurons)) //.mul(1/outputLength.toFloat)
   val tapData   = BasicTestInformation.getInitTaps
-  val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
-  val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
-  val cSlices   = nSlices.map(x => x._2.map(_._1))
-  cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))
+  /** Store the taps to a file after converting the order */
+  createInitialTaps
 
+  // Store the initial data and taps to a file.
   val dataData  = BasicTestInformation.getTraining
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
-  val result      = tapData dot dataData._1
-  val finalResult = Transforms.sigmoid(result)
-
-  val out    = DataFileGenerator.createFlatten3(s"$dataLocation/pre_data",result,'f')
-  val fin    = DataFileGenerator.createFlatten3(s"$dataLocation/out_data",finalResult,'f')
-
+  // Create the interface for the expected data
   val expectedData = FloatSignal("expected",INPUT)
   val expectedRdy  = new ReadyValidInterface(expectedData)
 
@@ -53,60 +48,48 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
+  val size = input.data.length()
+  /** Create the interface for the input data */
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
-  inRdyCount := ($iff (inRdyCount === 35) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
-
+  inRdyCount := ($iff (inRdyCount === size-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
 
+  /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
-  expRdyCount := ($iff (expRdyCount === 35) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
-
-  expectedRdy.vld := (index < expected.data.length()) ? 1 :: 0
+  expRdyCount := ($iff (expRdyCount === size-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
+  expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
 
+  // Dump RTL output signals to a file for later comparison
   val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
+  val errOut  = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
+  val biasOut = dutParser.mStage.memory.biasStructW ---->(s"$dataLocation/rtl_bias",Some("testSimple.simple.simple_st1"))
 
-  val errOut = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
 
-
+  // Control signals used for network stage
   dutParser.mStage.control.dataLength  := information.dataLength-1
   dutParser.mStage.control.loadDepth   := information.dataFill-1
   dutParser.mStage.control.stateLength     := information.stateLength-1
-  //dutParser.stage.control.biasLength      := information.biasLength-1
   dutParser.mStage.control.tapErrorLength  := information.errorTapLength-1
-
   dutParser.mStage.control.loadDepth  := 8 -1
 
-  this.createErrorCalculator
 
-  def createErrorCalculator = {
-    import com.simplifide.generate.newparser.typ.SegmentParser._
-    val mem     = signal("expected_memory",REG,U(32,0),128)
-    val expected = signal(FloatSignal("expected",WIRE))
-    interface.errorIn !:= expected minus interface.dataOut
+
+  /** Method used to reorder taps and output them to files.It is an overly complex transpose
+    * operation.
+    **/
+  def createInitialTaps  {
+    val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
+    val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
+    val cSlices   = nSlices.map(x => x._2.map(_._1))
+    cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))
+
   }
 
   override def postRun = {
-    val output  = rpOut.load()
-    val output2 = rOut.load()
 
-    val plotEnable = true
-    val plot1 = if (plotEnable) Some(s"$docLocation/results") else None
-    val plot2 = if (plotEnable) Some(s"$docLocation/resultse") else None
-
-    val error = PlotUtility.plotErrorRepeat(output.data().asDouble(),
-      out.data.data().asDouble(),plot1)
-    this.checkMaxError(error,.001)
-
-
-    val a = output2.data().asDouble()
-    val b = fin.data.data().asDouble()
-
-    val error2 = PlotUtility.plotErrors(output2, fin.data,plot2)
-    this.checkMaxError(error2,.06)
-    //assert(error2.max._1 < .06)
   }
 }

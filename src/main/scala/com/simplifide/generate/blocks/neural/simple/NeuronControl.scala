@@ -34,6 +34,7 @@ case class NeuronControl[T](override val name:String,
   signal(parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.memory.biasBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.stage.interface.reverse)
+  signal(parent.stage.dataOutBias.changeType(INPUT))
 
   // Datalength of this stage - used to count both input and output
   val dataLength       = signal("load_length",INPUT,U(info.dataSingleWidth,0))

@@ -5,9 +5,10 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.signal.sv.SignalInterface
 
 /**
-  * Created by andy on 6/3/17.
+  * FIXME : Really need to make data types generic
   */
 case class NeuralStageInterface[T](name:String, proto:T) extends SignalInterface {
+
   val dataIn         = FloatSignal(appendName("data"),OpType.Input)
   val inRdy          = new ReadyValidInterface(dataIn)
 

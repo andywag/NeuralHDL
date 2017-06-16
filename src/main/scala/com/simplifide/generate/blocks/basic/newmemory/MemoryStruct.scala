@@ -5,9 +5,13 @@ import com.simplifide.generate.blocks.basic.newmemory
 import com.simplifide.generate.blocks.basic.newmemory.MemoryStruct.Ctrl
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.generator.SimpleSegment
+import com.simplifide.generate.model.NdDataSet
+import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.parser.items.ConstantParser
+import com.simplifide.generate.signal
 import com.simplifide.generate.signal.sv.{SignalInterface, Struct}
 import com.simplifide.generate.signal.{FixedType, OpType, SignalTrait}
+import com.simplifide.generate.test2.data.DataGenParser.DisplayDump2
 
 /**
   * Created by andy on 5/9/17.
@@ -41,10 +45,20 @@ case class MemoryStruct(val name:String,
     new SegmentEntity(NewMemory(name,struct),name)
   }
 
+  /** Should move to a dump type class */
+  def ---->(name:String,path:Option[String]=None)(implicit clk:ClockControl,scope:EntityParser) = {
+    val dataSet = NdDataSet.empty(name)
+    val newVld = path.map(x => new SignalTrait.SignalPath(x,ctrl.wrVld)).getOrElse(ctrl.wrVld)
+    val newClk = clk.createEnable(newVld)
+    val newSignal = path.map(x => new SignalTrait.SignalPath(x,wrData)).getOrElse(wrData)
+    scope->(DisplayDump2(s"${name}.hex",newSignal)(newClk))
+    dataSet
+  }
 
 }
 
 object MemoryStruct {
+
   case class Ctrl(override val name:String, memoryRepeat:Array[Int],
                   dimensions:Array[Int], override val opType:OpType = OpType.Input) extends Struct {
 
@@ -91,5 +105,8 @@ object MemoryStruct {
     override def newSignal(name: String, opType: OpType, fix: FixedType): SignalTrait = {
       new newmemory.MemoryStruct.Ctrl(name,memoryRepeat,dimensions,opType)
     }
+
+
+
   }
 }

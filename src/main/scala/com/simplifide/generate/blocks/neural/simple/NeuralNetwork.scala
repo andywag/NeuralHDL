@@ -18,6 +18,7 @@ class NeuralNetwork[T](val name:String,
   val info = neuralInfo(0)
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
+  // Attach the output signals
   signal(interface.outRdy.reverse)
   signal(interface.outPreRdy.reverse)
 

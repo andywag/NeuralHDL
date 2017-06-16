@@ -22,6 +22,7 @@ case class OutputCtrl(override val name:String,
   signal(parent.parent.stage.dataOut.asInput)
   signal(parent.parent.stage.dataOutPre.asInput)
   signal(parent.parent.stage.fullOut.asInput)
+  signal(parent.parent.stage.dataOutBias.asInput)
 
   signal(dataToOutput.signals)
   signal(errorToOutput.signals)
@@ -94,15 +95,16 @@ case class OutputCtrl(override val name:String,
   dataOutPre.value.signals(0) := parent.parent.stage.dataOutPre
   dataOutPre.vld              := dataToOutput.activePre
 
-  /- ("Bias Output Memory Control")
-  // FIXME : Move to subblock
-  //biasStart    := loadFinish & (stateAddress === 0)
-  //biasEnable   := (readDataAddress <= biasLength) & (readDataAddress > 0)
-  //biasAddress  := $iff (biasStart) $then 0 $else_if (biasEnable) $then biasAddress + 1 $at clk
-  //val biasMem = parent.memory.biasBank.input
-  //biasMem.ctrl.rdAddress := biasAddress
-  //biasMem.ctrl.rdVld     := biasEnable
 
+  /- ("Bias Output Memory Control")
+
+
+  val biasMem = parent.parent.memory.biasBank.input
+  biasMem.ctrl.rdAddress := dataToOutput.biasAddress//tapMem.ctrl.rdAddress $at (clk)
+  biasMem.ctrl.rdVld     := tapMem.ctrl.rdVld//tapMem.ctrl.rdVld $at (clk)
+  biasMem.ctrl.wrAddress := dataToOutput.biasWrAddress//tapMem.ctrl.rdAddress $at (clk)
+  biasMem.ctrl.wrVld     := rdAddressVldDelay(4)
+  biasMem.wrData         := parent.parent.stage.dataOutBias
 
 }
 

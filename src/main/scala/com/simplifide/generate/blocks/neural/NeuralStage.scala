@@ -50,7 +50,7 @@ case class NeuralStage(override val name:String,
   val sigmoidBlock   = new Sigmoid.AlawFloat2("sigmoid", dataOut, dataOutPre)
 
 
-  val neuron    = new ComplexSegment.SegmentEntity(neuronBlock, "neuron")
+  val neuron       = new ComplexSegment.SegmentEntity(neuronBlock, "neuron")
   val nonlinearity = new ComplexSegment.SegmentEntity(sigmoidBlock, "sigmoid")
 
 
@@ -120,30 +120,46 @@ dataOut        := internalSignal plus bias
 
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
+  /- ("Delay the Input Valid")
+  Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
+
+  // Negate and shift down the error input which is input through the tap
   for (i <- 0 until numberOfNeurons) {
     tapConv.s(i).sgn :=  tapIn.s(i).sgn
     tapConv.s(i).exp :=  tapIn.s(i).exp - 6 // FIXME : Programmable Gain
     tapConv.s(i).man :=  tapIn.s(i).man
   }
+  // Latch the error input into a storage register for the first error
   tapLat !:= tapConv $at(clk.createEnable(errorFirst))
+  // During Error mode use the Error otherwise use the taps
   tapSel !:= errorMode ? tapLat :: tapIn
 
-  /- ("Delay the Input Valid")
-  Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
-
-  /- ("Select the inputs to the Neuron\n")
+  // Input Selection :
+  // For error use the delated error signal stored in tapInD
+  // For Data use either previous output or 0 for first data sample
+  /- ("Select the inputs to the Neuron")
   for (i <- 0 until depth) {
     neuronAccumIn(i) !:= errorD(1) ? tapInD(1).s(i) :: ((firstD(0)) ? 0 :: neuronOut(i))
   }
 
+  // Put the Neuron outputs into a delay line to share both the adder and the non-linearity
+  // For error Mode : Use Error Output to be added to the bias
+  // For data  Mode : Use outputs
   /- ("Create the output Delay Line\n")
-  dataOutDelay !:= ($if (firstD(0)) $then neuronOut $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
+  val neuronTemp      = seq(dataOut.newSignal(name = "neuron_temp"))(numberOfNeurons)
 
+  val tapLat1   = signal(SignalArray.Arr("taps_lat1",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
 
+  for (i <- 0 until numberOfNeurons) {
+    tapLat1.s(i).sgn !:= tapLat.s(i).sgn
+    tapLat1.s(i).man !:= tapLat.s(i).man
+    tapLat1.s(i).exp !:= tapLat.s(i).exp-8
+    neuronTemp(i)   !:=  (errorMode) ? tapLat1.s(i) :: neuronOut(i)
+  }
 
+  dataOutDelay !:= ($if (firstD(0)) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
 
-  val neuronInput = biasIn.map(x => signal(x.newSignal(name = x.appendName("_input"),opType=OpType.Logic)))
-
+  // Creation of neuron instance
   val neuronEntity = neuron.createEntity
   for (i <- 0 until numberOfNeurons) {
     val connection = Map(
@@ -155,16 +171,23 @@ dataOut        := internalSignal plus bias
     instance(neuronEntity,s"neuron$i",connection)
   }
 
+  // Final Adder Stage Used before Sigmoing
+  // For Data Stage uses  : Output + Bias
+  // For Error Stage uses : Bias + Error
   val adderOut       = neuronOut(0).newSignal(appendName("adder"))
   val adderBlock     = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasIn(0))
   instance(adderBlock)
 
   /- ("Assign the outputs")
   dataOutPre  !:= dataOutDelay(0)
+
+  /- ("Assign the bias output")
   dataOutBias !:= adderOut
 
   val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut)
   instance(nonlinearity.createEntity,s"sigmoid",connect)
+
+  // Parallel output of the blocks containing all the taps
 
   /- ("Assign the tap outputs")
   for (i <- 0 until depth) {
@@ -172,6 +195,8 @@ dataOut        := internalSignal plus bias
     fullOut1(sl) := neuronOut(i)
   }
   fullOut := fullOut1 $at(clk)
+
+
 
 }
 

@@ -36,7 +36,7 @@ case class NeuralMemory(override val name:String,
   val tapDim    = Array(dimensions.tapDim._1,dimensions.tapDim._2/dimensions.neuronDepth)
 
   val tapStructW  = MemoryStruct("tap_int",tapWidth,tapDim)
-  val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1))
+  val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._2))
   val dataStructW = MemoryStruct("data_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))
 
   val tapBank = MemoryBank(appendName("tap"),tapStructW, Some(s"${info.dataLocation}/init_taps"))

@@ -104,6 +104,15 @@ case class DataControl(override val name:String,
   readErrorCount   := $iff (stateFinish & errorUpdateLatch) $then readErrorCount + 1 $at clk
 
   dataToOutput.tapAddress       := $iff (stateFinish) $then 0 $else_if (updateCounter) $then (dataToOutput.tapAddress + 1) $at clk
+  val tapAddressD = register(dataToOutput.tapAddress)(5)
+
+  val dTapAddress = signal(dataToOutput.tapAddress.newSignal(name = "dtap_address",opType=REG))
+
+
+  dataToOutput.biasAddress    := errorUpdateLatch ? dataToOutput.tapAddress :: tapAddressD(1)
+  dataToOutput.biasWrAddress  := tapAddressD(4)
+
+  //dataToOutput.biasValid      := dataToOutput.tap
 
   /-("Data Memory Interface and Input Control")
 
@@ -124,6 +133,9 @@ case class DataControl(override val name:String,
   /- ("Data Memory Interface")
   dataToOutput.dataValid := input.rdy & input.vld
   dataToOutput.dataValue := input.value.signals(0)
+
+
+
 
 }
 
@@ -168,13 +180,19 @@ object DataControl {
     val loadFinish = SignalTrait("load_finish", OpType.Input)
     val dataReady = SignalTrait("data_ready", OpType.Input)
     val tapAddress = SignalTrait("tap_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
+
     val stateFinish = SignalTrait("state_finish", OpType.Input)
     val readFinish  = SignalTrait("read_finish",  OpType.Input, U(1))
     val dataValid   = SignalTrait("data_valid")
     val dataValue   = SignalTrait("data_value",OpType.Input,U(params.dataWidth))
 
+    val biasValid   = SignalTrait("data_valid")
+    val biasAddress    = SignalTrait("bias_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
+    val biasWrAddress = SignalTrait("bias_wr_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
+
+
     override val inputs = List(activePre, active, activeNormal, dataValue, dataValid, dataWriteAdd,dataReadAdd,tapAddress,
-      activeStartD, readFinish)
+      activeStartD, readFinish, biasAddress, biasWrAddress)
 
   }
 
