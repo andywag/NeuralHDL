@@ -12,4 +12,4 @@ def load_float_file(path) :
     file = open(path,'r')
     result = [hex_to_float(x.strip()) for x in file]
     file.close
-    return result
+    return numpy.array(result)

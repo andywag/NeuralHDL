@@ -16,23 +16,32 @@ bias  = fu.load_float_file(base + "rtl_bias.hex")
 #result = [fu.hex_to_float(x.strip()) for x in file]
 #bias   = [fu.hex_to_float(x.strip()) for x in fbias]
 
+outputs = 6
+
 tresult = numpy.array(error)
 size    = int(len(tresult)/6)
 shift  = numpy.square(numpy.reshape(tresult,(size,6)))
 vshift = numpy.sum(shift,1)
 
 #[print(x) for x in result[12:len(result):6]]
+plt.figure(figsize=(8,6))
 
-
+plt.subplot(211)
 plt.plot(vshift)
 plt.ylabel('mse')
-plt.show()
+plt.xlabel('time')
+plt.title('Squared Error vs Time')
 
+plt.subplot(223)
 plt.plot(tresult)
 plt.ylabel('error')
-plt.show()
+plt.xlabel('time')
+plt.title('Error vs Time')
 
-plt.plot(bias[12:len(bias):6])
+plt.subplot(224)
+plt.plot(bias[0:len(bias):outputs])
 plt.ylabel('bias')
+plt.xlabel('time')
+plt.title('Neuron Bias vs Time')
 plt.show()
 
