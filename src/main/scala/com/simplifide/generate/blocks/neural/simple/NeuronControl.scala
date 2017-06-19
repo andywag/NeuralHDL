@@ -2,6 +2,7 @@ package com.simplifide.generate.blocks.neural.simple
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
 import com.simplifide.generate.blocks.basic.operator.Operators
+import com.simplifide.generate.blocks.neural.NeuralStageTop.ControlStruct
 import com.simplifide.generate.blocks.neural.simple.DataControl.DataToOutput
 import com.simplifide.generate.blocks.neural.simple.ErrorControl.ErrorToOutput
 import com.simplifide.generate.blocks.neural.{NeuralStageInfo, NeuralStageInterface, NeuralStageTop}
@@ -36,21 +37,45 @@ case class NeuronControl[T](override val name:String,
   signal(parent.stage.interface.reverse)
   signal(parent.stage.dataOutBias.changeType(INPUT))
 
+  // Attach a Control Structure as input to thsiblock
+  val controlInterface = new ControlStruct(parent.appendName("ctrl_int"),this.info,INPUT)
+  signal(controlInterface)
+  // Control connections
+  // This is a bit of a kludge but the values are reassigned to the original signals to avoid complications
+  // FIXME : This should be cleaned up
+  private val dataLength       = signal("load_length",WIRE,U(info.dataSingleWidth,0))
+  private val loadDepth        = signal("load_depth",WIRE,U(info.dataFillWidth,0))
+  private val stateLength      = signal("state_length",WIRE,U(info.stateWidth,0))
+
+  dataLength  := controlInterface.loadLength
+  loadDepth   := controlInterface.loadDepth
+  stateLength := controlInterface.stateLength
+
+
+
   // Datalength of this stage - used to count both input and output
-  val dataLength       = signal("load_length",INPUT,U(info.dataSingleWidth,0))
-  val loadDepth        = signal("load_depth",INPUT,U(info.dataFillWidth,0))
-  val stateLength      = signal("state_length",INPUT,U(info.stateWidth,0))
+  //
+
 
   // Create the Data Input FIFO
-  val params = DataControl.Params(info.dataLength,info.dataFill, info.stateLength,info.tapAddressLength, info.errorFill)
+  val params = DataControl.Params(info.dataLength,
+    info.dataFill,
+    info.stateLength,
+    info.tapAddressLength,
+    info.errorFill)
+
   val dataToOutput = new DataToOutput(params)
   val errorToOutput = new ErrorToOutput(params)
 
   val dataFifo = new DataControl(appendName("data_fifo"),params,this,dataToOutput,dataIn)
-  val con1 = Map(dataFifo.loadLength -> this.dataLength, dataFifo.loadDepth -> this.loadDepth)
-  instance(dataFifo.createEntity,dataFifo.name,con1)
+  val con1 = Map(dataFifo.loadLength -> this.controlInterface.loadLength,
+    dataFifo.loadDepth -> this.controlInterface.loadDepth,
+    dataFifo.stateFinish -> this.controlInterface.stateLength
+  )
+  instance(dataFifo.createEntity,dataFifo.name)
 
   val errorFifo = new ErrorControl(appendName("error_fifo"),params,this,errorIn)
+  val errorCon = Map(errorFifo.loadLength -> this.controlInterface.loadLength)
   instance(errorFifo.createEntity,errorFifo.name)
 
   val outputEntity = new OutputCtrl(appendName("out_ctrl"),info,this,dataToOutput,errorToOutput)

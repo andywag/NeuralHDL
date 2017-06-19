@@ -80,12 +80,12 @@ class NeuronStageTest extends BlockScalaTest with BlockTestParser {
   }
 
 
-  val neuron    = new Neuron(dataOut(0),dataIn(0),tapIn(0),biasIn(0))
+  val neuron    = new Neuron(dataOut(0))
 
   /* FIXME : 1. Need generic copy of signal
              2. Need better way to pass a generic typ for creation (probably pass the segment down rather than isntance)
   */
-  val sigmoid   = new Sigmoid.AlawFloat2("sigmoid", dataOut(0), dataOutPre(0))
+  val sigmoid   = new Sigmoid.AlawFloat2("sigmoid", dataOut(0))
 
 
   val entity    = new ComplexSegment.SegmentEntity(neuron, "neuron")

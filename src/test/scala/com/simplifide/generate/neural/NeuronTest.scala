@@ -88,7 +88,7 @@ object NeuronTest {
 
     val dataOut   = signal(FloatSignal("out",OUTPUT))
 
-    val neuron = ->(new Neuron(dataOut, dataIn, tapIn, biasIn))
+    val neuron = ->(new Neuron(dataOut))
 
     override val document = neuron.document
 

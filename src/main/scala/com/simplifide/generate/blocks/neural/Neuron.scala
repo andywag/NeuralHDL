@@ -10,10 +10,7 @@ import com.simplifide.generate.util.PathUtilities
 /**
   * Created by andy on 5/8/17.
   */
-case class Neuron(dataOut:SignalTrait,
-                  dataIn:SignalTrait,
-                  taps:SignalTrait,
-                  bias:SignalTrait)(implicit val clk:ClockControl) extends ComplexSegment  {
+case class Neuron(proto:SignalTrait)(implicit val clk:ClockControl) extends ComplexSegment  {
 
   import com.simplifide.generate.newparser.typ.SegmentParser._
   import com.simplifide.generate.doc.MdGenerator._
@@ -55,6 +52,12 @@ dataOut        := internalSignal plus bias
 
 
 """
+  val dataOut:SignalTrait = proto.newSignal(name = "data_out",opType = OUTPUT)
+  val dataIn:SignalTrait = proto.newSignal(name = "data_in",opType = INPUT)
+  val taps:SignalTrait = proto.newSignal(name = "taps",opType = INPUT)
+  val bias:SignalTrait = proto.newSignal(name = "bias",opType = INPUT)
+
+
 
   val internalSignal = signal(dataOut.newSignal(name = dataOut.appendName("tap_data_out"),OpType.Signal))
   //val biasDelay      = signal(bias.newSignal(name = bias.appendName("d"),OpType.Register))

@@ -16,7 +16,7 @@ import org.nd4s.Implicits._
 /**
   * Created by andy on 6/3/17.
   */
-class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
+class SingleStageTest extends BlockScalaTest with BlockTestParser {
   /** Clock for the testbench */
   override def blockName: String = "simple"
 
@@ -24,7 +24,7 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   // Contains training data and initial taps
   val information = BasicTestInformation.getInformation(dataLocation)
   // Set the test length
-  override def getTestLength = BasicTestInformation.tapLength*12*16
+  override def getTestLength = BasicTestInformation.tapLength*64
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
@@ -34,7 +34,7 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   createInitialTaps
 
   // Store the initial data and taps to a file.
-  val dataData  = BasicTestInformation.getTraining
+  val dataData  = BasicTestInformation.getTrainIdent(6,12)
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
@@ -48,34 +48,42 @@ class SimpleNetworkTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
-  val size = input.data.length()
+  val size =input.data.length()
   /** Create the interface for the input data */
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
   inRdyCount := ($iff (inRdyCount === size-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
 
+  val size2 = expected.data.length()
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
-  expRdyCount := ($iff (expRdyCount === size-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
+  expRdyCount := ($iff (expRdyCount === size2-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
   expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
 
   // Dump RTL output signals to a file for later comparison
+  val rIn  = interface.inRdy.value.value            ---->(s"$dataLocation/rtl_in",clk.createEnable(interface.inRdy.enable), None, "Stage Output",8)
   val rOut  = interface.outRdy.value.value            ---->(s"$dataLocation/rtl_out",clk.createEnable(interface.outRdy.vld), None, "Stage Output",8)
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
   val errOut  = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
-  val biasOut = dutParser.mStage.memory.biasStructW ---->(s"$dataLocation/rtl_bias",Some("testSimple.simple.simple_st1"))
+  val biasOut = dutParser.mStage(0).memory.biasStructW ---->(s"$dataLocation/rtl_bias",Some("testSimple.simple.simple_st0"))
+  expectedRdy ---->(s"$dataLocation/rtl_expected")
 
+  dutParser.mStage(0).memory.dataStructW sread(s"$dataLocation/rtl_mem",Some("testSimple.simple.simple_st0"))
 
   // Control signals used for network stage
-  dutParser.mStage.control.dataLength  := information.dataLength-1
-  dutParser.mStage.control.loadDepth   := information.dataFill-1
-  dutParser.mStage.control.stateLength     := information.stateLength-1
-  dutParser.mStage.control.tapErrorLength  := information.errorTapLength-1
-  dutParser.mStage.control.loadDepth  := 8 -1
+  //dutParser.mStage(0).control.dataLength  := information.dataLength-1
+  //dutParser.mStage(0).control.loadDepth   := information.dataFill-1
+  //dutParser.mStage(0).control.stateLength     := information.stateLength-1
+  dutParser.mStage(0).control.tapErrorLength  := information.errorTapLength-1
+  //dutParser.mStage(0).control.loadDepth  := 8 -1
 
+
+  dutParser.mStage(0).control.controlInterface.loadLength    := information.dataLength-1
+  dutParser.mStage(0).control.controlInterface.loadDepth     := 2//information.dataFill-1
+  dutParser.mStage(0).control.controlInterface.stateLength   := information.stateLength-1
 
 
   /** Method used to reorder taps and output them to files.It is an overly complex transpose

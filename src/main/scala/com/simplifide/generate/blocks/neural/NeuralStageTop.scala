@@ -1,11 +1,12 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.neural.NeuralStageTop.{ ControlStruct}
 import com.simplifide.generate.blocks.neural.simple.NeuronControl
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
-import com.simplifide.generate.signal.sv.SignalInterface
-import com.simplifide.generate.signal.{FloatSignal, OpType}
+import com.simplifide.generate.signal.sv.{SignalInterface, Struct}
+import com.simplifide.generate.signal.{FixedType, FloatSignal, OpType, SignalTrait}
 import com.simplifide.generate.util.PathUtilities
 
 /**
@@ -67,7 +68,6 @@ This block contains 3 major subblocks
   signal(interface.outRdy.reverse)
   signal(interface.outPreRdy.reverse)
 
-
   // Instantiate the neural stage which is a group of neurons
   // Currently instantiated in block but could be converted to use external neurons/macs
   val stage = new NeuralStage(appendName("st"),info.numberNeurons)
@@ -85,8 +85,29 @@ This block contains 3 major subblocks
   val control    = new NeuronControl[T](appendName("ctrl"),info, interface, this)
   instance(control)
 
+}
+
+object NeuralStageTop {
 
 
+  case class ControlStruct(override val name:String, info:NeuralStageInfo,override val opType:OpType = OpType.Input) extends Struct {
+    override val packed: Boolean = true
+    override val typeName: String = s"${name}_t"
+
+    val loadLength       = SignalTrait(createName("load_length"),opType,FixedType.unsigned(info.dataSingleWidth,0))
+    val loadDepth        = SignalTrait(createName("load_depth"),opType,FixedType.unsigned(info.dataFillWidth,0))
+    val stateLength      = SignalTrait(createName("state_length"),opType,FixedType.unsigned(info.stateWidth,0))
+
+    override val signals: List[SignalTrait] = List(loadDepth, stateLength,loadLength)
+
+
+
+    /** Kind of a kludge need a better way to copy objects (shapeless maybe) */
+    override def copyStruct(n: String, o: OpType): SignalTrait = new ControlStruct(n,info,o)
+
+    /** Creates a New Signal (Virtual Constructor) */
+    override def newSignal(name: String, opType: OpType, fix: FixedType): SignalTrait = new ControlStruct(name,info,opType)
+  }
 }
 
 

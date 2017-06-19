@@ -46,8 +46,9 @@ case class NeuralStage(override val name:String,
 
   val interface = new Interface(this.name, this)
 
-  val neuronBlock    = new Neuron(dataOut,dataIn(0),tapIn.input.value,biasIn(0))
-  val sigmoidBlock   = new Sigmoid.AlawFloat2("sigmoid", dataOut, dataOutPre)
+  val neuronBlock    = new Neuron(dataOut)
+
+  val sigmoidBlock   = new Sigmoid.AlawFloat2("sigmoid", dataOut)
 
 
   val neuron       = new ComplexSegment.SegmentEntity(neuronBlock, "neuron")
@@ -98,6 +99,11 @@ dataOut        := internalSignal plus bias
 
 """
 
+  val tapGain = signal("tap_gain",WIRE,U(8))
+  val biasGain = signal("bias_gain",WIRE,U(8))
+
+  tapGain := 3
+  biasGain := 6
 
   val share  = dataIn.length
   val depth  = tapIn.length
@@ -126,7 +132,7 @@ dataOut        := internalSignal plus bias
   // Negate and shift down the error input which is input through the tap
   for (i <- 0 until numberOfNeurons) {
     tapConv.s(i).sgn :=  tapIn.s(i).sgn
-    tapConv.s(i).exp :=  tapIn.s(i).exp - 6 // FIXME : Programmable Gain
+    tapConv.s(i).exp :=  (tapIn.s(i).exp > tapGain) ? (tapIn.s(i).exp - tapGain) :: tapIn.s(i).exp // FIXME : Programmable Gain
     tapConv.s(i).man :=  tapIn.s(i).man
   }
   // Latch the error input into a storage register for the first error
@@ -153,8 +159,9 @@ dataOut        := internalSignal plus bias
   for (i <- 0 until numberOfNeurons) {
     tapLat1.s(i).sgn !:= tapLat.s(i).sgn
     tapLat1.s(i).man !:= tapLat.s(i).man
-    tapLat1.s(i).exp !:= tapLat.s(i).exp-8
-    neuronTemp(i)   !:=  (errorMode) ? tapLat1.s(i) :: neuronOut(i)
+    tapLat1.s(i).exp !:= (tapLat.s(i).exp > biasGain) ? (tapLat.s(i).exp - biasGain) :: tapLat.s(i).exp
+    //neuronTemp(i)   !:=  (errorMode) ? tapLat1.s(i) :: neuronOut(i)
+    neuronTemp(i)   !:=  neuronOut(i)
   }
 
   dataOutDelay !:= ($if (firstD(0)) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
@@ -184,7 +191,8 @@ dataOut        := internalSignal plus bias
   /- ("Assign the bias output")
   dataOutBias !:= adderOut
 
-  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut)
+  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut,
+    nonlinearity.segment.dataOut.asInstanceOf[SignalTrait] -> dataOut)
   instance(nonlinearity.createEntity,s"sigmoid",connect)
 
   // Parallel output of the blocks containing all the taps

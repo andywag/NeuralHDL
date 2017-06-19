@@ -87,7 +87,7 @@ object SigmoidTest {
     val dataIn    = signal(FloatSignal("data",INPUT))
     val dataOut   = signal(FloatSignal("out",OUTPUT))
 
-    val sig = ->(new Sigmoid.AlawFloat2("sigmoid",dataOut, dataIn))
+    val sig = ->(new Sigmoid.AlawFloat2("sigmoid",dataOut))
 
     override def document = sig.document
 

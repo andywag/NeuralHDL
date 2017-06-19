@@ -36,6 +36,12 @@ case class OutputCtrl(override val name:String,
   signal(parent.parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.parent.memory.biasBank.input.reverse) // Connect this to the data port of the memory
 
+  val enable_feedback     = signal("enable_feedback")
+  val enable_bias_feedback = signal("enable_bias_feedback")
+
+  enable_feedback      := 1
+  enable_bias_feedback := 0
+
   val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
 
 
@@ -68,7 +74,7 @@ case class OutputCtrl(override val name:String,
   /- ("Tap Input Memmory Control") // Fixme : Needs own module
 
   this.tapMem.ctrl.wrAddress  := rdAddressVldDelay(5) ? rdAddressDelay(5) :: info.tapAddressLength + errorToOutput.errorPhase
-  this.tapMem.ctrl.wrVld      := errorToOutput.errorValid | rdAddressVldDelay(5)
+  this.tapMem.ctrl.wrVld      := errorToOutput.errorValid | (enable_feedback & rdAddressVldDelay(5))
 
   this.tapMem.ctrl.subVld     := rdAddressVldDelay(5) ? 0 :: errorToOutput.errorValid
   this.tapMem.ctrl.subAddress := errorToOutput.errorSubAddress
@@ -103,7 +109,7 @@ case class OutputCtrl(override val name:String,
   biasMem.ctrl.rdAddress := dataToOutput.biasAddress//tapMem.ctrl.rdAddress $at (clk)
   biasMem.ctrl.rdVld     := tapMem.ctrl.rdVld//tapMem.ctrl.rdVld $at (clk)
   biasMem.ctrl.wrAddress := dataToOutput.biasWrAddress//tapMem.ctrl.rdAddress $at (clk)
-  biasMem.ctrl.wrVld     := rdAddressVldDelay(4)
+  biasMem.ctrl.wrVld     := enable_bias_feedback & rdAddressVldDelay(4)
   biasMem.wrData         := parent.parent.stage.dataOutBias
 
 }

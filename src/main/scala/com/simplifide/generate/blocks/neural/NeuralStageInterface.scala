@@ -21,8 +21,11 @@ case class NeuralStageInterface[T](name:String, proto:T) extends SignalInterface
   val dataOutPre     = FloatSignal(appendName("data_out_pre"),OpType.Output)
   val outPreRdy      = new ReadyValidInterface(dataOutPre)
 
+  val errorOut        = FloatSignal(appendName("error_out"),OpType.Input)
+  val errorOutRdy       = new ReadyValidInterface(errorOut)
+
   override val interfaces       = List(inRdy,errorRdy)
-  override val outputInterfaces = List(outRdy, outPreRdy)
+  override val outputInterfaces = List(outRdy,outPreRdy,errorOutRdy)
 
   // Tap Load Interface - Not currently implemented : Direct load of memory for now
   val tapIn       = FloatSignal("tap_in",OpType.Input)

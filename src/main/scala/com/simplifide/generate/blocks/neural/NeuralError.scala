@@ -34,7 +34,7 @@ case class NeuralError[T](override val name:String,
   instance(new Ctrl(appendName("ctrl"),info,this))
 
   // FIXME : Need to remove Hardocded Depths
-  val fifo = new NewRdyVldFifo(appendName("fifo"),ctrlOut,errorOut,16)
+  val fifo = new NewRdyVldFifo(appendName("fifo"),ctrlOut,errorOut,128)
   instance(fifo)
 
 }

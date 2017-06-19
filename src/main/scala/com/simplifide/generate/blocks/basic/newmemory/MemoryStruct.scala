@@ -16,15 +16,20 @@ import com.simplifide.generate.test2.data.DataGenParser.DisplayDump2
 /**
   * Created by andy on 5/9/17.
   */
+
 case class MemoryStruct(val name:String,
                         memoryRepeat:Array[Int],
-                        dimensions:Array[Int]) extends SignalInterface  {
+                        dimensions:Array[Int],
+                        packed:Boolean = false) extends SignalInterface  {
 
   val opType = OpType.Input
 
+  // FIXME : The memory size has issues with the current non-packet usage
+  //         Need to set a different option when the memory is packed
   val memoryWidth = memoryRepeat.foldLeft(1)(_*_)
   val memoryDepth1  = dimensions.foldLeft(1)(_*_)
   val addressSize  = math.ceil(math.log(memoryDepth1)/math.log(2.0)).toInt
+
   val memoryDepth  = math.pow(2.0,addressSize).toInt
 
   val dataWidth    = FixedType.unsigned(memoryWidth,0)
@@ -54,6 +59,16 @@ case class MemoryStruct(val name:String,
     scope->(DisplayDump2(s"${name}.hex",newSignal)(newClk))
     dataSet
   }
+
+  def sread(name:String,path:Option[String]=None)(implicit clk:ClockControl,scope:EntityParser) = {
+    val dataSet = NdDataSet.empty(name)
+    val newVld = path.map(x => new SignalTrait.SignalPath(x,ctrl.rdVld)).getOrElse(ctrl.rdVld)
+    val newClk = clk.createEnable(newVld)
+    val newSignal = path.map(x => new SignalTrait.SignalPath(x,rdData)).getOrElse(rdData)
+    scope->(DisplayDump2(s"${name}.hex",newSignal)(newClk))
+    dataSet
+  }
+
 
 }
 

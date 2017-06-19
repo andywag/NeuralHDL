@@ -23,11 +23,16 @@ trait Sigmoid extends ComplexSegment {
 object Sigmoid {
 
   case class AlawFloat2(override val name:String,
-                       dataOut:FloatSignal,
-                       dataIn:FloatSignal)(implicit clk:ClockControl) extends Sigmoid {
+                       proto:FloatSignal)(implicit clk:ClockControl) extends Sigmoid {
 
     import com.simplifide.generate.doc.MdGenerator._
+
+    val dataOut = proto.newSignal(name = "data_out",opType = OpType.Output).asInstanceOf[FloatSignal]
+    val dataIn  = proto.newSignal(name = "data_in",opType = OpType.Input).asInstanceOf[FloatSignal]
+
     override def document =
+
+
 
       s"""
 This block contains a sigmoid nonlinear operation based on "Myers and Hutchinson" piecewise linear approximation.

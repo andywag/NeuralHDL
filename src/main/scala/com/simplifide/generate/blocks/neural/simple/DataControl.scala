@@ -1,6 +1,7 @@
 package com.simplifide.generate.blocks.neural.simple
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.basic.misc.Counter
 import com.simplifide.generate.blocks.basic.operator.Operators
 import com.simplifide.generate.blocks.neural.simple.DataControl.DataToOutput
 import com.simplifide.generate.blocks.neural.simple.ErrorControl.ErrorToData
@@ -29,8 +30,8 @@ case class DataControl(override val name:String,
   val errorUpdateLatch = ErrorToData.errorUpdateLatch
 
   // Depth of the FIFO programmable register
-  val loadLength       = signal("load_length",INPUT,U(params.inputWidth1))
-  val loadDepth        = signal("load_depth", INPUT,U(params.inputWidth2))
+  val loadLength       = signal(parent.controlInterface.loadLength.newSignal(name="load_length",opType=INPUT))//signal("load_length",INPUT,U(params.inputWidth1))
+  val loadDepth        = signal(parent.controlInterface.loadDepth.newSignal(name="load_depth",opType=INPUT))
   val stateLength      = signal("state_length",INPUT,U(params.stateWidth))
 
   val loadFinish       = signal("load_finish",OUTPUT)
@@ -55,13 +56,14 @@ case class DataControl(override val name:String,
   val loadDepthCount    = signal("load_depth_count", REG,U(params.inputWidth2)) // Counter 2 : Depth
   val loadInputDone    = signal("load_input_done",WIRE) !-> (loadWidthCount === loadLength)
   loadWidthCount   := $iff (loadInputDone) $then 0 $else_if (input.rdy & input.vld) $then loadWidthCount + 1 $at clk
-  loadDepthCount    := $iff (loadInputDone) $then loadDepthCount + 1 $at clk
+  ->(Counter.Length(loadDepthCount,loadDepth,Some(loadInputDone)))
+  //loadDepthCount    := $iff (loadInputDone) $then loadDepthCount + 1 $at clk
 
   /- ("Control signals for the Read/Write Fifo Operation")
   val fifoEmpty           = signal("fifo_empty")
   val fifoEmptyReg        = signal("fifo_empty_reg",REG)
   val fifoInputDepth      = signal("fifo_input_depth",  REG,U(params.inputWidth2))
-  val fifoReadDepth       = signal("fifo_read_depth",  REG,U(params.inputWidth2))
+  //val fifoReadDepth       = signal("fifo_read_depth",  REG,U(params.inputWidth2))
 
   /- ("Fifo Controls - Used to Gate Inputs")
   fifoEmpty    := (readDepthCount == loadDepthCount)            // Empty Fifo when read depth equals write depth
@@ -83,11 +85,11 @@ case class DataControl(override val name:String,
   val data_active      = register("data_active",WIRE)(params.inputLength1 + 6)
   val outputValid      = register("output_valid",WIRE)(params.inputLength1 + 6)
 
-  data_start(0)        := (readFinish | (loadInputDone & ~errorUpdateMode)) & (fifoInputDepth >= 0)
+  data_start(0)        := (readFinish | (loadInputDone & ~errorUpdateMode & ~errorUpdateLatch)) & (fifoInputDepth >= 0)
 
   val dup = register(ErrorToData.errorUpdateMode)(3)
   // Data Active is either data is ready or error data is ready
-  data_active(0)       := (fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty) | ErrorToData.errorUpdateMode
+  data_active(0)       := (fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty) | ErrorToData.errorUpdateMode | ErrorToData.errorUpdateLatch
   val temp = signal("temp",WIRE)
   temp := ((fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty))
   outputValid(0)       := ~errorUpdateLatch & temp
@@ -100,8 +102,11 @@ case class DataControl(override val name:String,
 
   readWidthCount   := $iff (data_start | readFinish) $then 0 $else_if (updateCounter) $then readWidthCount + 1 $at clk
   readStateCount   := $iff (readFinish) $then readStateCount + 1 $at clk
-  readDepthCount   := $iff (stateFinish & outputValid(0)) $then readDepthCount + 1 $at clk
-  readErrorCount   := $iff (stateFinish & errorUpdateLatch) $then readErrorCount + 1 $at clk
+  //readDepthCount   := $iff (stateFinish & outputValid(0)) $then readDepthCount + 1 $at clk
+  ->(Counter.Length(readDepthCount,loadDepth,Some(stateFinish & outputValid(0))))
+
+  //readErrorCount   := $iff (stateFinish & errorUpdateLatch) $then readErrorCount + 1 $at clk
+  ->(Counter.Length(readErrorCount,loadDepth,Some(stateFinish & errorUpdateLatch)))
 
   dataToOutput.tapAddress       := $iff (stateFinish) $then 0 $else_if (updateCounter) $then (dataToOutput.tapAddress + 1) $at clk
   val tapAddressD = register(dataToOutput.tapAddress)(5)
@@ -142,7 +147,7 @@ case class DataControl(override val name:String,
 object DataControl {
 
   def logWidth(input: Int) = {
-    math.ceil(math.log(input) / math.log(2)).toInt
+    math.max(math.ceil(math.log(input) / math.log(2)),1.0).toInt
   }
 
   /**

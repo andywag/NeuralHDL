@@ -58,12 +58,15 @@ class NeuralTopTest extends BlockScalaTest with BlockTestParser {
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
 
 
-  dutParser.control.dataLength  := information.dataLength-1
-  dutParser.control.loadDepth   := information.dataFill-1
-  dutParser.control.stateLength := information.stateLength-1
-  //dutParser.control.biasLength  := information.biasLength-1
+  //dutParser.control.dataLength  := information.dataLength-1
+  //dutParser.control.loadDepth   := information.dataFill-1
+  //dutParser.control.loadDepth  := 8 -1
 
-  dutParser.control.loadDepth  := 8 -1
+  dutParser.control.controlInterface.loadLength  := information.dataLength-1
+  dutParser.control.controlInterface.loadDepth   := information.dataFill-1
+  dutParser.control.controlInterface.loadDepth  := 8 -1
+  dutParser.control.controlInterface.stateLength := information.stateLength-1
+
 
   this.createErrorCalculator
 

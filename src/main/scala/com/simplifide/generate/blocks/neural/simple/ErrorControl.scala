@@ -60,14 +60,14 @@ case class ErrorControl(override val name:String,
   input.rdy := (~rdAddressVldDelay(4) & ~errorFifoFull) & ~errorUpdateLatch(6)
 
   /- ("Finish Conditions")
-  errorFinish     := (errorCount === (tapErrorLength))
+  errorFinish     := (errorCount === (tapErrorLength)) & (input.enable)
   errorFinishTap  := ErrorToData.stateFinish & ErrorControl.errorUpdateLatch
 
 
   /- ("Input Control and Tap Addressiong")
   errorCount            := ($iff(errorFinish)    $then 0 $else (errorCount + 1)).$at(clk.createEnable(input.enable))
   val wrCount = ->(Counter.Length(errorWriteCount,loadLength,Some(input.enable)))
-  ->(Counter.Length(errorPhase,params.errorLength-1,Some(wrCount.end)))
+  ->(Counter.Length(errorPhase,params.errorLength-1,Some(wrCount.end & input.enable)))
   ->(Counter.Length(parent.errorToOutput.errorSubAddress,loadLength,Some(input.enable)))
 
   /- ("Error Input Operations")
@@ -81,14 +81,17 @@ case class ErrorControl(override val name:String,
 
 
   //errorUpdateMode       := errorPhase > 0
-  errorUpdateMode       := (errorFifoDepth > 0) & ~((errorFifoDepth === 1) & ErrorToData.stateFinish)
+
+  //errorUpdateMode       := (errorFifoDepth > 0) & ~((errorFifoDepth === 1) & ErrorToData.stateFinish & errorUpdateLatch)
+  errorUpdateMode       := (errorFifoDepth > 0) // & ErrorToData.stateFinish
 
   errorPhaseRead      := ($iff (errorPhaseRead === (params.errorLength-1)) $then 0 $else (errorPhaseRead +1)).$at(clk.createEnable(errorUpdateFirst))
 
   errorUpdateLatch(0)      := errorUpdateMode.$at(clk.createEnable(ErrorToData.stateFinish))
 
   errorUpdateFirst(0)      := (ErrorToData.stateFinish ? (errorUpdateMode & ErrorToData.readFinish) :: (errorUpdateLatch & ErrorToData.readFinish)).$at(clk)
-  errorUpdateLast(0)       := (errorUpdateLatch & ErrorToData.stateFinish).$at(clk)
+  //errorUpdateLast(0)       := (errorUpdateLatch & ErrorToData.stateFinish).$at(clk)
+  errorUpdateLast(0)       := ((errorFifoDepth > 0) & ErrorToData.stateFinish).$at(clk)
 
   ErrorControl.errorUpdateFirst  := errorUpdateFirst(0) & errorUpdateLatch(0)
   parent.errorToOutput.errorValue := input.value.exp

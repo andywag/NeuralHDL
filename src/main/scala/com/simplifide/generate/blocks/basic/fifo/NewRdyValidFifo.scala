@@ -35,6 +35,9 @@ case class NewRdyVldFifo(val name:String,
   vDepthE         := $iff (signalIn.enable & signalOut.enable) $then vDepth $else_if (signalIn.enable) $then vDepth + 1 $else_if (signalOut.enable) $then vDepth - 1 $else vDepth
   vDepth          := vDepthE $at clk
 
+  //vDepthE         := vWrite - vRead
+  //vDepth          := vDepthE $at clk
+
   vWrite          := $iff (signalIn.enable)  $then vWrite + 1 $at clk
   vReadE          := vRead - 1
   vRead           := $flop(clk.createEnable(signalOut.enable)) $reset (1) $enable (vRead + 1)
