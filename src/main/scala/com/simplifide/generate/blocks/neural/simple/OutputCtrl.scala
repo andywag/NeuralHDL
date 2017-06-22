@@ -40,7 +40,7 @@ case class OutputCtrl(override val name:String,
   val enable_bias_feedback = signal("enable_bias_feedback")
 
   enable_feedback      := 1
-  enable_bias_feedback := 0
+  enable_bias_feedback := 1
 
   val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
 
@@ -106,7 +106,7 @@ case class OutputCtrl(override val name:String,
 
 
   val biasMem = parent.parent.memory.biasBank.input
-  biasMem.ctrl.rdAddress := dataToOutput.biasAddress//tapMem.ctrl.rdAddress $at (clk)
+  biasMem.ctrl.rdAddress := dataToOutput.tapAddress//tapMem.ctrl.rdAddress $at (clk)
   biasMem.ctrl.rdVld     := tapMem.ctrl.rdVld//tapMem.ctrl.rdVld $at (clk)
   biasMem.ctrl.wrAddress := dataToOutput.biasWrAddress//tapMem.ctrl.rdAddress $at (clk)
   biasMem.ctrl.wrVld     := enable_bias_feedback & rdAddressVldDelay(4)

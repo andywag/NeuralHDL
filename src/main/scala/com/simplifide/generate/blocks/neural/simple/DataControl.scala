@@ -35,7 +35,7 @@ case class DataControl(override val name:String,
   val stateLength      = signal("state_length",INPUT,U(params.stateWidth))
 
   val loadFinish       = signal("load_finish",OUTPUT)
-  val dataReady        = signal("data_ready",OUTPUT)
+  val dataReady        = signal(appendName("data_ready"),OUTPUT)
   val stateFinish      = signal("state_finish",OUTPUT)
 
 
@@ -80,7 +80,10 @@ case class DataControl(override val name:String,
 
   /- ("Internal Counter for which state the operation is in")
   val readFinish       = signal("read_finish",  OUTPUT, U(1)) !-> (readWidthCount == loadLength)
-  stateFinish          := (readStateCount === stateLength) & (readFinish)
+  // For cases where there isn't a state set the output to the readcount end
+  if (params.stateLength == 1) stateFinish := readFinish
+  else stateFinish          := (readStateCount === stateLength) & (readFinish)
+
   val data_start       = register("data_start",WIRE)(3)
   val data_active      = register("data_active",WIRE)(params.inputLength1 + 6)
   val outputValid      = register("output_valid",WIRE)(params.inputLength1 + 6)
@@ -93,7 +96,17 @@ case class DataControl(override val name:String,
   val temp = signal("temp",WIRE)
   temp := ((fifoInputDepth > 0) & ~(fifoEmptyReg|fifoEmpty))
   outputValid(0)       := ~errorUpdateLatch & temp
+  // Create a gating signal for the output if there is only 1 stage
+  val gateValidD = signal("gate_valid_d",WIRE)
+  val gateValidE = signal("gate_valid_e",WIRE)
+  val gateValid  = signal("gate_valid")
 
+  // Creates a signal to gate the output enable only at the end of neural stage where the flop is active
+  // Error has a slightly different length that data because of the double read
+  gateValidD := ~errorUpdateLatch & (readWidthCount >= (loadLength - params.inputLength2 +1))
+  gateValidE := errorUpdateLatch & (readWidthCount >= (loadLength - params.inputLength2 )) & (readWidthCount < (loadLength))
+  if (params.inputLength2 < params.inputLength1) gateValid  := gateValidD | gateValidE
+  else gateValid  := 1
 
   val full_active      = (data_active | data_active(params.inputLength1))
 
@@ -124,8 +137,9 @@ case class DataControl(override val name:String,
   // Convenient Output Declarations
   dataToOutput.activeStart  := data_start
   dataToOutput.activeStartD := data_start(3)
+  // Latency = inputLength + 2 memory + 2 mac + 2bias/non
   dataToOutput.activePre    := outputValid(params.inputLength1+4)
-  dataToOutput.active       := outputValid(params.inputLength1+6)
+  dataToOutput.active       := outputValid(params.inputLength1+6) & gateValid
   dataToOutput.activeNormal := (data_active | data_active(params.inputLength1))
 
   dataToOutput.dataWriteAdd := Operators.Concat(loadDepthCount,loadWidthCount)
@@ -133,7 +147,9 @@ case class DataControl(override val name:String,
     (errorUpdateLatch & ~outputValid(0)) ? Operators.Concat(readErrorCount,readWidthCount) :: Operators.Concat(readDepthCount,readWidthCount)
 
   loadFinish  := readFinish
-  dataReady   := (fifoInputDepth <= (loadDepth-1))
+  dataReady   := (fifoInputDepth != loadDepth )
+  val test = signal("test")
+  test := (fifoInputDepth != loadDepth )
 
   /- ("Data Memory Interface")
   dataToOutput.dataValid := input.rdy & input.vld

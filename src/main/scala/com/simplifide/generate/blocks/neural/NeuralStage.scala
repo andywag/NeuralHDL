@@ -34,7 +34,12 @@ case class NeuralStage(override val name:String,
   val tapLat   = signal(SignalArray.Arr("taps_lat",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
   val tapSel   = signal(SignalArray.Arr("taps_select",FloatSignal(appendName(s"tap_lat"),WIRE),numberOfNeurons))
 
-  val biasIn = Seq(signal(FloatSignal(appendName("bias"),INPUT))) // FIXME : Generalize to Generic Number Type
+  val biasIn  = signal(FloatSignal(appendName("bias"),INPUT)) // FIXME : Generalize to Generic Number Type
+  // FIXME : The use of this is broken on a few levels. There are 2 purposes for this variable
+  // 1. Delay for Bias Addition : Delay needs to be the accumulator depth + 2 for adder delay
+  //                              This should be fixed to be the accumulator input but harder to debug
+  // 2. The second use is for the bias addition update which has a reasonable delay
+  val biasInR = register(biasIn)(numberOfNeurons+2) // FIXME : Generalize to Generic Number Type
 
   val dataOutPre   = signal(FloatSignal(appendName("data_out_pre"),OUTPUT))
   val dataOutBias  = signal(FloatSignal(appendName("data_out_bias"),OUTPUT))
@@ -76,7 +81,7 @@ operation is as follows.
 
 * input ${dataIn(0).document}   : Data Input of the Block
 * input ${tapIn(0).document}     : Neural Tap input of the Block
-* input ${biasIn(0).document}     : Bias Input of the Block (Needs to be delayed by 1 sample relative to other inputs
+* input ${biasIn.document}     : Bias Input of the Block (Needs to be delayed by 1 sample relative to other inputs
 
 ## Generator Code
 
@@ -108,7 +113,7 @@ dataOut        := internalSignal plus bias
   val share  = dataIn.length
   val depth  = tapIn.length
 
-  def inputs = tapIn :: first :: clk.allSignals(INPUT) ::: dataIn.toList  ::: biasIn.toList
+  def inputs = biasIn :: tapIn :: first :: clk.allSignals(INPUT) ::: dataIn.toList
 
   sigs(inputs.map(_.changeType(OpType.Input)))
   signal(dataOut.changeType(OpType.Output))
@@ -117,7 +122,7 @@ dataOut        := internalSignal plus bias
 
 
   val neuronOut      = seq(dataOut.newSignal(name = "wireOut"))(numberOfNeurons)
-  val neuronAccumIn  = seq(biasIn(0))(numberOfNeurons)
+  val neuronAccumIn  = seq(biasIn)(numberOfNeurons)
 
   val dataOutDelay    = seq(dataOut.newSignal(name = "outLine"),REG)(numberOfNeurons)
   val firstD          = Seq.tabulate(2)(x => signal(first.newSignal(name = s"first$x",REG)))
@@ -153,18 +158,27 @@ dataOut        := internalSignal plus bias
   // For data  Mode : Use outputs
   /- ("Create the output Delay Line\n")
   val neuronTemp      = seq(dataOut.newSignal(name = "neuron_temp"))(numberOfNeurons)
+  for (i <- 0 until numberOfNeurons) {
+    neuronTemp(i)   !:=  neuronOut(i)
+  }
+  dataOutDelay !:= ($if (firstD(0)) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
 
+  /- ("Create the bias update code")
   val tapLat1   = signal(SignalArray.Arr("taps_lat1",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
+  val biasAddInput = seq(dataOut.newSignal(name = "bias_add_input"),REG)(numberOfNeurons)
 
   for (i <- 0 until numberOfNeurons) {
     tapLat1.s(i).sgn !:= tapLat.s(i).sgn
     tapLat1.s(i).man !:= tapLat.s(i).man
     tapLat1.s(i).exp !:= (tapLat.s(i).exp > biasGain) ? (tapLat.s(i).exp - biasGain) :: tapLat.s(i).exp
-    //neuronTemp(i)   !:=  (errorMode) ? tapLat1.s(i) :: neuronOut(i)
-    neuronTemp(i)   !:=  neuronOut(i)
+    biasAddInput(i)     !:= tapLat1.s(i)
   }
 
-  dataOutDelay !:= ($if (firstD(0)) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
+
+  val biasAddDelay    = seq(dataOut.newSignal(name = "bias_add_delay"),REG)(numberOfNeurons)
+  biasAddDelay !:= ($if (firstD(0)) $then biasAddInput $else biasAddDelay.slice(1,biasAddDelay.length)) at (clk)
+
+
 
   // Creation of neuron instance
   val neuronEntity = neuron.createEntity
@@ -181,15 +195,19 @@ dataOut        := internalSignal plus bias
   // Final Adder Stage Used before Sigmoing
   // For Data Stage uses  : Output + Bias
   // For Error Stage uses : Bias + Error
-  val adderOut       = neuronOut(0).newSignal(appendName("adder"))
-  val adderBlock     = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasIn(0))
+  val adderOut           = neuronOut(0).newSignal(appendName("adder"))
+  val adderBlock         = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasInR(numberOfNeurons+2))
   instance(adderBlock)
+
+  val biasAdderOut       = neuronOut(0).newSignal(appendName("bias_adder"))
+  val biasAdderBlock     = new StageAdder(appendName("bias_add"),biasAdderOut,biasAddDelay(0),biasInR(1))
+  instance(biasAdderBlock)
 
   /- ("Assign the outputs")
   dataOutPre  !:= dataOutDelay(0)
 
   /- ("Assign the bias output")
-  dataOutBias !:= adderOut
+  dataOutBias !:= biasAdderOut
 
   val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut,
     nonlinearity.segment.dataOut.asInstanceOf[SignalTrait] -> dataOut)
@@ -210,7 +228,7 @@ dataOut        := internalSignal plus bias
 
 object NeuralStage {
   class Interface(override val name:String, stage:NeuralStage) extends SignalInterface {
-    override val inputs = List(stage.first, stage.dataIn(0), stage.biasIn(0),stage.tapIn,stage.errorMode,stage.errorFirst)
+    override val inputs = List(stage.first, stage.dataIn(0), stage.biasIn,stage.tapIn,stage.errorMode,stage.errorFirst)
     override val outputs = List(stage.dataOutPre, stage.dataOut)
   }
 

@@ -24,7 +24,8 @@ object BasicTestInformation {
     numberNeurons,
     errorFill,
     outputFill,
-    dataLocation)
+    dataLocation,
+    12)
 
   // Second Stage of data contains a 12x6 network stage
   def getInformation2(dataLocation:String) = NeuralStageInfo((outputLength,dataLength),
@@ -33,7 +34,8 @@ object BasicTestInformation {
     numberNeurons,
     errorFill,
     outputFill,
-    dataLocation)
+    dataLocation,
+    6)
 
   def getDualInformation(loc:String) = Seq(getInformation(loc),getInformation2(loc))
 

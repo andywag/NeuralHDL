@@ -18,7 +18,8 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
                            numberNeurons:Int,
                            errorFill:Int,
                            expectedFill:Int,
-                           dataLocation:String
+                           dataLocation:String,
+                           errorLength:Int = 12
                           ) {
 
   def logWidth(input:Int) = {
@@ -53,7 +54,7 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
   val expectedFifoAddressWidth = logWidth(expectedFifoDepth)
   // Error Fifo Information
   val errorFillWidth = logWidth(errorFill)
-  val errorTapLength = tapAddressLength
+  val errorTapLength = errorLength
 
   // FIXME : Need generic
   val memoryWidth = 32;

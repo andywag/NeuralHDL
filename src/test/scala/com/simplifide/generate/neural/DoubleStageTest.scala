@@ -17,7 +17,8 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
 
   // Get test information from a shared location
   // Contains training data and initial taps
-  val information = BasicTestInformation.getInformation(dataLocation)
+  //val information = BasicTestInformation.getInformation(dataLocation)
+  val information = BasicTestInformation.getDualInformation(dataLocation)
   // Set the test length
   override def getTestLength = BasicTestInformation.tapLength*8
   val numberNeurons = BasicTestInformation.numberNeurons
@@ -43,16 +44,17 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
-  val size = input.data.length()
+  val size = 6//input.data.length()
   /** Create the interface for the input data */
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
   inRdyCount := ($iff (inRdyCount === size-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
 
+  val size2 = 6//expected.data.length()
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
-  expRdyCount := ($iff (expRdyCount === size-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
+  expRdyCount := ($iff (expRdyCount === size2-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
   expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
@@ -70,23 +72,24 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
 
   // Control signals used for network stage
 
-  dutParser.mStage(0).control.controlInterface.loadLength  := information.dataLength-1
-  dutParser.mStage(0).control.controlInterface.loadDepth   := information.dataFill-1
-  dutParser.mStage(0).control.controlInterface.stateLength := information.stateLength-1
-  dutParser.mStage(0).control.tapErrorLength  := information.errorTapLength-1
+  dutParser.mStage(0).control.controlInterface.loadLength   := information(0).dataLength-1
+  dutParser.mStage(0).control.controlInterface.loadDepth    := information(0).dataFill-1
+  dutParser.mStage(0).control.controlInterface.stateLength  := information(0).stateLength-1
+  dutParser.mStage(0).control.controlInterface.errorLength  := information(0).errorTapLength-1
 
-  dutParser.mStage(1).control.controlInterface.loadLength  := information.tapDimension._2-1
-  dutParser.mStage(1).control.controlInterface.loadDepth   := information.dataFill-1
-  dutParser.mStage(1).control.controlInterface.stateLength := 1
-  dutParser.mStage(1).control.tapErrorLength  := information.errorTapLength-1
+  dutParser.mStage(1).control.controlInterface.loadLength   := information(0).tapDimension._2-1
+  dutParser.mStage(1).control.controlInterface.loadDepth    := information(0).dataFill-1
+  dutParser.mStage(1).control.controlInterface.stateLength  := 1
+  dutParser.mStage(1).control.controlInterface.errorLength  := information(1).errorTapLength-1
 
+  interface.outRdy.rdy := 1
 
 
   /** Method used to reorder taps and output them to files.It is an overly complex transpose
     * operation.
     **/
   def createInitialTaps  {
-    val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
+    val allSlices = List.tabulate(information(0).tapDimension._2)(x => tapData.slice(x,0))
     val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
     val cSlices   = nSlices.map(x => x._2.map(_._1))
     cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))

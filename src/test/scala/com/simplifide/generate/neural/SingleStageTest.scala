@@ -77,12 +77,12 @@ class SingleStageTest extends BlockScalaTest with BlockTestParser {
   //dutParser.mStage(0).control.dataLength  := information.dataLength-1
   //dutParser.mStage(0).control.loadDepth   := information.dataFill-1
   //dutParser.mStage(0).control.stateLength     := information.stateLength-1
-  dutParser.mStage(0).control.tapErrorLength  := information.errorTapLength-1
+  dutParser.mStage(0).control.controlInterface.errorLength  := information.errorTapLength-1
   //dutParser.mStage(0).control.loadDepth  := 8 -1
 
 
   dutParser.mStage(0).control.controlInterface.loadLength    := information.dataLength-1
-  dutParser.mStage(0).control.controlInterface.loadDepth     := 2//information.dataFill-1
+  dutParser.mStage(0).control.controlInterface.loadDepth     := 5//information.dataFill-1
   dutParser.mStage(0).control.controlInterface.stateLength   := information.stateLength-1
 
 
