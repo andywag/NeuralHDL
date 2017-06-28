@@ -80,11 +80,13 @@
   wire                  [1:0]   error_phase_read  ;  // <2,0>
   wire                  [31:0]  error_sub_address ;  // <32,0>
   wire                  [3:0]   error_tap_length  ;  // <4,0>
+  wire                          error_tap_update_out;  // <1,0>
   wire                          error_update_first;  // <1,0>
   wire                          error_update_latch;  // <1,0>
   wire                          error_update_mode ;  // <1,0>
   wire                          error_valid       ;  // <1,0>
   wire                  [31:0]  error_value       ;  // <32,0>
+  wire                          input_stage       ;  // <1,0>
   wire                  [2:0]   load_depth        ;  // <3,0>
   wire                  [2:0]   load_length       ;  // <3,0>
   wire                          read_finish       ;  // <1,0>
@@ -124,6 +126,7 @@ simple_st0_ctrl_data_fifo simple_st0_ctrl_data_fifo (
     .data_value(data_value),
     .data_write_addr(data_write_addr),
     .error_finish_tap(error_finish_tap),
+    .error_tap_update_out(error_tap_update_out),
     .error_update_first(error_update_first),
     .error_update_latch(error_update_latch),
     .error_update_mode(error_update_mode),
@@ -153,11 +156,13 @@ simple_st0_ctrl_error_fifo simple_st0_ctrl_error_fifo (
     .error_phase_read(error_phase_read),
     .error_sub_address(error_sub_address),
     .error_tap_length(error_tap_length),
+    .error_tap_update_out(error_tap_update_out),
     .error_update_first(error_update_first),
     .error_update_latch(error_update_latch),
     .error_update_mode(error_update_mode),
     .error_valid(error_valid),
     .error_value(error_value),
+    .input_stage(input_stage),
     .load_length(load_length),
     .read_finish(read_finish),
     .reset(reset),
@@ -196,6 +201,7 @@ simple_st0_ctrl_out_ctrl simple_st0_ctrl_out_ctrl (
     .error_phase_read(error_phase_read),
     .error_sub_address(error_sub_address),
     .error_tap_length(error_tap_length),
+    .error_tap_update_out(error_tap_update_out),
     .error_update_first(error_update_first),
     .error_update_latch(error_update_latch),
     .error_valid(error_valid),
@@ -229,5 +235,6 @@ assign load_length = simple_st0_ctrl_int.load_length;
 assign load_depth = simple_st0_ctrl_int.load_depth;
 assign state_length = simple_st0_ctrl_int.state_length;
 assign error_tap_length = simple_st0_ctrl_int.error_length;
+assign input_stage = simple_st0_ctrl_int.input_stage;
 endmodule
 

@@ -31,6 +31,7 @@
   input                 [1:0]   error_phase_read,
   input                 [31:0]  error_sub_address,
   input                 [3:0]   error_tap_length,
+  input                         error_tap_update_out,
   input                         error_update_first,
   input                         error_update_latch,
   input                         error_valid,
@@ -155,6 +156,8 @@ assign tap_int.wr_vld = (error_valid | (enable_feedback & wr_address_vld_r5));
 assign tap_int.sub_vld = wr_address_vld_r5 ? 'd0 : error_valid;
 assign tap_int.sub_addr = error_sub_address;
 assign tap_int.sub_data = error_value;
+assign tap_int.inter = error_tap_update_out;
+assign tap_int.inter_first = error_update_first;
 assign tap_int_wr_data = full_st0_st_tap_out;
 
 // Output Driving Control

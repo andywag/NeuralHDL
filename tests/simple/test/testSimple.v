@@ -254,6 +254,7 @@ assign simple_st0_ctrl_int.error_length = 4'd11;
 assign simple_st0_ctrl_int.load_length = 3'd5;
 assign simple_st0_ctrl_int.load_depth = 3'd5;
 assign simple_st0_ctrl_int.state_length = 'd1;
+assign simple_st0_ctrl_int.input_stage = 'd1;
 
 // Counter to Index Test
 always @(posedge clk) begin

@@ -15,6 +15,7 @@
     module full_st1_ctrl_data_fifo(
   input                         clk,
   input                         error_finish_tap,
+  input                         error_tap_update_out,
   input                         error_update_first,
   input                         error_update_latch,
   input                         error_update_mode,

@@ -48,6 +48,8 @@
 
 // Registers 
 
+  reg                   [3:0]   inter_count_0     ;  // <4,0>
+  reg                   [3:0]   inter_count_1     ;  // <4,0>
 
 
 // Other
@@ -120,6 +122,32 @@ memory_32_4 full_st0_mem_tap_5 (
     .m_wr_data(write_5),
     .reset(reset));
 
+always @(posedge clk) begin
+  if (reset) begin
+    inter_count_0 <= 4'd0;
+  end
+  else if (tap_int.inter) begin 
+    if ((tap_int.inter_first | (inter_count_0 == 'd5))) begin
+      inter_count_0 <= 4'd0;
+    end
+    else begin
+      inter_count_0 <= inter_count_0[3:0] + 4'd1;
+    end
+  end
+end
+always @(posedge clk) begin
+  if (reset) begin
+    inter_count_1 <= 4'd0;
+  end
+  else if ((tap_int.inter_first | (inter_count_0 == 'd5))) begin 
+    if (tap_int.inter_first) begin
+      inter_count_1 <= 4'd0;
+    end
+    else begin
+      inter_count_1 <= inter_count_1[3:0] + 4'd1;
+    end
+  end
+end
 assign write_sub[0] = ((tap_int.sub_addr == 'd0) & tap_int.sub_vld);
 assign write_0 = write_sub[0] ? tap_int.sub_data : tap_int_wr_data[31:0];
 assign mem_int_0.rd_address = tap_int.rd_address;

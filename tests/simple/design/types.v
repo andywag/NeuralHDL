@@ -6,6 +6,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } bias_int_32_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -15,6 +17,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [5:0]   wr_address        ;  // <6,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } data_int_32_6; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -24,6 +28,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [5:0]   wr_address        ;  // <6,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } expected_int_32_6; 
 typedef struct packed {
   logic                         sgn               ;  // <1,0>
@@ -38,6 +44,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } m_32_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -47,6 +55,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [5:0]   wr_address        ;  // <6,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } m_32_6; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -56,6 +66,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_0_192_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -65,6 +77,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_0_32_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -74,6 +88,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [5:0]   wr_address        ;  // <6,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_0_32_6; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -83,6 +99,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_1_192_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -92,6 +110,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_2_192_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -101,6 +121,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_3_192_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -110,6 +132,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_4_192_4; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
@@ -119,12 +143,15 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } mem_int_5_192_4; 
 typedef struct packed {
   logic                 [2:0]   load_depth        ;  // <3,0>
   logic                         state_length      ;  // <1,0>
   logic                 [2:0]   load_length       ;  // <3,0>
   logic                 [3:0]   error_length      ;  // <4,0>
+  logic                         input_stage       ;  // <1,0>
 } simple_st0_ctrl_int_t; 
 typedef struct packed {
   float_24_8                    v0;  // <1,0>
@@ -150,6 +177,8 @@ typedef struct packed {
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
   logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
 } tap_int_192_4; 
 typedef struct packed {
   float_24_8                    v0;  // <1,0>

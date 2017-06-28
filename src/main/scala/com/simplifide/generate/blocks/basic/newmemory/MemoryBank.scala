@@ -1,12 +1,13 @@
 package com.simplifide.generate.blocks.basic.newmemory
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
+import com.simplifide.generate.blocks.basic.misc.Counter
 import com.simplifide.generate.blocks.test.FileLoad.{ReadMemH, ReadMemHName}
 import com.simplifide.generate.generator.{ComplexSegment, SimpleSegment}
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.project.{Connection, NewEntityInstance}
-import com.simplifide.generate.signal.{FixedType, SignalTrait}
+import com.simplifide.generate.signal.{Constant, FixedType, SignalTrait}
 
 /**
   * Created by andy on 5/22/17.
@@ -18,6 +19,19 @@ case class MemoryBank(name:String,
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
 
+  def createInter() = {
+    val interCount0     = signal("inter_count_0",REG,input.ctrl.rdAddress.fixed)
+    val interCount1     = signal("inter_count_1",REG,input.ctrl.rdAddress.fixed)
+    val base            = signal("inter_base",REG,input.ctrl.rdAddress.fixed)
+
+    val res = input.ctrl.interFirst | (interCount0 === number -1)
+    ->(Counter.Simple(interCount0,Some(res),Some(input.ctrl.inter)))
+    ->(Counter.Simple(interCount1,Some(input.ctrl.interFirst),Some(res)))
+
+    val insts    = for (i <- 0 until number) {
+
+    }
+  }
 
   override def createBody() {}
   //override val instances = struct.createEntity
@@ -37,6 +51,9 @@ case class MemoryBank(name:String,
   val memCtrl1     = List.tabulate(number)(x => signal(input.ctrl.copyStruct(s"mem_int_$x",WIRE)))
   val memCtrl      = memCtrl1.map(_.asInstanceOf[MemoryStruct.Ctrl])
 
+  // Create the interleaving control for the tap memory.
+  // Should not be included in this block but is here for convenience now
+  if (number > 1) createInter()
 
   val insts    = for (i <- 0 until number) {
     // Signals
@@ -46,6 +63,10 @@ case class MemoryBank(name:String,
     // Slice values for signal
     val slice = (width*(i+1)-1,width*i)
     if (number > 1) {
+      //val rd_offset1 = signal(s"rd_offset1_$i", WIRE, input.ctrl.rdAddress.fixed)
+      //val rd_offset = signal(s"rd_offset_$i", WIRE, input.ctrl.rdAddress.fixed)
+      //rd_offset1 := input.ctrl.rdAddress + i
+      //rd_offset  := (rd_offset1 < number) ? rd_offset1 :: rd_offset1 - number
       writeArray((i,i)) := (input.ctrl.subAddress === i) & input.ctrl.subVld
       wr := writeArray((i,i)) ? input.ctrl.subData :: input.wrData(slice) // Select either the single line or the array
       memCtrl(i).rdAddress := input.ctrl.rdAddress

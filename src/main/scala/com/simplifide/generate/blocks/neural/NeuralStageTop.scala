@@ -98,8 +98,9 @@ object NeuralStageTop {
     val loadDepth        = SignalTrait(createName("load_depth"),opType,FixedType.unsigned(info.dataFillWidth,0))
     val stateLength      = SignalTrait(createName("state_length"),opType,FixedType.unsigned(info.stateWidth,0))
     val errorLength      = SignalTrait(createName("error_length"),opType,FixedType.unsigned(info.tapAddressWidth,0))
-    
-    override val signals: List[SignalTrait] = List(loadDepth, stateLength,loadLength, errorLength)
+    val inputStage       = SignalTrait(createName("input_stage"),opType,FixedType.unsigned(1,0))
+
+    override val signals: List[SignalTrait] = List(loadDepth, stateLength,loadLength, errorLength, inputStage)
 
 
 

@@ -25,10 +25,13 @@ case class ErrorControl(override val name:String,
   signal(parent.parent.stage.errorMode.changeType(OUTPUT))
   signal(parent.parent.stage.errorFirst.changeType(OUTPUT))
 
+  // Signal specifying whether this block feeds back the error signal
+  val inputStage = signal(parent.inputStage.asInput)
+  // Signal to control when the block is updating the error to the earlier stage
+  val errorTapUpdate = signal("error_tap_update")
+
 
   val errorUpdateMode       = ErrorToData.errorUpdateMode
-
-
   val loadLength       = signal("load_length",INPUT,U(params.inputWidth1))
 
 
@@ -51,6 +54,10 @@ case class ErrorControl(override val name:String,
   val errorUpdateLast        = register("error_update_last_internal",WIRE)(4)
 
 
+  // Create 2 possible phases for dealing with the error feedback values
+
+
+
   // FIXME : Duplicate Operations
   /- ("Create the Tap Update Control which gates the error feedback")
   val rdAddressVld      = signal("wr_address_vld",WIRE)
@@ -63,6 +70,11 @@ case class ErrorControl(override val name:String,
   errorFinish     := (errorCount === (tapErrorLength)) & (input.enable)
   errorFinishTap  := ErrorToData.stateFinish & ErrorControl.errorUpdateLatch
 
+  /- ("Condition to Update Error Mode")
+  val realErrorFinish = signal("real_error_finish")
+  errorTapUpdate  := $iff (inputStage) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
+  ErrorControl.errorTapUpdateOut := errorTapUpdate & ~inputStage
+  realErrorFinish := errorFinish & errorTapUpdate
 
   /- ("Input Control and Tap Addressiong")
   errorCount            := ($iff(errorFinish)    $then 0 $else (errorCount + 1)).$at(clk.createEnable(input.enable))
@@ -71,26 +83,21 @@ case class ErrorControl(override val name:String,
   ->(Counter.Length(parent.errorToOutput.errorSubAddress,loadLength,Some(input.enable)))
 
   /- ("Error Input Operations")
-  //errorPhase      := ($iff (errorPhase === (params.errorLength-1)) $then (errorPhase ::= 0) $else (errorPhase +1)).$at(clk.createEnable(errorFinish))
-  //errorPhaseCount := ($iff (errorPhaseCount === (params.errorLength-1)) $then (errorPhaseCount ::= 0) $else (errorPhaseCount +1)).$at(clk.createEnable(errorFinishTap))
-  errorFifoDepth   := $iff (errorUpdateLast(0) & errorFinish) $then           // Fifo is cleared only when error is used (not implemented)
+  val decrement = errorUpdateLast(0) & errorTapUpdate
+  errorFifoDepth   := $iff (decrement & errorFinish) $then           // Fifo is cleared only when error is used (not implemented)
     errorFifoDepth $else_if (errorFinish) $then
-    errorFifoDepth + 1 $else_if (errorUpdateLast(0)) $then errorFifoDepth - 1  $at clk
+    errorFifoDepth + 1 $else_if (decrement) $then errorFifoDepth - 1  $at clk
 
   errorFifoFull := (errorFifoDepth === params.errorLength-2)
 
 
-  //errorUpdateMode       := errorPhase > 0
-
-  //errorUpdateMode       := (errorFifoDepth > 0) & ~((errorFifoDepth === 1) & ErrorToData.stateFinish & errorUpdateLatch)
-  errorUpdateMode       := (errorFifoDepth > 0) // & ErrorToData.stateFinish
-
-  errorPhaseRead      := ($iff (errorPhaseRead === (params.errorLength-1)) $then 0 $else (errorPhaseRead +1)).$at(clk.createEnable(errorUpdateFirst))
-
+  /-("Error Control Signals")
+  errorUpdateMode       := (errorFifoDepth > 0)
+  val phaseEnable = errorUpdateFirst & errorTapUpdate
+  errorPhaseRead      := ($iff (errorPhaseRead === (params.errorLength-1)) $then 0 $else (errorPhaseRead +1)).$at(clk.createEnable(phaseEnable))
   errorUpdateLatch(0)      := errorUpdateMode.$at(clk.createEnable(ErrorToData.stateFinish))
 
   errorUpdateFirst(0)      := (ErrorToData.stateFinish ? (errorUpdateMode & ErrorToData.readFinish) :: (errorUpdateLatch & ErrorToData.readFinish)).$at(clk)
-  //errorUpdateLast(0)       := (errorUpdateLatch & ErrorToData.stateFinish).$at(clk)
   errorUpdateLast(0)       := ((errorFifoDepth > 0) & ErrorToData.stateFinish).$at(clk)
 
   ErrorControl.errorUpdateFirst  := errorUpdateFirst(0) & errorUpdateLatch(0)
@@ -107,9 +114,10 @@ case class ErrorControl(override val name:String,
 }
 
 object ErrorControl {
-  val errorUpdateLatch      = SignalTrait("error_update_latch",OpType.Input)
-  val errorUpdateFirst       = SignalTrait("error_update_first",OpType.Input)
-  val errorFinishTap         = SignalTrait("error_finish_tap",OpType.Output)
+  val errorUpdateLatch          = SignalTrait("error_update_latch",OpType.Input)
+  val errorUpdateFirst          = SignalTrait("error_update_first",OpType.Input)
+  val errorFinishTap            = SignalTrait("error_finish_tap",OpType.Output)
+  val errorTapUpdateOut         = SignalTrait("error_tap_update_out",OpType.Output)
 
   case class ErrorToOutput(params:DataControl.Params) extends SignalInterface{
     override val name = "error_to_data"
@@ -122,7 +130,8 @@ object ErrorControl {
     val errorPhaseRead      = SignalTrait("error_phase_read",OpType.RegOutput,FixedType.unsigned(params.errorWidth,0))
 
     override val inputs = List(errorCount, errorValid, errorValue,
-      errorPhase, errorPhaseRead, errorUpdateLatch, errorUpdateFirst, errorSubAddress)
+      errorPhase, errorPhaseRead, errorUpdateLatch, errorUpdateFirst, errorSubAddress,
+      ErrorControl.errorTapUpdateOut)
   }
 
   case object ErrorToData extends SignalInterface{
@@ -135,7 +144,9 @@ object ErrorControl {
     val errorUpdateFirst   = ErrorControl.errorUpdateFirst
 
 
-    override val inputs = List(errorUpdateMode, errorUpdateFirst, errorUpdateLatch, errorFinishTap)
+
+    override val inputs = List(errorUpdateMode, errorUpdateFirst, errorUpdateLatch, errorFinishTap,
+      ErrorControl.errorTapUpdateOut)
     override val outputs = List(stateFinish, readFinish)
 
   }

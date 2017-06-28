@@ -47,13 +47,14 @@ case class NeuronControl[T](override val name:String,
   private val loadDepth        = signal("load_depth",WIRE,U(info.dataFillWidth,0))
   private val stateLength      = signal("state_length",WIRE,U(info.stateWidth,0))
   private val tapErrorLength   = signal("error_tap_length",WIRE,U(info.tapAddressWidth,0))
+  val inputStage       = signal("input_stage")
+
 
   dataLength     := controlInterface.loadLength
   loadDepth      := controlInterface.loadDepth
   stateLength    := controlInterface.stateLength
   tapErrorLength := controlInterface.errorLength
-
-
+  inputStage     := controlInterface.inputStage
   // Datalength of this stage - used to count both input and output
   //
 

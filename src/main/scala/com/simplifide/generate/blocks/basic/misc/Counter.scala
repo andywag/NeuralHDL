@@ -30,18 +30,24 @@ class Counter(val counter:SignalTrait)(implicit clk:ClockControl) extends Simple
 
 object Counter {
 
-  case class Simple(val signal:SignalTrait, val reset:Option[Expression], enable:Option[Expression])(implicit clk:ClockControl) extends ComplexSegment {
+  case class Simple(val signal:SignalTrait, val reset:Option[Expression], enable:Option[Expression],
+                    incr:Expression = Constant(1.0))(implicit clk:ClockControl) extends ComplexSegment {
     /** Defines the body in the block */
     override def createBody: Unit = {}
 
     val op = reset match {
-      case Some(x) => $iff (x) $then 0 $else (signal + 1)
-      case _       => signal + 1
+      case Some(x) => $iff (x) $then 0 $else (signal + incr)
+      case _       => signal + incr
     }
     val cl = enable.map(clk.createEnable(_)).getOrElse(clk)
     signal := op.$at(cl)
 
     def end = reset.getOrElse(Constant(1.0))
+
+  }
+
+  def Increment(signal:SignalTrait,inc:Expression,
+                reset:Option[Expression]=None,enable:Option[Expression]=None)(implicit clk:ClockControl) = {
 
   }
 

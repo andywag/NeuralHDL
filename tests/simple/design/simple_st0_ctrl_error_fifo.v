@@ -15,6 +15,7 @@
     module simple_st0_ctrl_error_fifo(
   input                         clk,
   input                 [3:0]   error_tap_length,
+  input                         input_stage,
   input                 [2:0]   load_length,
   input                         read_finish,
   input                         reset,
@@ -27,6 +28,7 @@
   output                [1:0]   error_phase,
   output                [1:0]   error_phase_read,
   output                [31:0]  error_sub_address,
+  output                        error_tap_update_out,
   output                        error_update_first,
   output                        error_update_latch,
   output                        error_update_mode,
@@ -44,8 +46,10 @@
 
   wire                          error_fifo_full   ;  // <1,0>
   wire                          error_finish      ;  // <1,0>
+  wire                          error_tap_update  ;  // <1,0>
   wire                          error_update_first_internal;  // <1,0>
   wire                          error_update_last_internal;  // <1,0>
+  wire                          real_error_finish ;  // <1,0>
   wire                          wr_address_vld    ;  // <1,0>
 
 
@@ -155,6 +159,23 @@ assign stage_0_error_rdy = ((~wr_address_vld_r4 & ~error_fifo_full) & ~error_upd
 assign error_finish = ((error_count == error_tap_length) & (stage_0_error_rdy & stage_0_error_vld));
 assign error_finish_tap = (state_finish & error_update_latch);
 
+// Condition to Update Error Mode
+always @(posedge clk) begin
+  if (reset) begin
+    error_tap_update <= 'd0;
+  end
+  else begin
+    if (input_stage) begin
+      error_tap_update <= 'd1;
+    end
+    else if (error_update_last_internal) begin 
+      error_tap_update <= ~error_tap_update;
+    end
+  end
+end
+assign error_tap_update_out = (error_tap_update & ~input_stage);
+assign real_error_finish = (error_finish & error_tap_update);
+
 // Input Control and Tap Addressiong
 always @(posedge clk) begin
   if (reset) begin
@@ -215,24 +236,26 @@ always @(posedge clk) begin
     error_fifo_depth <= 3'd0;
   end
   else begin
-    if ((error_update_last_internal & error_finish)) begin
+    if (((error_update_last_internal & error_tap_update) & error_finish)) begin
       error_fifo_depth <= error_fifo_depth;
     end
     else if (error_finish) begin 
       error_fifo_depth <= error_fifo_depth[2:0] + 3'd1;
     end
-    else if (error_update_last_internal) begin 
+    else if ((error_update_last_internal & error_tap_update)) begin 
       error_fifo_depth <= error_fifo_depth[2:0] - 3'd1;
     end
   end
 end
 assign error_fifo_full = (error_fifo_depth == 'd2);
+
+// Error Control Signals
 assign error_update_mode = (error_fifo_depth > 'd0);
 always @(posedge clk) begin
   if (reset) begin
     error_phase_read <= 2'd0;
   end
-  else if (error_update_first_internal) begin 
+  else if ((error_update_first_internal & error_tap_update)) begin 
     if ((error_phase_read == 'd3)) begin
       error_phase_read <= 2'd0;
     end
