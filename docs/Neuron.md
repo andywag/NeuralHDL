@@ -35,8 +35,8 @@ dataOut        := internalSignal plus bias
 
 ## Reference Code
 
-* [Code Generator](../../../src/main/scala/com/simplifide/generate/blocks/neural//Neuron.scala)
-* [Verilog Output](../design/)
+* [Code Generator](../src/main/scala/com/simplifide/generate/blocks/neural/Neuron.scala)
+* [Verilog Output](../tests/neuron/design/neuron.v)
 
 
 
