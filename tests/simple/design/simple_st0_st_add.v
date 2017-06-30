@@ -14,7 +14,7 @@
 
     module simple_st0_st_add(
   input                         clk,
-  input float_24_8              outLine_w0,
+  input float_24_8              out_line_w0,
   input                         reset,
   input float_24_8              simple_st0_st_bias_r8,
   output float_24_8             simple_st0_st_adder);
@@ -51,11 +51,11 @@
 
 
 
-assign simple_st0_st_adder_del = {0'd0,outLine_w0.exp} - {0'd0,simple_st0_st_bias_r8.exp};
+assign simple_st0_st_adder_del = {0'd0,out_line_w0.exp} - {0'd0,simple_st0_st_bias_r8.exp};
 assign simple_st0_st_adder_shift = simple_st0_st_adder_del[8] ? -simple_st0_st_adder_del : simple_st0_st_adder_del;
 assign simple_st0_st_adder_sgn = simple_st0_st_adder_del[8];
-assign simple_st0_st_adder_exp = simple_st0_st_adder_del[8] ? simple_st0_st_bias_r8.exp : outLine_w0.exp;
-assign simple_st0_st_adder_ain1 = outLine_w0.sgn ? -{1'd0,1'd0,1'd1,outLine_w0.man} : {1'd0,1'd0,1'd1,outLine_w0.man};
+assign simple_st0_st_adder_exp = simple_st0_st_adder_del[8] ? simple_st0_st_bias_r8.exp : out_line_w0.exp;
+assign simple_st0_st_adder_ain1 = out_line_w0.sgn ? -{1'd0,1'd0,1'd1,out_line_w0.man} : {1'd0,1'd0,1'd1,out_line_w0.man};
 assign simple_st0_st_adder_ain2 = simple_st0_st_bias_r8.sgn ? -{1'd0,1'd0,1'd1,simple_st0_st_bias_r8.man} : {1'd0,1'd0,1'd1,simple_st0_st_bias_r8.man};
 assign simple_st0_st_adder_nsh_in = simple_st0_st_adder_sgn ? simple_st0_st_adder_ain2 : simple_st0_st_adder_ain1;
 assign simple_st0_st_adder_sh_in1 = simple_st0_st_adder_sgn ? simple_st0_st_adder_ain1 : simple_st0_st_adder_ain2;

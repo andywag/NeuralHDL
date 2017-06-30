@@ -157,7 +157,7 @@ assign stage_0_error_rdy = ((~wr_address_vld_r4 & ~error_fifo_full) & ~error_upd
 
 // Finish Conditions
 assign error_finish = ((error_count == error_tap_length) & (stage_0_error_rdy & stage_0_error_vld));
-assign error_finish_tap = (state_finish & error_update_latch);
+assign error_finish_tap = ((state_finish & error_update_latch) & error_tap_update);
 
 // Condition to Update Error Mode
 always @(posedge clk) begin
@@ -195,7 +195,7 @@ always @(posedge clk) begin
     error_write_count <= 4'd0;
   end
   else if ((stage_0_error_rdy & stage_0_error_vld)) begin 
-    if ((error_write_count == load_length)) begin
+    if ((error_write_count == 'd5)) begin
       error_write_count <= 4'd0;
     end
     else begin
@@ -207,7 +207,7 @@ always @(posedge clk) begin
   if (reset) begin
     error_phase <= 2'd0;
   end
-  else if (((error_write_count == load_length) & (stage_0_error_rdy & stage_0_error_vld))) begin 
+  else if (((error_write_count == 'd5) & (stage_0_error_rdy & stage_0_error_vld))) begin 
     if ((error_phase == 'd3)) begin
       error_phase <= 2'd0;
     end
@@ -221,7 +221,7 @@ always @(posedge clk) begin
     error_sub_address <= 32'd0;
   end
   else if ((stage_0_error_rdy & stage_0_error_vld)) begin 
-    if ((error_sub_address == load_length)) begin
+    if ((error_sub_address == 'd5)) begin
       error_sub_address <= 32'd0;
     end
     else begin
@@ -255,7 +255,7 @@ always @(posedge clk) begin
   if (reset) begin
     error_phase_read <= 2'd0;
   end
-  else if ((error_update_first_internal & error_tap_update)) begin 
+  else if ((error_update_first_internal & (~error_tap_update | input_stage))) begin 
     if ((error_phase_read == 'd3)) begin
       error_phase_read <= 2'd0;
     end

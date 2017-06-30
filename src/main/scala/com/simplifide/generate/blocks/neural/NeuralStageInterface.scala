@@ -21,6 +21,7 @@ case class NeuralStageInterface[T](name:String, proto:T) extends SignalInterface
   val dataOutPre     = FloatSignal(appendName("data_out_pre"),OpType.Output)
   val outPreRdy      = new ReadyValidInterface(dataOutPre)
 
+
   val errorOut        = FloatSignal(appendName("error_out"),OpType.Input)
   val errorOutRdy       = new ReadyValidInterface(errorOut)
 

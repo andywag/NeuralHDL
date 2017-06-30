@@ -36,6 +36,7 @@
   output                        data_valid,
   output                [31:0]  data_value,
   output                [6:0]   data_write_addr,
+  output                        err_finish_i,
   output                        full_st1_ctrl_data_fifo_data_ready,
   output                        load_finish,
   output                        read_finish,
@@ -57,8 +58,6 @@
   wire                          gate_valid_e      ;  // <1,0>
   wire                          load_input_done   ;  // <1,0>
   wire                          output_valid      ;  // <1,0>
-  wire                          read_state_count  ;  // <1,0>
-  wire                  [3:0]   read_width_count  ;  // <4,0>
   wire                          temp              ;  // <1,0>
   wire                          test              ;  // <1,0>
   wire                          update_counter    ;  // <1,0>
@@ -88,6 +87,12 @@
   reg                           data_start_r2     ;  // <1,0>
   reg                           data_start_r3     ;  // <1,0>
   reg                   [4:0]   dtap_address      ;  // <5,0>
+  reg                           err_finish        ;  // <1,0>
+  reg                           err_finish_r1     ;  // <1,0>
+  reg                           err_finish_r2     ;  // <1,0>
+  reg                           err_finish_r3     ;  // <1,0>
+  reg                           err_finish_r4     ;  // <1,0>
+  reg                   [3:0]   error_update_count;  // <4,0>
   reg                           error_update_mode_r1;  // <1,0>
   reg                           error_update_mode_r2;  // <1,0>
   reg                           error_update_mode_r3;  // <1,0>
@@ -115,6 +120,8 @@
   reg                           output_valid_r9   ;  // <1,0>
   reg                   [2:0]   read_depth_count  ;  // <3,0>
   reg                   [2:0]   read_error_count  ;  // <3,0>
+  reg                           read_state_count  ;  // <1,0>
+  reg                   [3:0]   read_width_count  ;  // <4,0>
   reg                   [4:0]   tap_address_r1    ;  // <5,0>
   reg                   [4:0]   tap_address_r2    ;  // <5,0>
   reg                   [4:0]   tap_address_r3    ;  // <5,0>
@@ -178,6 +185,20 @@ always @(posedge clk) begin
     data_start_r1 <= data_start;
     data_start_r2 <= data_start_r1;
     data_start_r3 <= data_start_r2;
+  end
+end
+always @(posedge clk) begin
+  if (reset) begin
+    err_finish_r1 <= 'd0;
+    err_finish_r2 <= 'd0;
+    err_finish_r3 <= 'd0;
+    err_finish_r4 <= 'd0;
+  end
+  else begin
+    err_finish_r1 <= err_finish;
+    err_finish_r2 <= err_finish_r1;
+    err_finish_r3 <= err_finish_r2;
+    err_finish_r4 <= err_finish_r3;
   end
 end
 always @(posedge clk) begin
@@ -346,6 +367,20 @@ always @(posedge clk) begin
     end
   end
 end
+always @* err_finish <= (error_update_count == 'd5);
+always @(posedge clk) begin
+  if (reset) begin
+    error_update_count <= 4'd0;
+  end
+  else begin
+    if ((data_start | err_finish)) begin
+      error_update_count <= 4'd0;
+    end
+    else if (update_counter) begin 
+      error_update_count <= error_update_count[3:0] + 4'd1;
+    end
+  end
+end
 always @(posedge clk) begin
   if (reset) begin
     read_depth_count <= 3'd0;
@@ -363,7 +398,7 @@ always @(posedge clk) begin
   if (reset) begin
     read_error_count <= 3'd0;
   end
-  else if ((state_finish & error_update_latch)) begin 
+  else if (((state_finish & ~error_tap_update_out) & error_update_latch)) begin 
     if ((read_error_count == load_depth)) begin
       read_error_count <= 3'd0;
     end
@@ -403,5 +438,6 @@ assign test = (fifo_input_depth != load_depth);
 // Data Memory Interface
 assign data_valid = (stage_1_data_rdy & stage_1_data_vld);
 assign data_value = stage_1_data;
+assign err_finish_i = (err_finish_r4 & error_tap_update_out);
 endmodule
 

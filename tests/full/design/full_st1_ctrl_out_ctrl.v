@@ -18,6 +18,7 @@
   input                         active_pre,
   input                         active_start_d,
   input                 [4:0]   bias_address,
+  input                         bias_enable,
   input                 [31:0]  bias_int_rd_data,
   input                 [4:0]   bias_wr_address,
   input                         clk,
@@ -26,6 +27,7 @@
   input                         data_valid,
   input                 [31:0]  data_value,
   input                 [6:0]   data_write_addr,
+  input                         err_finish_i,
   input                 [3:0]   error_count,
   input                 [1:0]   error_phase,
   input                 [1:0]   error_phase_read,
@@ -44,8 +46,11 @@
   input                         reset,
   input                         stage_1_data_out_pre_rdy,
   input                         stage_1_data_out_rdy,
+  input                         stage_1_error_out_rdy,
   input                 [4:0]   tap_address,
+  input                         tap_enable,
   input                 [191:0] tap_int_rd_data,
+  input                         zerror_int_rdy,
   output bias_int_32_3          bias_int,
   output                [31:0]  bias_int_wr_data,
   output data_int_32_7          data_int,
@@ -59,11 +64,19 @@
   output                        stage_1_data_out_pre_fst,
   output                        stage_1_data_out_pre_vld,
   output                        stage_1_data_out_vld,
+  output float_24_8             stage_1_error_out,
+  output                        stage_1_error_out_fst,
+  output                        stage_1_error_out_vld,
+  output                        stage_error_back,
   output                        stage_error_first,
   output                        stage_error_mode,
   output tap_int_192_4          tap_int,
   output                [191:0] tap_int_wr_data,
-  output taps_typ_6             taps);
+  output taps_typ_6             taps,
+  output                        update_error_first,
+  output float_24_8             zerror_int,
+  output                        zerror_int_fst,
+  output                        zerror_int_vld);
 
 // Parameters 
 
@@ -71,14 +84,25 @@
 
 // Wires 
 
-  wire                          enable_bias_feedback;  // <1,0>
-  wire                          enable_feedback   ;  // <1,0>
+  wire                          error_tap_write   ;  // <1,0>
   wire                  [3:0]   rd_address_wire   ;  // <4,0>
   wire                          wr_address_vld    ;  // <1,0>
 
 
 // Registers 
 
+  reg                           active_start_d_r1 ;  // <1,0>
+  reg                           active_start_d_r2 ;  // <1,0>
+  reg                           error_tap_update_out_r1;  // <1,0>
+  reg                           error_tap_update_out_r10;  // <1,0>
+  reg                           error_tap_update_out_r2;  // <1,0>
+  reg                           error_tap_update_out_r3;  // <1,0>
+  reg                           error_tap_update_out_r4;  // <1,0>
+  reg                           error_tap_update_out_r5;  // <1,0>
+  reg                           error_tap_update_out_r6;  // <1,0>
+  reg                           error_tap_update_out_r7;  // <1,0>
+  reg                           error_tap_update_out_r8;  // <1,0>
+  reg                           error_tap_update_out_r9;  // <1,0>
   reg                   [3:0]   rd_address_wire_r1;  // <4,0>
   reg                   [3:0]   rd_address_wire_r2;  // <4,0>
   reg                   [3:0]   rd_address_wire_r3;  // <4,0>
@@ -96,6 +120,42 @@
 
 
 
+always @(posedge clk) begin
+  if (reset) begin
+    active_start_d_r1 <= 'd0;
+    active_start_d_r2 <= 'd0;
+  end
+  else begin
+    active_start_d_r1 <= active_start_d;
+    active_start_d_r2 <= active_start_d_r1;
+  end
+end
+always @(posedge clk) begin
+  if (reset) begin
+    error_tap_update_out_r1 <= 'd0;
+    error_tap_update_out_r2 <= 'd0;
+    error_tap_update_out_r3 <= 'd0;
+    error_tap_update_out_r4 <= 'd0;
+    error_tap_update_out_r5 <= 'd0;
+    error_tap_update_out_r6 <= 'd0;
+    error_tap_update_out_r7 <= 'd0;
+    error_tap_update_out_r8 <= 'd0;
+    error_tap_update_out_r9 <= 'd0;
+    error_tap_update_out_r10 <= 'd0;
+  end
+  else begin
+    error_tap_update_out_r1 <= error_tap_update_out;
+    error_tap_update_out_r2 <= error_tap_update_out_r1;
+    error_tap_update_out_r3 <= error_tap_update_out_r2;
+    error_tap_update_out_r4 <= error_tap_update_out_r3;
+    error_tap_update_out_r5 <= error_tap_update_out_r4;
+    error_tap_update_out_r6 <= error_tap_update_out_r5;
+    error_tap_update_out_r7 <= error_tap_update_out_r6;
+    error_tap_update_out_r8 <= error_tap_update_out_r7;
+    error_tap_update_out_r9 <= error_tap_update_out_r8;
+    error_tap_update_out_r10 <= error_tap_update_out_r9;
+  end
+end
 always @(posedge clk) begin
   if (reset) begin
     rd_address_wire_r1 <= 4'd0;
@@ -130,8 +190,6 @@ always @(posedge clk) begin
     wr_address_vld_r6 <= wr_address_vld_r5;
   end
 end
-assign enable_feedback = 'd1;
-assign enable_bias_feedback = 'd1;
 
 // Data Input Memory Control
 assign data_int_wr_data = data_value;
@@ -152,7 +210,8 @@ assign wr_address_vld = (error_update_latch & ~error_update_first);
 
 // Tap Input Memmory Control
 assign tap_int.wr_address = wr_address_vld_r5 ? rd_address_wire_r5 : 4'd12 + {1'd0,error_phase};
-assign tap_int.wr_vld = (error_valid | (enable_feedback & wr_address_vld_r5));
+assign error_tap_write = (~error_tap_update_out_r5 & (tap_enable & wr_address_vld_r5));
+assign tap_int.wr_vld = (error_valid | error_tap_write);
 assign tap_int.sub_vld = wr_address_vld_r5 ? 'd0 : error_valid;
 assign tap_int.sub_addr = error_sub_address;
 assign tap_int.sub_data = error_value;
@@ -161,7 +220,9 @@ assign tap_int.inter_first = error_update_first;
 assign tap_int_wr_data = full_st1_st_tap_out;
 
 // Output Driving Control
+assign stage_error_back = error_tap_update_out;
 assign first = active_start_d;
+assign update_error_first = err_finish_i;
 assign full_st1_st_data = data_int_rd_data;
 assign full_st1_st_bias[31:0] = bias_int_rd_data;
 assign taps.v0 = tap_int_rd_data[31:0];
@@ -181,7 +242,11 @@ assign stage_1_data_out_pre_vld = active_pre;
 assign bias_int.rd_address = tap_address;
 assign bias_int.rd_vld = tap_int.rd_vld;
 assign bias_int.wr_address = bias_wr_address;
-assign bias_int.wr_vld = (enable_bias_feedback & wr_address_vld_r4);
+assign bias_int.wr_vld = (bias_enable & wr_address_vld_r4);
 assign bias_int_wr_data = full_st1_st_data_out_bias;
+
+// Error Output Control
+assign zerror_int = full_st1_st_data_out_pre;
+assign zerror_int_vld = (error_tap_update_out_r10 & ~active_start_d_r2);
 endmodule
 

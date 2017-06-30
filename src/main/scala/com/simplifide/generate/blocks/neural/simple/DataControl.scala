@@ -75,8 +75,9 @@ case class DataControl(override val name:String,
     fifoInputDepth + 1 $else_if (updateOn) $then fifoInputDepth - 1  $at clk
 
 
-  val readWidthCount  = signal("read_width_count",  WIRE,U(params.inputWidth1))
-  val readStateCount  = signal("read_state_count",  WIRE,U(params.stateWidth))
+  val errorUpdateCount = signal("error_update_count",REG,U(params.inputWidth1))
+  val readWidthCount  = signal("read_width_count",  REG,U(params.inputWidth1))
+  val readStateCount  = signal("read_state_count",  REG,U(params.stateWidth))
 
   /- ("Internal Counter for which state the operation is in")
   val readFinish       = signal("read_finish",  OUTPUT, U(1)) !-> (readWidthCount == loadLength)
@@ -115,11 +116,15 @@ case class DataControl(override val name:String,
 
   readWidthCount   := $iff (data_start | readFinish) $then 0 $else_if (updateCounter) $then readWidthCount + 1 $at clk
   readStateCount   := $iff (readFinish) $then readStateCount + 1 $at clk
+
+  val errFinish    = register("err_finish",  REG)(4)
+  errFinish(0)     := (errorUpdateCount === params.inputLength2-1)
+  errorUpdateCount := $iff (data_start | errFinish(0)) $then 0 $else_if (updateCounter) $then errorUpdateCount + 1 $at clk
+
   //readDepthCount   := $iff (stateFinish & outputValid(0)) $then readDepthCount + 1 $at clk
   ->(Counter.Length(readDepthCount,loadDepth,Some(stateFinish & outputValid(0))))
-
-  //readErrorCount   := $iff (stateFinish & errorUpdateLatch) $then readErrorCount + 1 $at clk
-  ->(Counter.Length(readErrorCount,loadDepth,Some(stateFinish & errorUpdateLatch)))
+  ->(Counter.Length(readErrorCount,loadDepth,Some(stateFinish & ~ErrorControl.errorTapUpdateOut & errorUpdateLatch)))
+  //->(Counter.Simple(errorUpdateCount,)
 
   dataToOutput.tapAddress       := $iff (stateFinish) $then 0 $else_if (updateCounter) $then (dataToOutput.tapAddress + 1) $at clk
   val tapAddressD = register(dataToOutput.tapAddress)(5)
@@ -135,8 +140,9 @@ case class DataControl(override val name:String,
   /-("Data Memory Interface and Input Control")
 
   // Convenient Output Declarations
+
   dataToOutput.activeStart  := data_start
-  dataToOutput.activeStartD := data_start(3)
+  dataToOutput.activeStartD := data_start(3) //| (errFinish(3) & ErrorControl.errorTapUpdateOut)
   // Latency = inputLength + 2 memory + 2 mac + 2bias/non
   dataToOutput.activePre    := outputValid(params.inputLength1+4)
   dataToOutput.active       := outputValid(params.inputLength1+6) & gateValid
@@ -154,7 +160,7 @@ case class DataControl(override val name:String,
   /- ("Data Memory Interface")
   dataToOutput.dataValid := input.rdy & input.vld
   dataToOutput.dataValue := input.value.signals(0)
-
+  dataToOutput.errFinish := errFinish(4) & ErrorControl.errorTapUpdateOut
 
 
 
@@ -174,7 +180,8 @@ object DataControl {
                     val inputLength2: Int,
                     val stateLength: Int,
                     val tapLength: Int,
-                    val errorLength: Int) {
+                    val errorLength: Int,
+                    val numberOfNeurons:Int) {
 
     val inputWidth1 = logWidth(inputLength1)
     val inputWidth2 = logWidth(inputLength2)
@@ -210,10 +217,11 @@ object DataControl {
     val biasValid   = SignalTrait("data_valid")
     val biasAddress    = SignalTrait("bias_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
     val biasWrAddress = SignalTrait("bias_wr_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
+    val errFinish =   SignalTrait("err_finish_i",OpType.Input)
 
 
     override val inputs = List(activePre, active, activeNormal, dataValue, dataValid, dataWriteAdd,dataReadAdd,tapAddress,
-      activeStartD, readFinish, biasAddress, biasWrAddress)
+      activeStartD, readFinish, biasAddress, biasWrAddress, errFinish)
 
   }
 

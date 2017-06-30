@@ -1,7 +1,8 @@
 package com.simplifide.generate.blocks.neural
 
+import com.simplifide.generate.blocks.basic.fifo.NewRdyVldFifo
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.neural.NeuralStageTop.{ ControlStruct}
+import com.simplifide.generate.blocks.neural.NeuralStageTop.ControlStruct
 import com.simplifide.generate.blocks.neural.simple.NeuronControl
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
@@ -67,6 +68,7 @@ This block contains 3 major subblocks
   signal(interface.inRdy.signals)
   signal(interface.outRdy.reverse)
   signal(interface.outPreRdy.reverse)
+  signal(interface.errorOutRdy.reverse)
 
   // Instantiate the neural stage which is a group of neurons
   // Currently instantiated in block but could be converted to use external neurons/macs
@@ -85,6 +87,10 @@ This block contains 3 major subblocks
   val control    = new NeuronControl[T](appendName("ctrl"),info, interface, this)
   instance(control)
 
+  // FIXME : Need to remove Hardocded Depths
+  val fifo = new NewRdyVldFifo(appendName("fifo"),control.outputEntity.errorIntRdy,interface.errorOutRdy,128)
+  instance(fifo)
+
 }
 
 object NeuralStageTop {
@@ -99,8 +105,11 @@ object NeuralStageTop {
     val stateLength      = SignalTrait(createName("state_length"),opType,FixedType.unsigned(info.stateWidth,0))
     val errorLength      = SignalTrait(createName("error_length"),opType,FixedType.unsigned(info.tapAddressWidth,0))
     val inputStage       = SignalTrait(createName("input_stage"),opType,FixedType.unsigned(1,0))
+    val tapEnable        = SignalTrait(createName("tap_update_enable"),opType,FixedType.unsigned(1,0))
+    val biasEnable        = SignalTrait(createName("bias_update_enable"),opType,FixedType.unsigned(1,0))
 
-    override val signals: List[SignalTrait] = List(loadDepth, stateLength,loadLength, errorLength, inputStage)
+    override val signals: List[SignalTrait] = List(loadDepth, stateLength,loadLength, errorLength, inputStage,
+      tapEnable, biasEnable)
 
 
 

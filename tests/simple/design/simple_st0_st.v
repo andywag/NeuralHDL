@@ -18,9 +18,11 @@
   input                         reset,
   input float_24_8              simple_st0_st_bias,
   input float_24_8              simple_st0_st_data,
+  input                         stage_error_back,
   input                         stage_error_first,
   input                         stage_error_mode,
   input simple_st0_st_tap_typ_6 taps,
+  input                         update_error_first,
   output reg            [191:0] simple_st0_st_tap_out,
   output float_24_8             simple_st0_st_bias_adder,
   output float_24_8             simple_st0_st_data_out,
@@ -34,6 +36,12 @@
 // Wires 
 
   wire                  [7:0]   bias_gain         ;  // <8,0>
+  float_24_8                    input_data_w0;  // <1,0>
+  float_24_8                    input_data_w1;  // <1,0>
+  float_24_8                    input_data_w2;  // <1,0>
+  float_24_8                    input_data_w3;  // <1,0>
+  float_24_8                    input_data_w4;  // <1,0>
+  float_24_8                    input_data_w5;  // <1,0>
   float_24_8                    neuron_temp_w0;  // <1,0>
   float_24_8                    neuron_temp_w1;  // <1,0>
   float_24_8                    neuron_temp_w2;  // <1,0>
@@ -74,12 +82,18 @@
   float_24_8                    bias_add_input_w5;  // <1,0>
   reg                           first0            ;  // <1,0>
   reg                           first1            ;  // <1,0>
-  float_24_8                    outLine_w0;  // <1,0>
-  float_24_8                    outLine_w1;  // <1,0>
-  float_24_8                    outLine_w2;  // <1,0>
-  float_24_8                    outLine_w3;  // <1,0>
-  float_24_8                    outLine_w4;  // <1,0>
-  float_24_8                    outLine_w5;  // <1,0>
+  float_24_8                    in_line_w0;  // <1,0>
+  float_24_8                    in_line_w1;  // <1,0>
+  float_24_8                    in_line_w2;  // <1,0>
+  float_24_8                    in_line_w3;  // <1,0>
+  float_24_8                    in_line_w4;  // <1,0>
+  float_24_8                    in_line_w5;  // <1,0>
+  float_24_8                    out_line_w0;  // <1,0>
+  float_24_8                    out_line_w1;  // <1,0>
+  float_24_8                    out_line_w2;  // <1,0>
+  float_24_8                    out_line_w3;  // <1,0>
+  float_24_8                    out_line_w4;  // <1,0>
+  float_24_8                    out_line_w5;  // <1,0>
   float_24_8                    simple_st0_st_bias_r1;  // <1,0>
   float_24_8                    simple_st0_st_bias_r2;  // <1,0>
   float_24_8                    simple_st0_st_bias_r3;  // <1,0>
@@ -88,6 +102,15 @@
   float_24_8                    simple_st0_st_bias_r6;  // <1,0>
   float_24_8                    simple_st0_st_bias_r7;  // <1,0>
   float_24_8                    simple_st0_st_bias_r8;  // <1,0>
+  reg                           stage_error_back_r1;  // <1,0>
+  reg                           stage_error_back_r2;  // <1,0>
+  reg                           stage_error_back_r3;  // <1,0>
+  reg                           stage_error_back_r4;  // <1,0>
+  reg                           stage_error_back_r5;  // <1,0>
+  reg                           stage_error_back_r6;  // <1,0>
+  reg                           stage_error_back_r7;  // <1,0>
+  reg                           stage_error_back_r8;  // <1,0>
+  reg                           stage_error_back_r9;  // <1,0>
   reg                           stage_error_mode_r1;  // <1,0>
   simple_st0_st_tap_lat_typ_6   taps_conv;  // <1,0>
   simple_st0_st_tap_lat_typ_6   taps_lat;  // <1,0>
@@ -123,6 +146,30 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
   if (reset) begin
+    stage_error_back_r1 <= 'd0;
+    stage_error_back_r2 <= 'd0;
+    stage_error_back_r3 <= 'd0;
+    stage_error_back_r4 <= 'd0;
+    stage_error_back_r5 <= 'd0;
+    stage_error_back_r6 <= 'd0;
+    stage_error_back_r7 <= 'd0;
+    stage_error_back_r8 <= 'd0;
+    stage_error_back_r9 <= 'd0;
+  end
+  else begin
+    stage_error_back_r1 <= stage_error_back;
+    stage_error_back_r2 <= stage_error_back_r1;
+    stage_error_back_r3 <= stage_error_back_r2;
+    stage_error_back_r4 <= stage_error_back_r3;
+    stage_error_back_r5 <= stage_error_back_r4;
+    stage_error_back_r6 <= stage_error_back_r5;
+    stage_error_back_r7 <= stage_error_back_r6;
+    stage_error_back_r8 <= stage_error_back_r7;
+    stage_error_back_r9 <= stage_error_back_r8;
+  end
+end
+always @(posedge clk) begin
+  if (reset) begin
     stage_error_mode_r1 <= 'd0;
   end
   else begin
@@ -144,7 +191,7 @@ end
 neuron neuron0 (
     .bias(simple_st0_st_bias_w0),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w0),
     .data_out(wireOut_w0),
     .reset(reset),
     .taps(taps_select.v0));
@@ -156,7 +203,7 @@ neuron neuron0 (
 neuron neuron1 (
     .bias(simple_st0_st_bias_w1),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w1),
     .data_out(wireOut_w1),
     .reset(reset),
     .taps(taps_select.v1));
@@ -168,7 +215,7 @@ neuron neuron1 (
 neuron neuron2 (
     .bias(simple_st0_st_bias_w2),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w2),
     .data_out(wireOut_w2),
     .reset(reset),
     .taps(taps_select.v2));
@@ -180,7 +227,7 @@ neuron neuron2 (
 neuron neuron3 (
     .bias(simple_st0_st_bias_w3),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w3),
     .data_out(wireOut_w3),
     .reset(reset),
     .taps(taps_select.v3));
@@ -192,7 +239,7 @@ neuron neuron3 (
 neuron neuron4 (
     .bias(simple_st0_st_bias_w4),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w4),
     .data_out(wireOut_w4),
     .reset(reset),
     .taps(taps_select.v4));
@@ -204,7 +251,7 @@ neuron neuron4 (
 neuron neuron5 (
     .bias(simple_st0_st_bias_w5),
     .clk(clk),
-    .data_in(simple_st0_st_data),
+    .data_in(input_data_w5),
     .data_out(wireOut_w5),
     .reset(reset),
     .taps(taps_select.v5));
@@ -215,7 +262,7 @@ neuron neuron5 (
 
 simple_st0_st_add simple_st0_st_add (
     .clk(clk),
-    .outLine_w0(outLine_w0),
+    .out_line_w0(out_line_w0),
     .reset(reset),
     .simple_st0_st_adder(simple_st0_st_adder),
     .simple_st0_st_bias_r8(simple_st0_st_bias_r8));
@@ -255,6 +302,34 @@ always @(posedge clk) begin
     first1 <= first0;
   end
 end
+always @(posedge clk) begin
+  if (reset) begin
+    in_line_w0 <= 'd0;
+    in_line_w1 <= 'd0;
+    in_line_w2 <= 'd0;
+    in_line_w3 <= 'd0;
+    in_line_w4 <= 'd0;
+    in_line_w5 <= 'd0;
+  end
+  else begin
+    if (first) begin
+      in_line_w0 <= taps.v0;
+      in_line_w1 <= taps.v1;
+      in_line_w2 <= taps.v2;
+      in_line_w3 <= taps.v3;
+      in_line_w4 <= taps.v4;
+      in_line_w5 <= taps.v5;
+    end
+    else begin
+      in_line_w0 <= in_line_w1;
+      in_line_w1 <= in_line_w2;
+      in_line_w2 <= in_line_w3;
+      in_line_w3 <= in_line_w4;
+      in_line_w4 <= in_line_w5;
+      in_line_w5 <= in_line_w0;
+    end
+  end
+end
 always @* taps_conv.v0.sgn <= taps.v0.sgn;
 always @* taps_conv.v0.exp <= (taps.v0.exp > tap_gain) ? taps.v0.exp[7:0] - tap_gain[7:0] : taps.v0.exp;
 always @* taps_conv.v0.man <= taps.v0.man;
@@ -281,15 +356,15 @@ always @(posedge clk) begin
     taps_lat <= taps_conv;
   end
 end
-assign taps_select = stage_error_mode ? taps_lat : taps;
+assign taps_select = (stage_error_mode & ~stage_error_back_r2) ? taps_lat : taps;
 
 // Select the inputs to the Neuron
-assign simple_st0_st_bias_w0 = stage_error_mode_r1 ? taps_r1.v0 : first0 ? 'd0 : wireOut_w0;
-assign simple_st0_st_bias_w1 = stage_error_mode_r1 ? taps_r1.v1 : first0 ? 'd0 : wireOut_w1;
-assign simple_st0_st_bias_w2 = stage_error_mode_r1 ? taps_r1.v2 : first0 ? 'd0 : wireOut_w2;
-assign simple_st0_st_bias_w3 = stage_error_mode_r1 ? taps_r1.v3 : first0 ? 'd0 : wireOut_w3;
-assign simple_st0_st_bias_w4 = stage_error_mode_r1 ? taps_r1.v4 : first0 ? 'd0 : wireOut_w4;
-assign simple_st0_st_bias_w5 = stage_error_mode_r1 ? taps_r1.v5 : first0 ? 'd0 : wireOut_w5;
+assign simple_st0_st_bias_w0 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v0 : (first0 | update_error_first) ? 'd0 : wireOut_w0;
+assign simple_st0_st_bias_w1 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v1 : (first0 | update_error_first) ? 'd0 : wireOut_w1;
+assign simple_st0_st_bias_w2 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v2 : (first0 | update_error_first) ? 'd0 : wireOut_w2;
+assign simple_st0_st_bias_w3 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v3 : (first0 | update_error_first) ? 'd0 : wireOut_w3;
+assign simple_st0_st_bias_w4 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v4 : (first0 | update_error_first) ? 'd0 : wireOut_w4;
+assign simple_st0_st_bias_w5 = (stage_error_mode_r1 & ~stage_error_back_r2) ? taps_r1.v5 : (first0 | update_error_first) ? 'd0 : wireOut_w5;
 
 // Create the output Delay Line
 
@@ -301,28 +376,28 @@ assign neuron_temp_w4 = wireOut_w4;
 assign neuron_temp_w5 = wireOut_w5;
 always @(posedge clk) begin
   if (reset) begin
-    outLine_w0 <= 'd0;
-    outLine_w1 <= 'd0;
-    outLine_w2 <= 'd0;
-    outLine_w3 <= 'd0;
-    outLine_w4 <= 'd0;
-    outLine_w5 <= 'd0;
+    out_line_w0 <= 'd0;
+    out_line_w1 <= 'd0;
+    out_line_w2 <= 'd0;
+    out_line_w3 <= 'd0;
+    out_line_w4 <= 'd0;
+    out_line_w5 <= 'd0;
   end
   else begin
-    if (first0) begin
-      outLine_w0 <= neuron_temp_w0;
-      outLine_w1 <= neuron_temp_w1;
-      outLine_w2 <= neuron_temp_w2;
-      outLine_w3 <= neuron_temp_w3;
-      outLine_w4 <= neuron_temp_w4;
-      outLine_w5 <= neuron_temp_w5;
+    if ((first0 | update_error_first)) begin
+      out_line_w0 <= neuron_temp_w0;
+      out_line_w1 <= neuron_temp_w1;
+      out_line_w2 <= neuron_temp_w2;
+      out_line_w3 <= neuron_temp_w3;
+      out_line_w4 <= neuron_temp_w4;
+      out_line_w5 <= neuron_temp_w5;
     end
     else begin
-      outLine_w0 <= outLine_w1;
-      outLine_w1 <= outLine_w2;
-      outLine_w2 <= outLine_w3;
-      outLine_w3 <= outLine_w4;
-      outLine_w4 <= outLine_w5;
+      out_line_w0 <= out_line_w1;
+      out_line_w1 <= out_line_w2;
+      out_line_w2 <= out_line_w3;
+      out_line_w3 <= out_line_w4;
+      out_line_w4 <= out_line_w5;
     end
   end
 end
@@ -379,9 +454,15 @@ always @(posedge clk) begin
     end
   end
 end
+assign input_data_w0 = stage_error_back_r2 ? in_line_w0 : simple_st0_st_data;
+assign input_data_w1 = stage_error_back_r2 ? in_line_w1 : simple_st0_st_data;
+assign input_data_w2 = stage_error_back_r2 ? in_line_w2 : simple_st0_st_data;
+assign input_data_w3 = stage_error_back_r2 ? in_line_w3 : simple_st0_st_data;
+assign input_data_w4 = stage_error_back_r2 ? in_line_w4 : simple_st0_st_data;
+assign input_data_w5 = stage_error_back_r2 ? in_line_w5 : simple_st0_st_data;
 
 // Assign the outputs
-assign simple_st0_st_data_out_pre = outLine_w0;
+assign simple_st0_st_data_out_pre = out_line_w0;
 
 // Assign the bias output
 assign simple_st0_st_data_out_bias = simple_st0_st_bias_adder;

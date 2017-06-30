@@ -48,7 +48,7 @@ object Counter {
 
   def Increment(signal:SignalTrait,inc:Expression,
                 reset:Option[Expression]=None,enable:Option[Expression]=None)(implicit clk:ClockControl) = {
-
+    new Simple(signal,reset,enable,inc)
   }
 
   def Length(signal:SignalTrait, length:Expression, enable:Option[Expression]=None)(implicit clk:ClockControl) = {

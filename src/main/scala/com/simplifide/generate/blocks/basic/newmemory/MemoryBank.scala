@@ -26,11 +26,20 @@ case class MemoryBank(name:String,
 
     val res = input.ctrl.interFirst | (interCount0 === number -1)
     ->(Counter.Simple(interCount0,Some(res),Some(input.ctrl.inter)))
-    ->(Counter.Simple(interCount1,Some(input.ctrl.interFirst),Some(res)))
+    ->(Counter.Increment(interCount1,number,Some(input.ctrl.interFirst),Some(res)))
+
+    val rdOffset = seq(signal(s"rd_offset", WIRE, input.ctrl.rdAddress.fixed))(number)
 
     val insts    = for (i <- 0 until number) {
+      val rd_offset1 = signal(s"rd_offset1_$i", WIRE, input.ctrl.rdAddress.fixed)
+      val rd_offset0 = signal(s"rd_offset0_$i", WIRE, input.ctrl.rdAddress.fixed)
+      //val rd_offset = signal(s"rd_offset_$i", WIRE, input.ctrl.rdAddress.fixed)
 
+      rd_offset1  := interCount0 + i
+      rd_offset0  := (rd_offset1 < number) ? rd_offset1 :: rd_offset1 - number
+      rdOffset(i)   := rd_offset0 + interCount1
     }
+    rdOffset
   }
 
   override def createBody() {}
@@ -53,7 +62,7 @@ case class MemoryBank(name:String,
 
   // Create the interleaving control for the tap memory.
   // Should not be included in this block but is here for convenience now
-  if (number > 1) createInter()
+  val rdOffset = if (number > 1) createInter() else Seq()
 
   val insts    = for (i <- 0 until number) {
     // Signals
@@ -69,7 +78,7 @@ case class MemoryBank(name:String,
       //rd_offset  := (rd_offset1 < number) ? rd_offset1 :: rd_offset1 - number
       writeArray((i,i)) := (input.ctrl.subAddress === i) & input.ctrl.subVld
       wr := writeArray((i,i)) ? input.ctrl.subData :: input.wrData(slice) // Select either the single line or the array
-      memCtrl(i).rdAddress := input.ctrl.rdAddress
+      memCtrl(i).rdAddress := (input.ctrl.inter & ~ input.ctrl.interFirst) ? rdOffset(i) :: input.ctrl.rdAddress
       memCtrl(i).rdVld     := input.ctrl.rdVld
       memCtrl(i).wrAddress := input.ctrl.wrAddress
       memCtrl(i).wrVld     := writeArray((i,i)) | (input.ctrl.wrVld & ~input.ctrl.subVld)

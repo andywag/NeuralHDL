@@ -33,6 +33,8 @@ object SignalArray {
       new Arr(name, input.signal.newSignal(name,opType,fix),length)
     }
 
+    def toSeq = signals
+
     //def g(index:Int):
 
   }

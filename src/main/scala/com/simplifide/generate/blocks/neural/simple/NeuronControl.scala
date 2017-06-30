@@ -49,12 +49,17 @@ case class NeuronControl[T](override val name:String,
   private val tapErrorLength   = signal("error_tap_length",WIRE,U(info.tapAddressWidth,0))
   val inputStage       = signal("input_stage")
 
+  val tapEnable        = signal(controlInterface.tapEnable.newSignal(name = "tap_enable",opType = WIRE))
+  val biasEnable        = signal(controlInterface.biasEnable.newSignal(name = "bias_enable",opType = WIRE))
+
 
   dataLength     := controlInterface.loadLength
   loadDepth      := controlInterface.loadDepth
   stateLength    := controlInterface.stateLength
   tapErrorLength := controlInterface.errorLength
   inputStage     := controlInterface.inputStage
+  tapEnable      := controlInterface.tapEnable
+  biasEnable     := controlInterface.biasEnable
   // Datalength of this stage - used to count both input and output
   //
 
@@ -64,7 +69,8 @@ case class NeuronControl[T](override val name:String,
     info.dataFill,
     info.stateLength,
     info.tapAddressLength,
-    info.errorFill)
+    info.errorFill,
+  info.numberNeurons)
 
 
 

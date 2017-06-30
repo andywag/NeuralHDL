@@ -48,13 +48,21 @@
   output                        stage_1_data_out_pre_vld,
   output                        stage_1_data_out_vld,
   output                        stage_1_data_rdy,
+  output float_24_8             stage_1_error_out,
+  output                        stage_1_error_out_fst,
+  output                        stage_1_error_out_vld,
   output                        stage_1_error_rdy,
+  output                        stage_error_back,
   output                        stage_error_first,
   output                        stage_error_mode,
   output                        tap_in_rdy,
   output tap_int_192_4          tap_int,
   output                [191:0] tap_int_wr_data,
-  output taps_typ_6             taps);
+  output taps_typ_6             taps,
+  output                        update_error_first,
+  output float_24_8             zerror_int,
+  output                        zerror_int_fst,
+  output                        zerror_int_vld);
 
 // Parameters 
 
@@ -67,6 +75,7 @@
   wire                          active_pre        ;  // <1,0>
   wire                          active_start_d    ;  // <1,0>
   wire                  [4:0]   bias_address      ;  // <5,0>
+  wire                          bias_enable       ;  // <1,0>
   wire                  [31:0]  bias_int_rd_data  ;  // <32,0>
   wire                  [4:0]   bias_wr_address   ;  // <5,0>
   wire                  [31:0]  data_int_rd_data  ;  // <32,0>
@@ -74,6 +83,7 @@
   wire                          data_valid        ;  // <1,0>
   wire                  [31:0]  data_value        ;  // <32,0>
   wire                  [6:0]   data_write_addr   ;  // <7,0>
+  wire                          err_finish_i      ;  // <1,0>
   wire                  [3:0]   error_count       ;  // <4,0>
   wire                          error_finish_tap  ;  // <1,0>
   wire                  [1:0]   error_phase       ;  // <2,0>
@@ -95,10 +105,13 @@
   wire                          read_finish       ;  // <1,0>
   wire                          stage_1_data_out_pre_rdy;  // <1,0>
   wire                          stage_1_data_out_rdy;  // <1,0>
+  wire                          stage_1_error_out_rdy;  // <1,0>
   wire                          state_finish      ;  // <1,0>
   wire                          state_length      ;  // <0,0>
   wire                  [4:0]   tap_address       ;  // <5,0>
+  wire                          tap_enable        ;  // <1,0>
   wire                  [191:0] tap_int_rd_data   ;  // <192,0>
+  wire                          zerror_int_rdy    ;  // <1,0>
 
 
 // Registers 
@@ -125,6 +138,7 @@ full_st1_ctrl_data_fifo full_st1_ctrl_data_fifo (
     .data_valid(data_valid),
     .data_value(data_value),
     .data_write_addr(data_write_addr),
+    .err_finish_i(err_finish_i),
     .error_finish_tap(error_finish_tap),
     .error_tap_update_out(error_tap_update_out),
     .error_update_first(error_update_first),
@@ -184,6 +198,7 @@ full_st1_ctrl_out_ctrl full_st1_ctrl_out_ctrl (
     .active_pre(active_pre),
     .active_start_d(active_start_d),
     .bias_address(bias_address),
+    .bias_enable(bias_enable),
     .bias_int(bias_int),
     .bias_int_rd_data(bias_int_rd_data),
     .bias_int_wr_data(bias_int_wr_data),
@@ -196,6 +211,7 @@ full_st1_ctrl_out_ctrl full_st1_ctrl_out_ctrl (
     .data_valid(data_valid),
     .data_value(data_value),
     .data_write_addr(data_write_addr),
+    .err_finish_i(err_finish_i),
     .error_count(error_count),
     .error_phase(error_phase),
     .error_phase_read(error_phase_read),
@@ -223,18 +239,31 @@ full_st1_ctrl_out_ctrl full_st1_ctrl_out_ctrl (
     .stage_1_data_out_pre_vld(stage_1_data_out_pre_vld),
     .stage_1_data_out_rdy(stage_1_data_out_rdy),
     .stage_1_data_out_vld(stage_1_data_out_vld),
+    .stage_1_error_out(stage_1_error_out),
+    .stage_1_error_out_fst(stage_1_error_out_fst),
+    .stage_1_error_out_rdy(stage_1_error_out_rdy),
+    .stage_1_error_out_vld(stage_1_error_out_vld),
+    .stage_error_back(stage_error_back),
     .stage_error_first(stage_error_first),
     .stage_error_mode(stage_error_mode),
     .tap_address(tap_address),
+    .tap_enable(tap_enable),
     .tap_int(tap_int),
     .tap_int_rd_data(tap_int_rd_data),
     .tap_int_wr_data(tap_int_wr_data),
-    .taps(taps));
+    .taps(taps),
+    .update_error_first(update_error_first),
+    .zerror_int(zerror_int),
+    .zerror_int_fst(zerror_int_fst),
+    .zerror_int_rdy(zerror_int_rdy),
+    .zerror_int_vld(zerror_int_vld));
 
 assign load_length = full_st1_ctrl_int.load_length;
 assign load_depth = full_st1_ctrl_int.load_depth;
 assign state_length = full_st1_ctrl_int.state_length;
 assign error_tap_length = full_st1_ctrl_int.error_length;
 assign input_stage = full_st1_ctrl_int.input_stage;
+assign tap_enable = full_st1_ctrl_int.tap_update_enable;
+assign bias_enable = full_st1_ctrl_int.bias_update_enable;
 endmodule
 

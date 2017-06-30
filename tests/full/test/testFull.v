@@ -39,15 +39,18 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:36];  // <32,0>
+  reg                   [31:0]  expected_mem[0:108];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
+  reg                   [31:0]  rtl_error0_fptr   ;  // <32,0>
+  reg                   [31:0]  rtl_error1_fptr   ;  // <32,0>
+  reg                   [31:0]  rtl_error_fptr    ;  // <32,0>
   reg                   [31:0]  rtl_out_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_st0_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_st1_fptr      ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
+  reg                   [31:0]  st_data_mem[0:108];  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
@@ -106,7 +109,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd576)) begin
+    if ((counter == 'd36864)) begin
       $finish;
     end
   end
@@ -116,7 +119,7 @@ always @(posedge clk) begin
     in_rdy_count <= 32'd0;
   end
   else if ((st_data_rdy & st_data_vld)) begin 
-    if ((in_rdy_count == 'd5)) begin
+    if ((in_rdy_count == 'd107)) begin
       in_rdy_count <= 32'd0;
     end
     else begin
@@ -137,7 +140,7 @@ always @(posedge clk) begin
     exp_rdy_count <= 32'd0;
   end
   else if ((expected_rdy & expected_vld)) begin 
-    if ((exp_rdy_count == 'd5)) begin
+    if ((exp_rdy_count == 'd107)) begin
       exp_rdy_count <= 32'd0;
     end
     else begin
@@ -209,14 +212,62 @@ always @(posedge clk) begin
     $fdisplay(rtl_st1_fptr,"%h ",testFull.full.stage_1_data_out);
   end
 end
+
+// Store Store 
+initial begin
+  rtl_error_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_error.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.stage_1_error_vld & testFull.full.stage_1_error_rdy)) begin 
+    $fdisplay(rtl_error_fptr,"%h ",testFull.full.stage_1_error);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_error0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_error0.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.stage_0_error_vld & testFull.full.stage_0_error_rdy)) begin 
+    $fdisplay(rtl_error0_fptr,"%h ",testFull.full.stage_0_error);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_error1_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_error1.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.stage_1_error_vld & testFull.full.stage_1_error_rdy)) begin 
+    $fdisplay(rtl_error1_fptr,"%h ",testFull.full.stage_1_error);
+  end
+end
 assign full_st0_ctrl_int.load_length = 3'd5;
 assign full_st0_ctrl_int.load_depth = 3'd5;
 assign full_st0_ctrl_int.state_length = 'd1;
 assign full_st0_ctrl_int.error_length = 4'd11;
+assign full_st0_ctrl_int.input_stage = 'd1;
+assign full_st0_ctrl_int.tap_update_enable = 'd1;
+assign full_st0_ctrl_int.bias_update_enable = 'd1;
 assign full_st1_ctrl_int.load_length = 4'd11;
 assign full_st1_ctrl_int.load_depth = 3'd5;
 assign full_st1_ctrl_int.state_length = 'd1;
 assign full_st1_ctrl_int.error_length = 4'd5;
+assign full_st1_ctrl_int.error_length = 4'd5;
+assign full_st1_ctrl_int.tap_update_enable = 'd1;
+assign full_st1_ctrl_int.bias_update_enable = 'd1;
 assign st_data_out_rdy = 'd1;
 
 // Counter to Index Test

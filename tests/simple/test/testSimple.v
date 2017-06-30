@@ -255,6 +255,8 @@ assign simple_st0_ctrl_int.load_length = 3'd5;
 assign simple_st0_ctrl_int.load_depth = 3'd5;
 assign simple_st0_ctrl_int.state_length = 'd1;
 assign simple_st0_ctrl_int.input_stage = 'd1;
+assign simple_st0_ctrl_int.tap_update_enable = 'd1;
+assign simple_st0_ctrl_int.bias_update_enable = 'd1;
 
 // Counter to Index Test
 always @(posedge clk) begin

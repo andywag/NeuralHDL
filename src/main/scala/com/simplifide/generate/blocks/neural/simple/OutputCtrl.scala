@@ -5,6 +5,8 @@ import com.simplifide.generate.blocks.neural.NeuralStageInfo
 import com.simplifide.generate.blocks.neural.simple.DataControl.DataToOutput
 import com.simplifide.generate.blocks.neural.simple.ErrorControl.{ErrorToData, ErrorToOutput}
 import com.simplifide.generate.parser.EntityParser
+import com.simplifide.generate.signal.{FloatSignal, OpType}
+import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 
 /**
   * Created by andy on 6/8/17.
@@ -29,6 +31,9 @@ case class OutputCtrl(override val name:String,
 
   signal(parent.interface.outRdy.reverse)
   signal(parent.interface.outPreRdy.reverse)
+  signal(parent.interface.errorOutRdy.reverse)
+
+
   signal(parent.parent.stage.interface.reverse)
 
 
@@ -36,14 +41,26 @@ case class OutputCtrl(override val name:String,
   signal(parent.parent.memory.tapBank.input.reverse) // Connect this to the data port of the memory
   signal(parent.parent.memory.biasBank.input.reverse) // Connect this to the data port of the memory
 
-  val enable_feedback     = signal("enable_feedback")
-  val enable_bias_feedback = signal("enable_bias_feedback")
+  // FIXME : Need ordering of types
+  // FIXME : This is creating a huge array for this signal
+  val errorInt        = FloatSignal("zerror_int",OpType.Output)
+  val errorIntRdy       = new ReadyValidInterface(errorInt)
+  signal(errorIntRdy.reverse)
 
-  enable_feedback      := 1
-  enable_bias_feedback := 1
+  val enable_feedback = signal(parent.tapEnable.asInput)
+  //val enable_feedback     = signal("enable_feedback")
+  val enable_bias_feedback = signal(parent.biasEnable.asInput)
+  //val enable_bias_feedback = signal("enable_bias_feedback")
+
+  //enable_feedback      := 1
+  //enable_bias_feedback := 1
 
   val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
 
+  // Delay the tap update signal to cut off the writes to the tap memory
+  // FIXME : This is also done inside
+  // FIXME : The length is also incorrectly hardcoded
+  val errorTapUpdateD = register(ErrorControl.errorTapUpdateOut)(10)
 
   /- ("Data Input Memory Control")
   //dataIn.rdy     := dataReady//(fifoInputDepth <= loadDepth)
@@ -74,7 +91,10 @@ case class OutputCtrl(override val name:String,
   /- ("Tap Input Memmory Control") // Fixme : Needs own module
 
   this.tapMem.ctrl.wrAddress  := rdAddressVldDelay(5) ? rdAddressDelay(5) :: info.tapAddressLength + errorToOutput.errorPhase
-  this.tapMem.ctrl.wrVld      := errorToOutput.errorValid | (enable_feedback & rdAddressVldDelay(5))
+
+  val errorTapWrite = signal("error_tap_write")
+  errorTapWrite := ~errorTapUpdateD(5) & (enable_feedback & rdAddressVldDelay(5))
+  this.tapMem.ctrl.wrVld      := errorToOutput.errorValid | errorTapWrite
 
   this.tapMem.ctrl.subVld      := rdAddressVldDelay(5) ? 0 :: errorToOutput.errorValid
   this.tapMem.ctrl.subAddress  := errorToOutput.errorSubAddress
@@ -86,7 +106,9 @@ case class OutputCtrl(override val name:String,
 
 
   /- ("Output Driving Control")
+  parent.parent.stage.stateErrorBack := ErrorControl.errorTapUpdateOut
   parent.parent.stage.first       := dataToOutput.activeStartD
+  parent.parent.stage.updateErrorFirst := dataToOutput.errFinish
   parent.parent.stage.dataIn(0)   := parent.parent.memory.dataBank.input.rdData
   parent.parent.stage.biasIn(0)   := parent.parent.memory.biasBank.input.rdData
   for (i <- 0 until info.numberNeurons) {
@@ -113,6 +135,13 @@ case class OutputCtrl(override val name:String,
   biasMem.ctrl.wrAddress := dataToOutput.biasWrAddress//tapMem.ctrl.rdAddress $at (clk)
   biasMem.ctrl.wrVld     := enable_bias_feedback & rdAddressVldDelay(4)
   biasMem.wrData         := parent.parent.stage.dataOutBias
+
+
+  /- ("Error Output Control")
+  errorInt        := parent.parent.stage.dataOutPre
+  val delayFirst = register(dataToOutput.activeStartD)(2)
+  //delayFirst := dataToOutput.activeStartD $at clk
+  errorIntRdy.vld := errorTapUpdateD(10) & ~delayFirst(2)
 
 }
 

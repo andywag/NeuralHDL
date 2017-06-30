@@ -64,6 +64,23 @@ def getTrainIdent(a:Int,b:Int) = {
   (input,output)
 }
 
+  def inTest(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
+    if (x < 6) {
+      if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
+    }
+    else if (x < 12) {
+       if (y == x | y == (x+2)%6) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
+    }
+    else {
+      if ((y) == (x%6) | y == (x%6)+1) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
+    })
+
+  def getTrainTest(a:Int,b:Int) = {
+    val input =  Nd4j.create(inTest(b,a))
+    val output = Nd4j.create(inTest(b,a))
+    (input,output)
+  }
+
 
   val identTaps ="""1 0 0 0 0 0
 0 1 0 0 0 0

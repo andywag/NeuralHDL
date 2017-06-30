@@ -68,7 +68,8 @@ case class ErrorControl(override val name:String,
 
   /- ("Finish Conditions")
   errorFinish     := (errorCount === (tapErrorLength)) & (input.enable)
-  errorFinishTap  := ErrorToData.stateFinish & ErrorControl.errorUpdateLatch
+  // It is a bit questionable to use errorTapUpdate - Should use not with inputEnable
+  errorFinishTap  := ErrorToData.stateFinish & ErrorControl.errorUpdateLatch & errorTapUpdate
 
   /- ("Condition to Update Error Mode")
   val realErrorFinish = signal("real_error_finish")
@@ -78,9 +79,11 @@ case class ErrorControl(override val name:String,
 
   /- ("Input Control and Tap Addressiong")
   errorCount            := ($iff(errorFinish)    $then 0 $else (errorCount + 1)).$at(clk.createEnable(input.enable))
-  val wrCount = ->(Counter.Length(errorWriteCount,loadLength,Some(input.enable)))
+  // Write Count should be a function of the tap width not loadLength
+  // This is an addressing problem rather than a count problem
+  val wrCount = ->(Counter.Length(errorWriteCount,params.numberOfNeurons-1,Some(input.enable)))
   ->(Counter.Length(errorPhase,params.errorLength-1,Some(wrCount.end & input.enable)))
-  ->(Counter.Length(parent.errorToOutput.errorSubAddress,loadLength,Some(input.enable)))
+  ->(Counter.Length(parent.errorToOutput.errorSubAddress,params.numberOfNeurons-1,Some(input.enable)))
 
   /- ("Error Input Operations")
   val decrement = errorUpdateLast(0) & errorTapUpdate
@@ -93,7 +96,7 @@ case class ErrorControl(override val name:String,
 
   /-("Error Control Signals")
   errorUpdateMode       := (errorFifoDepth > 0)
-  val phaseEnable = errorUpdateFirst & errorTapUpdate
+  val phaseEnable = errorUpdateFirst & (errorTapUpdate)
   errorPhaseRead      := ($iff (errorPhaseRead === (params.errorLength-1)) $then 0 $else (errorPhaseRead +1)).$at(clk.createEnable(phaseEnable))
   errorUpdateLatch(0)      := errorUpdateMode.$at(clk.createEnable(ErrorToData.stateFinish))
 

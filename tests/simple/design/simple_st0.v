@@ -23,6 +23,7 @@
   input                         stage_0_data_vld,
   input float_24_8              stage_0_error,
   input                         stage_0_error_fst,
+  input                         stage_0_error_out_rdy,
   input                         stage_0_error_vld,
   input float_24_8              tap_in,
   input                         tap_in_fst,
@@ -36,6 +37,9 @@
   output                        stage_0_data_out_pre_vld,
   output                        stage_0_data_out_vld,
   output                        stage_0_data_rdy,
+  output float_24_8             stage_0_error_out,
+  output                        stage_0_error_out_fst,
+  output                        stage_0_error_out_vld,
   output                        stage_0_error_rdy,
   output                        tap_in_rdy);
 
@@ -58,12 +62,18 @@
   float_24_8                    simple_st0_st_data_out_bias;  // <1,0>
   float_24_8                    simple_st0_st_data_out_pre;  // <1,0>
   wire                  [191:0] simple_st0_st_tap_out;  // <192,0>
+  wire                          stage_0_error_out_rdy;  // <1,0>
+  wire                          stage_error_back  ;  // <1,0>
   wire                          stage_error_first ;  // <1,0>
   wire                          stage_error_mode  ;  // <1,0>
   tap_int_192_4                 tap_int;  // <1,0>
   wire                  [191:0] tap_int_rd_data   ;  // <192,0>
   wire                  [191:0] tap_int_wr_data   ;  // <192,0>
   taps_typ_6                    taps;  // <1,0>
+  wire                          update_error_first;  // <1,0>
+  float_24_8                    zerror_int;  // <1,0>
+  wire                          zerror_int_fst    ;  // <1,0>
+  wire                          zerror_int_vld    ;  // <1,0>
 
 
 // Registers 
@@ -89,9 +99,11 @@ simple_st0_st simple_st0_st (
     .simple_st0_st_data_out_bias(simple_st0_st_data_out_bias),
     .simple_st0_st_data_out_pre(simple_st0_st_data_out_pre),
     .simple_st0_st_tap_out(simple_st0_st_tap_out),
+    .stage_error_back(stage_error_back),
     .stage_error_first(stage_error_first),
     .stage_error_mode(stage_error_mode),
-    .taps(taps));
+    .taps(taps),
+    .update_error_first(update_error_first));
 
 ////////////////////////////////////////////////////////////////////////////////
 // simple_st0_mem
@@ -145,8 +157,12 @@ simple_st0_ctrl simple_st0_ctrl (
     .stage_0_data_vld(stage_0_data_vld),
     .stage_0_error(stage_0_error),
     .stage_0_error_fst(stage_0_error_fst),
+    .stage_0_error_out(stage_0_error_out),
+    .stage_0_error_out_fst(stage_0_error_out_fst),
+    .stage_0_error_out_vld(stage_0_error_out_vld),
     .stage_0_error_rdy(stage_0_error_rdy),
     .stage_0_error_vld(stage_0_error_vld),
+    .stage_error_back(stage_error_back),
     .stage_error_first(stage_error_first),
     .stage_error_mode(stage_error_mode),
     .tap_in(tap_in),
@@ -156,7 +172,27 @@ simple_st0_ctrl simple_st0_ctrl (
     .tap_int(tap_int),
     .tap_int_rd_data(tap_int_rd_data),
     .tap_int_wr_data(tap_int_wr_data),
-    .taps(taps));
+    .taps(taps),
+    .update_error_first(update_error_first),
+    .zerror_int(zerror_int),
+    .zerror_int_fst(zerror_int_fst),
+    .zerror_int_vld(zerror_int_vld));
+
+////////////////////////////////////////////////////////////////////////////////
+// simple_st0_fifo
+////////////////////////////////////////////////////////////////////////////////
+
+simple_st0_fifo simple_st0_fifo (
+    .clk(clk),
+    .reset(reset),
+    .stage_0_error_out(stage_0_error_out),
+    .stage_0_error_out_fst(stage_0_error_out_fst),
+    .stage_0_error_out_rdy(stage_0_error_out_rdy),
+    .stage_0_error_out_vld(stage_0_error_out_vld),
+    .zerror_int(zerror_int),
+    .zerror_int_fst(zerror_int_fst),
+    .zerror_int_rdy(zerror_int_rdy),
+    .zerror_int_vld(zerror_int_vld));
 
 endmodule
 
