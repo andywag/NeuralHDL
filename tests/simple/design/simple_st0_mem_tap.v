@@ -194,9 +194,9 @@ assign mem_int_0.wr_address = tap_int.wr_address;
 assign mem_int_0.wr_vld = (write_sub[0] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[31:0] = read_0;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_0.hex",simple_st0_mem_tap_0.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_0.hex",simple_st0_mem_tap_0.memory_32_4_memory);
 end
 
 assign write_sub[1] = ((tap_int.sub_addr == 'd1) & tap_int.sub_vld);
@@ -207,9 +207,9 @@ assign mem_int_1.wr_address = tap_int.wr_address;
 assign mem_int_1.wr_vld = (write_sub[1] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[63:32] = read_1;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_1.hex",simple_st0_mem_tap_1.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_1.hex",simple_st0_mem_tap_1.memory_32_4_memory);
 end
 
 assign write_sub[2] = ((tap_int.sub_addr == 'd2) & tap_int.sub_vld);
@@ -220,9 +220,9 @@ assign mem_int_2.wr_address = tap_int.wr_address;
 assign mem_int_2.wr_vld = (write_sub[2] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[95:64] = read_2;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_2.hex",simple_st0_mem_tap_2.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_2.hex",simple_st0_mem_tap_2.memory_32_4_memory);
 end
 
 assign write_sub[3] = ((tap_int.sub_addr == 'd3) & tap_int.sub_vld);
@@ -233,9 +233,9 @@ assign mem_int_3.wr_address = tap_int.wr_address;
 assign mem_int_3.wr_vld = (write_sub[3] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[127:96] = read_3;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_3.hex",simple_st0_mem_tap_3.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_3.hex",simple_st0_mem_tap_3.memory_32_4_memory);
 end
 
 assign write_sub[4] = ((tap_int.sub_addr == 'd4) & tap_int.sub_vld);
@@ -246,9 +246,9 @@ assign mem_int_4.wr_address = tap_int.wr_address;
 assign mem_int_4.wr_vld = (write_sub[4] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[159:128] = read_4;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_4.hex",simple_st0_mem_tap_4.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_4.hex",simple_st0_mem_tap_4.memory_32_4_memory);
 end
 
 assign write_sub[5] = ((tap_int.sub_addr == 'd5) & tap_int.sub_vld);
@@ -259,9 +259,9 @@ assign mem_int_5.wr_address = tap_int.wr_address;
 assign mem_int_5.wr_vld = (write_sub[5] | (tap_int.wr_vld & ~tap_int.sub_vld));
 assign tap_int_rd_data[191:160] = read_5;
 
-// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps
+// Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps_5.hex",simple_st0_mem_tap_5.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_5.hex",simple_st0_mem_tap_5.memory_32_4_memory);
 end
 
 endmodule

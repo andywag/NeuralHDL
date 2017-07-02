@@ -109,8 +109,8 @@ dataOut        := internalSignal plus bias
   val tapGain = signal("tap_gain",WIRE,U(8))
   val biasGain = signal("bias_gain",WIRE,U(8))
 
-  tapGain := 3
-  biasGain := 6
+  tapGain := 4
+  biasGain := 4
 
   val share  = dataIn.length
   val depth  = tapIn.length

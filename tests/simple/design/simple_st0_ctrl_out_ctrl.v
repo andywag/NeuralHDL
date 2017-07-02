@@ -85,13 +85,14 @@
 // Wires 
 
   wire                          error_tap_write   ;  // <1,0>
-  wire                          first_d           ;  // <1,0>
   wire                  [3:0]   rd_address_wire   ;  // <4,0>
   wire                          wr_address_vld    ;  // <1,0>
 
 
 // Registers 
 
+  reg                           active_start_d_r1 ;  // <1,0>
+  reg                           active_start_d_r2 ;  // <1,0>
   reg                           error_tap_update_out_r1;  // <1,0>
   reg                           error_tap_update_out_r10;  // <1,0>
   reg                           error_tap_update_out_r2;  // <1,0>
@@ -119,6 +120,16 @@
 
 
 
+always @(posedge clk) begin
+  if (reset) begin
+    active_start_d_r1 <= 'd0;
+    active_start_d_r2 <= 'd0;
+  end
+  else begin
+    active_start_d_r1 <= active_start_d;
+    active_start_d_r2 <= active_start_d_r1;
+  end
+end
 always @(posedge clk) begin
   if (reset) begin
     error_tap_update_out_r1 <= 'd0;
@@ -236,14 +247,6 @@ assign bias_int_wr_data = simple_st0_st_data_out_bias;
 
 // Error Output Control
 assign zerror_int = simple_st0_st_data_out_pre;
-always @(posedge clk) begin
-  if (reset) begin
-    first_d <= 'd0;
-  end
-  else begin
-    first_d <= active_start_d;
-  end
-end
-assign zerror_int_vld = (error_tap_update_out_r10 & ~first_d);
+assign zerror_int_vld = (error_tap_update_out_r10 & ~active_start_d_r2);
 endmodule
 

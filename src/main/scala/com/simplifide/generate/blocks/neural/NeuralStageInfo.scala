@@ -19,7 +19,8 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
                            errorFill:Int,
                            expectedFill:Int,
                            dataLocation:String,
-                           errorLength:Int = 12
+                           errorLength:Int = 12,
+                           tapLocation:Option[String] = None
                           ) {
 
   def logWidth(input:Int) = {

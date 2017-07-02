@@ -39,9 +39,11 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:108];  // <32,0>
+  reg                   [31:0]  expected_mem[0:174];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
+  reg                   [31:0]  rtl_bias0_fptr    ;  // <32,0>
+  reg                   [31:0]  rtl_bias1_fptr    ;  // <32,0>
   reg                   [31:0]  rtl_error0_fptr   ;  // <32,0>
   reg                   [31:0]  rtl_error1_fptr   ;  // <32,0>
   reg                   [31:0]  rtl_error_fptr    ;  // <32,0>
@@ -49,8 +51,10 @@
   reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_st0_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_st1_fptr      ;  // <32,0>
+  reg                   [31:0]  rtl_tap0_fptr     ;  // <32,0>
+  reg                   [31:0]  rtl_tap1_fptr     ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:108];  // <32,0>
+  reg                   [31:0]  st_data_mem[0:174];  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
@@ -109,7 +113,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd36864)) begin
+    if ((counter == 'd73728)) begin
       $finish;
     end
   end
@@ -119,7 +123,7 @@ always @(posedge clk) begin
     in_rdy_count <= 32'd0;
   end
   else if ((st_data_rdy & st_data_vld)) begin 
-    if ((in_rdy_count == 'd107)) begin
+    if ((in_rdy_count == 'd35)) begin
       in_rdy_count <= 32'd0;
     end
     else begin
@@ -140,7 +144,7 @@ always @(posedge clk) begin
     exp_rdy_count <= 32'd0;
   end
   else if ((expected_rdy & expected_vld)) begin 
-    if ((exp_rdy_count == 'd107)) begin
+    if ((exp_rdy_count == 'd35)) begin
       exp_rdy_count <= 32'd0;
     end
     else begin
@@ -252,6 +256,62 @@ always @(posedge clk) begin
   end
   else if ((testFull.full.stage_1_error_vld & testFull.full.stage_1_error_rdy)) begin 
     $fdisplay(rtl_error1_fptr,"%h ",testFull.full.stage_1_error);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_bias0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_bias0.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.full_st0.bias_int.wr_vld & ~testFull.full.full_st0.bias_int.sub_vld)) begin 
+    $fdisplay(rtl_bias0_fptr,"%h ",testFull.full.full_st0.bias_int_wr_data);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_bias1_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_bias1.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.full_st1.bias_int.wr_vld & ~testFull.full.full_st1.bias_int.sub_vld)) begin 
+    $fdisplay(rtl_bias1_fptr,"%h ",testFull.full.full_st1.bias_int_wr_data);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_tap0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_tap0.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.full_st0.tap_int.wr_vld & ~testFull.full.full_st0.tap_int.sub_vld)) begin 
+    $fdisplay(rtl_tap0_fptr,"%h ",testFull.full.full_st0.tap_int_wr_data);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_tap1_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/full/data/rtl_tap1.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testFull.full.full_st1.tap_int.wr_vld & ~testFull.full.full_st1.tap_int.sub_vld)) begin 
+    $fdisplay(rtl_tap1_fptr,"%h ",testFull.full.full_st1.tap_int_wr_data);
   end
 end
 assign full_st0_ctrl_int.load_length = 3'd5;

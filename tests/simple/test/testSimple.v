@@ -38,7 +38,7 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:72];  // <32,0>
+  reg                   [31:0]  expected_mem[0:138];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
   reg                   [31:0]  rtl_bias_fptr     ;  // <32,0>
@@ -48,8 +48,9 @@
   reg                   [31:0]  rtl_mem_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_out_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
+  reg                   [31:0]  rtl_tap_fptr      ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
+  reg                   [31:0]  st_data_mem[0:138];  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
@@ -105,7 +106,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd4608)) begin
+    if ((counter == 'd36864)) begin
       $finish;
     end
   end
@@ -136,7 +137,7 @@ always @(posedge clk) begin
     exp_rdy_count <= 32'd0;
   end
   else if ((expected_rdy & expected_vld)) begin 
-    if ((exp_rdy_count == 'd71)) begin
+    if ((exp_rdy_count == 'd35)) begin
       exp_rdy_count <= 32'd0;
     end
     else begin
@@ -218,8 +219,22 @@ always @(posedge clk) begin
   if (reset) begin
     
   end
-  else if (testSimple.simple.simple_st0.bias_int.wr_vld) begin 
+  else if ((testSimple.simple.simple_st0.bias_int.wr_vld & ~testSimple.simple.simple_st0.bias_int.sub_vld)) begin 
     $fdisplay(rtl_bias_fptr,"%h ",testSimple.simple.simple_st0.bias_int_wr_data);
+  end
+end
+
+// Store Store 
+initial begin
+  rtl_tap_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_tap.hex","w");
+end
+
+always @(posedge clk) begin
+  if (reset) begin
+    
+  end
+  else if ((testSimple.simple.simple_st0.tap_int.wr_vld & ~testSimple.simple.simple_st0.tap_int.sub_vld)) begin 
+    $fdisplay(rtl_tap_fptr,"%h ",testSimple.simple.simple_st0.tap_int_wr_data);
   end
 end
 

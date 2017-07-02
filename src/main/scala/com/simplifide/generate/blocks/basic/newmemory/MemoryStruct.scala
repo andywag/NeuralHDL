@@ -54,7 +54,9 @@ case class MemoryStruct(val name:String,
   def ---->(name:String,path:Option[String]=None)(implicit clk:ClockControl,scope:EntityParser) = {
     val dataSet = NdDataSet.empty(name)
     val newVld = path.map(x => new SignalTrait.SignalPath(x,ctrl.wrVld)).getOrElse(ctrl.wrVld)
-    val newClk = clk.createEnable(newVld)
+    val newSub = path.map(x => new SignalTrait.SignalPath(x,ctrl.subVld)).getOrElse(ctrl.subVld)
+
+    val newClk = clk.createEnable(newVld & ~newSub)
     val newSignal = path.map(x => new SignalTrait.SignalPath(x,wrData)).getOrElse(wrData)
     scope->(DisplayDump2(s"${name}.hex",newSignal)(newClk))
     dataSet

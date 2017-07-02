@@ -7,6 +7,7 @@ import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal.FloatSignal
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
+import org.nd4j.linalg.api.ndarray.INDArray
 
 /**
   * Created by andy on 6/3/17.
@@ -20,17 +21,21 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   //val information = BasicTestInformation.getInformation(dataLocation)
   val information = BasicTestInformation.getDualInformation(dataLocation)
   // Set the test length
-  override def getTestLength = BasicTestInformation.tapLength*512
+  override def getTestLength = BasicTestInformation.tapLength*1024
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
 
-  val tapData   = BasicTestInformation.getInitTaps
+  //val tapData   = BasicTestInformation.getInitTaps
+  val tapData   = BasicTestInformation.getRandomTaps
+
   /** Store the taps to a file after converting the order */
-  createInitialTaps
+  createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps0")
+  createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps1")
 
   // Store the initial data and taps to a file.
-  val dataData  = BasicTestInformation.getTrainTest(6,18)
+  val data1     = BasicTestInformation.getTrainIdent(6,6)
+  val dataData  = BasicTestInformation.getTrainTest //getTrainIdent(6,6)
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
@@ -46,14 +51,14 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
-  val size = input.data.length()
+  val size = 6*6//input.data.length()
   /** Create the interface for the input data */
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
   inRdyCount := ($iff (inRdyCount === size-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
 
-  val size2 = expected.data.length()
+  val size2 = 6*6//expected.data.length()
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
   expRdyCount := ($iff (expRdyCount === size2-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
@@ -71,7 +76,10 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   val errOut  = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testFull.full"))
   dutParser.interfaces(0).errorRdy ---->(s"$dataLocation/rtl_error0",Some("testFull.full"))
   dutParser.interfaces(1).errorRdy ---->(s"$dataLocation/rtl_error1",Some("testFull.full"))
-
+  dutParser.mStage(0).memory.biasStructW ---->(s"$dataLocation/rtl_bias0",Some("testFull.full.full_st0"))
+  dutParser.mStage(1).memory.biasStructW ---->(s"$dataLocation/rtl_bias1",Some("testFull.full.full_st1"))
+  dutParser.mStage(0).memory.tapStructW ---->(s"$dataLocation/rtl_tap0",Some("testFull.full.full_st0"))
+  dutParser.mStage(1).memory.tapStructW ---->(s"$dataLocation/rtl_tap1",Some("testFull.full.full_st1"))
 
   //val errOut  = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
   //val biasOut = dutParser.mStage.memory.biasStructW ---->(s"$dataLocation/rtl_bias",Some("testSimple.simple.simple_st1"))
@@ -101,11 +109,11 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   /** Method used to reorder taps and output them to files.It is an overly complex transpose
     * operation.
     **/
-  def createInitialTaps  {
+  def createInitialTaps(tapData:INDArray, base:String)  {
     val allSlices = List.tabulate(information(0).tapDimension._2)(x => tapData.slice(x,0))
     val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
     val cSlices   = nSlices.map(x => x._2.map(_._1))
-    cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))
+    cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"${base}_${x._2}",x._1))
 
   }
 

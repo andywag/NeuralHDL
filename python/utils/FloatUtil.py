@@ -13,3 +13,14 @@ def load_float_file(path) :
     result = [hex_to_float(x.strip()) for x in file]
     file.close
     return numpy.array(result)
+
+def handle_line(input) :
+    line = list(map(''.join, zip(*[iter(input)] * 8)))
+    result = [hex_to_float(x.strip()) for x in line]
+    return numpy.array(result)
+
+def load_float_array_file(path) :
+    file = open(path, 'r')
+    results = [handle_line(x) for x in file]
+    file.close
+    return numpy.array(results)

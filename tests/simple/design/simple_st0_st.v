@@ -288,8 +288,8 @@ sigmoid sigmoid (
     .data_out(simple_st0_st_data_out),
     .reset(reset));
 
-assign tap_gain = 8'd3;
-assign bias_gain = 8'd6;
+assign tap_gain = 8'd4;
+assign bias_gain = 8'd4;
 
 // Delay the Input Valid
 always @(posedge clk) begin

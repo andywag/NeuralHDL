@@ -25,7 +25,8 @@ object BasicTestInformation {
     errorFill,
     outputFill,
     dataLocation,
-    12)
+    12,
+    Some(s"${dataLocation}/init_taps0"))
 
   // Second Stage of data contains a 12x6 network stage
   def getInformation2(dataLocation:String) = NeuralStageInfo((outputLength,dataLength),
@@ -35,21 +36,14 @@ object BasicTestInformation {
     errorFill,
     outputFill,
     dataLocation,
-    6)
+    6,
+    Some(s"${dataLocation}/init_taps1"))
 
   def getDualInformation(loc:String) = Seq(getInformation(loc),getInformation2(loc))
 
 
 
 
-  val trainingData1 =
-    """1 0 0 0 0 0 1 0 0 0 0 0
-0 1 0 0 0 0 0 1 0 0 0 0
-0 0 1 0 0 0 0 0 1 0 0 0
-0 0 0 1 0 0 0 0 0 1 0 0
-0 0 0 0 1 0 0 0 0 0 1 0
-0 0 0 0 0 1 0 0 0 0 0 1
-"""
 
 val trainingData =
     """1 0 0 0 0 0 1 0 0 0 0 0
@@ -59,25 +53,64 @@ def inIdent(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
   if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0)
 
 def getTrainIdent(a:Int,b:Int) = {
+
   val input =  Nd4j.create(inIdent(a,a))
   val output = Nd4j.create(inIdent(b,a))
   (input,output)
 }
 
-  def inTest(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
+  /*
+  def inTest(a:Int,b:Int,o:Int=0)  = Array.tabulate(a,b)((x,y) =>
     if (x < 6) {
       if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
     }
     else if (x < 12) {
-       if (y == x | y == (x+2)%6) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
+       if (y == (x+o)%6 | y == (x+1+o)%6) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
     }
     else {
-      if ((y) == (x%6) | y == (x%6)+1) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
+      if ((y) == ((x+o)%6) | y == ((x+o)%6)+1) (if (x % 2 == 0) 1.0 else -1.0) else 0.0
     })
+    */
+  val trainingData1 = List(
+    //Array(1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+    //Array(0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+    //Array(0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+    //Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0),
+    //Array(0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
+    //Array(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
 
-  def getTrainTest(a:Int,b:Int) = {
-    val input =  Nd4j.create(inTest(b,a))
-    val output = Nd4j.create(inTest(b,a))
+  Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
+  Array(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0),
+  Array(1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0),
+  Array(1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+  Array(1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0),
+  Array(0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0),
+  Array(1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0),
+  Array(0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0),
+  Array(1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0),
+  Array(1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0),
+  Array(1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0),
+  Array(1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0),
+  Array(1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+  Array(1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0),
+  Array(1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0),
+  Array(0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0),
+  Array(0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0),
+  Array(1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0),
+  Array(1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0),
+  Array(1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0),
+  Array(1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0),
+  Array(1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0),
+  Array(1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0))
+
+
+  lazy val getTrainTest = {
+    val input1 = trainingData1.map(x => x.slice(0,6).map(_.toDouble))
+    val output1 = trainingData1.map(x => x.slice(6,12).map(_.toDouble))
+
+    val input = Nd4j.create(input1.toArray).transpose()
+    val output = Nd4j.create(output1.toArray).transpose()
+
     (input,output)
   }
 
@@ -88,12 +121,12 @@ def getTrainIdent(a:Int,b:Int) = {
 0 0 0 1 0 0
 0 0 0 0 1 0
 0 0 0 0 0 1
-0 0 0 0 0 0
-0 0 0 0 0 0
-0 0 0 0 0 0
-0 0 0 0 0 0
-0 0 0 0 0 0
-0 0 0 0 0 0""".stripMargin
+1 0 0 0 0 0
+0 1 0 0 0 0
+0 0 1 0 0 0
+0 0 0 1 0 0
+0 0 0 0 1 0
+0 0 0 0 0 1""".stripMargin
 
 /*
   val identTaps ="""0 0 0 0 0 0
@@ -171,6 +204,14 @@ def getTrainIdent(a:Int,b:Int) = {
     val data1 = arr.split("\n")
     val data2 = data1.map(x => hl(x))
     val input =  Nd4j.create(data2)
+    input
+  }
+
+  def getRandomTaps = {
+
+    //val data1 = arr.split("\n")
+    //val data2 = data1.map(x => hl(x))
+    val input =  Nd4j.randn(12,6).mul(.25)
     input
   }
 

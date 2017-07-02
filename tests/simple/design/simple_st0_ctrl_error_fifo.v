@@ -255,7 +255,7 @@ always @(posedge clk) begin
   if (reset) begin
     error_phase_read <= 2'd0;
   end
-  else if ((error_update_first_internal & (~error_tap_update | input_stage))) begin 
+  else if ((error_update_first_internal & error_tap_update)) begin 
     if ((error_phase_read == 'd3)) begin
       error_phase_read <= 2'd0;
     end

@@ -24,17 +24,21 @@ class SingleStageTest extends BlockScalaTest with BlockTestParser {
   // Contains training data and initial taps
   val information = BasicTestInformation.getInformation(dataLocation)
   // Set the test length
-  override def getTestLength = BasicTestInformation.tapLength*64
+  override def getTestLength = BasicTestInformation.tapLength*512
   val numberNeurons = BasicTestInformation.numberNeurons
 
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
 
-  val tapData   = BasicTestInformation.getInitTaps
+  //val tapData   = BasicTestInformation.getInitTaps
+  val tapData   = BasicTestInformation.getRandomTaps
+
   /** Store the taps to a file after converting the order */
   createInitialTaps
 
   // Store the initial data and taps to a file.
-  val dataData  = BasicTestInformation.getTrainIdent(6,12)
+  //val dataData  = BasicTestInformation.getTrainIdent(6,12)
+  val dataData  = BasicTestInformation.getTrainTest
+
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
@@ -48,14 +52,14 @@ class SingleStageTest extends BlockScalaTest with BlockTestParser {
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
 
-  val size =input.data.length()
+  val size = 36//input.data.length()
   /** Create the interface for the input data */
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
   inRdyCount := ($iff (inRdyCount === size-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
   interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
 
-  val size2 = expected.data.length()
+  val size2 = 36//expected.data.length()
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
   expRdyCount := ($iff (expRdyCount === size2-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
@@ -69,6 +73,9 @@ class SingleStageTest extends BlockScalaTest with BlockTestParser {
   val rpOut = interface.outPreRdy.value.value         ----> (s"$dataLocation/rtl_pre",clk.createEnable(interface.outPreRdy.vld), None, "Stage Pre Non",8)
   val errOut  = dutParser.mError.errorOut ---->(s"$dataLocation/rtl_error",Some("testSimple.simple.simple_err"))
   val biasOut = dutParser.mStage(0).memory.biasStructW ---->(s"$dataLocation/rtl_bias",Some("testSimple.simple.simple_st0"))
+  dutParser.mStage(0).memory.tapStructW ---->(s"$dataLocation/rtl_tap",Some("testSimple.simple.simple_st0"))
+
+
   expectedRdy ---->(s"$dataLocation/rtl_expected")
 
   dutParser.mStage(0).memory.dataStructW sread(s"$dataLocation/rtl_mem",Some("testSimple.simple.simple_st0"))
@@ -96,7 +103,7 @@ class SingleStageTest extends BlockScalaTest with BlockTestParser {
     val allSlices = List.tabulate(information.tapDimension._2)(x => tapData.slice(x,0))
     val nSlices   = allSlices.zipWithIndex.groupBy(x => (x._2 % numberNeurons)).toList.sortBy(_._1)
     val cSlices   = nSlices.map(x => x._2.map(_._1))
-    cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps_${x._2}",x._1))
+    cSlices.zipWithIndex.foreach(x => DataFileGenerator.createFlattenCombine(s"$dataLocation/init_taps0_${x._2}",x._1))
 
   }
 
