@@ -34,8 +34,8 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps1")
 
   // Store the initial data and taps to a file.
-  val data1     = BasicTestInformation.getTrainIdent(6,6)
-  val dataData  = BasicTestInformation.getTrainTest //getTrainIdent(6,6)
+  val dataData     = BasicTestInformation.getTrainIdent(6,6)
+  //val dataData  = BasicTestInformation.getTrainTest //getTrainIdent(6,6)
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 

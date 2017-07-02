@@ -39,7 +39,7 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:174];  // <32,0>
+  reg                   [31:0]  expected_mem[0:36];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
   reg                   [31:0]  rtl_bias0_fptr    ;  // <32,0>
@@ -54,7 +54,7 @@
   reg                   [31:0]  rtl_tap0_fptr     ;  // <32,0>
   reg                   [31:0]  rtl_tap1_fptr     ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:174];  // <32,0>
+  reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
