@@ -1,6 +1,12 @@
 { 
-  "gitbook": "2.5.2",
+  "gitbook": "2.x.x",
   "structure": { 
     "summary": "docs/SUMMARY.md" 
-  } 
+  },
+  "plugins": ["mermaid-2"],
+  "pluginsConfig": {
+    "mermaid-2": {
+      "theme": "forest"
+    }
+  }
 }

@@ -66,7 +66,9 @@
 
   float_24_8                    expected;  // <1,0>
   full_st0_ctrl_int_t           full_st0_ctrl_int;  // <1,0>
+  full_st0_st_reg_t             full_st0_st_reg;  // <1,0>
   full_st1_ctrl_int_t           full_st1_ctrl_int;  // <1,0>
+  full_st1_st_reg_t             full_st1_st_reg;  // <1,0>
   float_24_8                    st_data;  // <1,0>
   float_24_8                    st_data_out;  // <1,0>
   float_24_8                    st_data_out_pre;  // <1,0>
@@ -85,8 +87,10 @@ full full (
     .expected_vld(expected_vld),
     .full_st0_ctrl_data_fifo_data_ready(full_st0_ctrl_data_fifo_data_ready),
     .full_st0_ctrl_int(full_st0_ctrl_int),
+    .full_st0_st_reg(full_st0_st_reg),
     .full_st1_ctrl_data_fifo_data_ready(full_st1_ctrl_data_fifo_data_ready),
     .full_st1_ctrl_int(full_st1_ctrl_int),
+    .full_st1_st_reg(full_st1_st_reg),
     .load_finish(load_finish),
     .reset(reset),
     .st_data(st_data),
@@ -113,7 +117,7 @@ always @(posedge clk) begin
     
   end
   else begin
-    if ((counter == 'd73728)) begin
+    if ((counter == 'd36864)) begin
       $finish;
     end
   end
@@ -321,6 +325,9 @@ assign full_st0_ctrl_int.error_length = 4'd11;
 assign full_st0_ctrl_int.input_stage = 'd1;
 assign full_st0_ctrl_int.tap_update_enable = 'd1;
 assign full_st0_ctrl_int.bias_update_enable = 'd1;
+assign full_st0_st_reg.tap_gain = 6'd3;
+assign full_st0_st_reg.bias_gain = 6'd3;
+assign full_st0_st_reg.disable_non_linearity = 'd0;
 assign full_st1_ctrl_int.load_length = 4'd11;
 assign full_st1_ctrl_int.load_depth = 3'd5;
 assign full_st1_ctrl_int.state_length = 'd1;
@@ -328,6 +335,9 @@ assign full_st1_ctrl_int.error_length = 4'd5;
 assign full_st1_ctrl_int.error_length = 4'd5;
 assign full_st1_ctrl_int.tap_update_enable = 'd1;
 assign full_st1_ctrl_int.bias_update_enable = 'd1;
+assign full_st1_st_reg.tap_gain = 6'd3;
+assign full_st1_st_reg.bias_gain = 6'd3;
+assign full_st1_st_reg.disable_non_linearity = 'd1;
 assign st_data_out_rdy = 'd1;
 
 // Counter to Index Test

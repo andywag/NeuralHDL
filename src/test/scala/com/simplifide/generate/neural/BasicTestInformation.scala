@@ -28,6 +28,17 @@ object BasicTestInformation {
     12,
     Some(s"${dataLocation}/init_taps0"))
 
+  // First Stage of data contains a 6x12 network stage
+  def getInformationH(dataLocation:String) = NeuralStageInfo((outputLength,outputLength),
+    outputLength,
+    dataFill,
+    numberNeurons,
+    errorFill,
+    outputFill,
+    dataLocation,
+    12,
+    Some(s"${dataLocation}/init_taps0"))
+
   // Second Stage of data contains a 12x6 network stage
   def getInformation2(dataLocation:String) = NeuralStageInfo((outputLength,dataLength),
     outputLength,
@@ -40,6 +51,7 @@ object BasicTestInformation {
     Some(s"${dataLocation}/init_taps1"))
 
   def getDualInformation(loc:String) = Seq(getInformation(loc),getInformation2(loc))
+  def getThreeInformation(loc:String) = Seq(getInformation(loc),getInformationH(loc),getInformation2(loc))
 
 
 
@@ -72,13 +84,12 @@ def getTrainIdent(a:Int,b:Int) = {
     })
     */
   val trainingData1 = List(
-    //Array(1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-    //Array(0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-    //Array(0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0),
-    //Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0),
-    //Array(0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
-    //Array(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
-
+    Array(1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+    Array(0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+    Array(0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+    Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0),
+    Array(0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
+    Array(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
   Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
   Array(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0),
   Array(1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0),

@@ -15,6 +15,7 @@
     module full_st1(
   input                         clk,
   input full_st1_ctrl_int_t     full_st1_ctrl_int,
+  input full_st1_st_reg_t       full_st1_st_reg,
   input                         reset,
   input float_24_8              stage_1_data,
   input                         stage_1_data_fst,
@@ -97,6 +98,7 @@ full_st1_st full_st1_st (
     .full_st1_st_data_out(full_st1_st_data_out),
     .full_st1_st_data_out_bias(full_st1_st_data_out_bias),
     .full_st1_st_data_out_pre(full_st1_st_data_out_pre),
+    .full_st1_st_reg(full_st1_st_reg),
     .full_st1_st_tap_out(full_st1_st_tap_out),
     .reset(reset),
     .stage_error_back(stage_error_back),

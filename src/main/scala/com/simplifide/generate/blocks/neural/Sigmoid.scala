@@ -29,6 +29,7 @@ object Sigmoid {
 
     val dataOut = proto.newSignal(name = "data_out",opType = OpType.Output).asInstanceOf[FloatSignal]
     val dataIn  = proto.newSignal(name = "data_in",opType = OpType.Input).asInstanceOf[FloatSignal]
+    val bypass  = signal("bypass",INPUT)
 
     override def document =
 
@@ -135,7 +136,8 @@ The code used to generate this code is relatively complex
 
     // Temporary Bypass of Sigmoid operation
     //dataOut    := intOut $at clk
-    dataOut    := dataIn $at clk
+    dataOut    := $iff (bypass) $then dataIn $else intOut  $at clk
+    //dataOut    := dataIn $at clk
 
     override def createBody = {}
     override def inputs: Seq[SignalTrait] = dataIn :: clk.allSignals(INPUT)

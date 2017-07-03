@@ -14,7 +14,7 @@ trait BlockTestParser extends TestEntityParser{
   /** Clock for the testbench */
   def blockName:String
   override val name = "test" + blockName.capitalize
-
+  def waveformEnable = false
 
 
   override implicit val clk: ClockControl = ClockControl("clk","reset")
@@ -32,7 +32,7 @@ trait BlockTestParser extends TestEntityParser{
       )
   )
 
-  val project = new BlockProject(this)
+  val project = new BlockProject(this, waveformEnable)
   project.cleanProject
   project.createProjectStructure
 

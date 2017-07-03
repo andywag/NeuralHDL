@@ -8,7 +8,7 @@ import com.simplifide.generate.test2.{Test, TestEntityParser}
 /**
   * Created by andy on 5/3/17.
   */
-class BlockProject(test:BlockTestParser)(implicit val clk:ClockControl) extends Project{
+class BlockProject(test:BlockTestParser, waveform:Boolean = false)(implicit val clk:ClockControl) extends Project{
   /** Base Location of the ProjectGenerator */
   override val location: String = s"tests/${test.blockName}"
 
@@ -19,7 +19,7 @@ class BlockProject(test:BlockTestParser)(implicit val clk:ClockControl) extends 
   override def rootEntity        = rootEntity1
 
   val testCase          = test
-  lazy val rootTests1    = List(Test(testCase.createEntity))
+  lazy val rootTests1    = List(Test(testCase.createEntity, waveform))
   override def rootTests = rootTests1
 
 }

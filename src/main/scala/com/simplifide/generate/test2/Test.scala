@@ -15,6 +15,7 @@ trait Test {
 
   /** Test Entity */
   val testBench:NewEntity
+  val waveform = false
 
   def postRun = {}
 
@@ -22,7 +23,7 @@ trait Test {
 
   def createTest(project:Project) = {
     testBench.writeModule(project.projectStructure.test)
-    val wrap = new TestCWrapper(testBench.name)
+    val wrap = new TestCWrapper(testBench.name, waveform)
     wrap.writeCode(s"${project.projectStructure.test}/${testBench.name}.cpp")
   }
 
@@ -41,9 +42,9 @@ trait Test {
 }
 
 object Test {
-  def apply(dut:NewEntity)(implicit clk:ClockControl) = new Impl(dut)
+  def apply(dut:NewEntity, waveform:Boolean=false)(implicit clk:ClockControl) = new Impl(dut, waveform)
 
-  class Impl(override val testBench:NewEntity) extends Test
+  class Impl(override val testBench:NewEntity, override val waveform:Boolean = false) extends Test
 
 }
 

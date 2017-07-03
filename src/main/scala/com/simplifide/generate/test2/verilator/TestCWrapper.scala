@@ -34,7 +34,7 @@ int main(int argc, char **argv, char **env) {
 
     if (main_time % 10 == 1) {
       top->clk = 0;
-      //${getDump}
+      ${if (wave) getDump else ""}
     }
     else if (main_time % 10 == 6) {
       top->clk = 1;

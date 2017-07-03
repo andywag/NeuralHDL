@@ -1,14 +1,15 @@
 package com.simplifide.generate.blocks.neural
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.neural.NeuralStage.{Interface, StageAdder}
+import com.simplifide.generate.blocks.neural.NeuralStage.{Interface, Register, StageAdder}
+import com.simplifide.generate.blocks.neural.NeuralStageTop.ControlStruct
 import com.simplifide.generate.doc.MdGenerator._
 import com.simplifide.generate.generator.ComplexSegment
 import com.simplifide.generate.generator.ComplexSegment.SegmentEntity
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
-import com.simplifide.generate.signal.sv.{ReadyValid, SignalArray, SignalInterface}
-import com.simplifide.generate.signal.{FloatSignal, OpType, SignalTrait, sv}
+import com.simplifide.generate.signal.sv.{ReadyValid, SignalArray, SignalInterface, Struct}
+import com.simplifide.generate.signal._
 import com.simplifide.generate.util.PathUtilities
 
 /**
@@ -23,10 +24,14 @@ case class NeuralStage(override val name:String,
   // Create the I/O signals for the block
   val first  = signal("first",INPUT)
 
+  // Control Signals from the control block
   val errorMode        = signal("stage_error_mode",INPUT)
   val errorFirst       = signal("stage_error_first",INPUT)
   val stateErrorBack   = signal("stage_error_back",INPUT)
   val updateErrorFirst = signal("update_error_first",INPUT)
+  // Register Control Signals
+  val ri = new Register(appendName("reg"),6)
+  signal(ri)
 
   val dataIn = Seq(signal(FloatSignal(appendName("data"),INPUT))) // FIXME : Generalize to Generic Number Type
   // FIXME : Add support for arrays :
@@ -60,6 +65,146 @@ case class NeuralStage(override val name:String,
 
   val neuron       = new ComplexSegment.SegmentEntity(neuronBlock, "neuron")
   val nonlinearity = new ComplexSegment.SegmentEntity(sigmoidBlock, "sigmoid")
+
+
+
+
+  //val tapGain = signal("tap_gain",WIRE,U(8))
+  //val biasGain = signal("bias_gain",WIRE,U(8))
+
+
+  //tapGain := 4
+  //biasGain := 4
+
+  val share  = dataIn.length
+  val depth  = tapIn.length
+
+  def inputs = biasIn :: tapIn :: first :: clk.allSignals(INPUT) ::: dataIn.toList
+
+  sigs(inputs.map(_.changeType(OpType.Input)))
+  signal(dataOut.changeType(OpType.Output))
+  signal(dataOutBias.changeType(OpType.Output))
+  signal(dataOutPre.changeType(OpType.Output))
+
+
+  // Input Delay Line for Backpropagation : Error is stored and rotated around
+  val neuronIn    = seq(dataOut.newSignal(name = "in_line"),REG)(numberOfNeurons)
+
+  val neuronOut      = seq(dataOut.newSignal(name = "wireOut"))(numberOfNeurons)
+  val neuronAccumIn  = seq(biasIn)(numberOfNeurons)
+
+  val dataOutDelay    = seq(dataOut.newSignal(name = "out_line"),REG)(numberOfNeurons)
+  val firstD          = Seq.tabulate(2)(x => signal(first.newSignal(name = s"first$x",REG)))
+  val errorD          = register(errorMode)(1)
+  val tapInD          = register(tapIn)(1)
+
+  // Delay the control signal for backpropagation
+  // FIXME : Need to properly control the length
+  val stageErrorBackD = register(stateErrorBack)(9)
+
+  import com.simplifide.generate.newparser.typ.SegmentParser._
+
+  /- ("Delay the Input Valid")
+  Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
+
+  // Latch the input error for backpropagation
+  neuronIn !:= ($if (first) $then tapIn.toSeq $else (neuronIn.slice(1,neuronIn.length).toList ::: List(neuronIn(0))) ) at (clk)
+
+  // Negate and shift down the error input which is input through the tap
+  for (i <- 0 until numberOfNeurons) {
+    tapConv.s(i).sgn :=  tapIn.s(i).sgn
+    tapConv.s(i).exp :=  (tapIn.s(i).exp > ri.tapGain) ? (tapIn.s(i).exp - ri.tapGain) :: tapIn.s(i).exp // FIXME : Programmable Gain
+    tapConv.s(i).man :=  tapIn.s(i).man
+  }
+  // Latch the error input into a storage register for the first error
+  tapLat !:= tapConv $at(clk.createEnable(errorFirst))
+
+  // During Error mode use the Error otherwise use the taps
+  // During Back propagation and data the taps are used regularly
+  tapSel !:= (errorMode & ~stageErrorBackD(2)) ? tapLat :: tapIn
+
+  // Input Selection :
+  // For error use the delated error signal stored in tapInD
+  // For Data use either previous output or 0 for first data sample
+  /- ("Select the inputs to the Neuron")
+  for (i <- 0 until depth) {
+    neuronAccumIn(i) !:= (errorD(1) & ~stageErrorBackD(2))  ? tapInD(1).s(i) :: ((firstD(0) | updateErrorFirst) ? 0 :: neuronOut(i))
+  }
+
+  // Put the Neuron outputs into a delay line to share both the adder and the non-linearity
+  // For error Mode : Use Error Output to be added to the bias
+  // For data  Mode : Use outputs
+  /- ("Create the output Delay Line\n")
+  val neuronTemp      = seq(dataOut.newSignal(name = "neuron_temp"))(numberOfNeurons)
+  for (i <- 0 until numberOfNeurons) {
+    neuronTemp(i)   !:=  neuronOut(i)
+  }
+  dataOutDelay !:= ($if (firstD(0) | updateErrorFirst) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
+
+  /- ("Create the bias update code")
+  val tapLat1   = signal(SignalArray.Arr("taps_lat1",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
+  val biasAddInput = seq(dataOut.newSignal(name = "bias_add_input"),REG)(numberOfNeurons)
+
+  for (i <- 0 until numberOfNeurons) {
+    tapLat1.s(i).sgn !:= tapLat.s(i).sgn
+    tapLat1.s(i).man !:= tapLat.s(i).man
+    tapLat1.s(i).exp !:= (tapLat.s(i).exp > ri.biasGain) ? (tapLat.s(i).exp - ri.biasGain) :: tapLat.s(i).exp
+    biasAddInput(i)     !:= tapLat1.s(i)
+  }
+
+
+  val biasAddDelay    = seq(dataOut.newSignal(name = "bias_add_delay"),REG)(numberOfNeurons)
+  biasAddDelay !:= ($if (firstD(0)) $then biasAddInput $else biasAddDelay.slice(1,biasAddDelay.length)) at (clk)
+
+
+  val nIn = seq(neuron.segment.dataIn.newSignal(name = "input_data"))(numberOfNeurons)
+  List.tabulate(numberOfNeurons){x => nIn(x) !:= stageErrorBackD(2) ? neuronIn(x) :: dataIn(0)}
+
+
+  // Creation of neuron instance
+  val neuronEntity = neuron.createEntity
+  for (i <- 0 until numberOfNeurons) {
+    val connection = Map(
+      neuron.segment.dataIn  -> nIn(i),//dataIn(0),
+      neuron.segment.taps    -> tapSel.s(i),
+      neuron.segment.bias    -> neuronAccumIn(i),
+      neuron.segment.dataOut -> neuronOut(i)
+    )
+    instance(neuronEntity,s"neuron$i",connection)
+  }
+
+  // Final Adder Stage Used before Sigmoing
+  // For Data Stage uses  : Output + Bias
+  // For Error Stage uses : Bias + Error
+  val adderOut           = neuronOut(0).newSignal(appendName("adder"))
+  val adderBlock         = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasInR(numberOfNeurons+2))
+  instance(adderBlock)
+
+  val biasAdderOut       = neuronOut(0).newSignal(appendName("bias_adder"))
+  val biasAdderBlock     = new StageAdder(appendName("bias_add"),biasAdderOut,biasAddDelay(0),biasInR(1))
+  instance(biasAdderBlock)
+
+  /- ("Assign the outputs")
+  dataOutPre  !:= dataOutDelay(0)
+
+  /- ("Assign the bias output")
+  dataOutBias !:= biasAdderOut
+
+  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut,
+    nonlinearity.segment.dataOut.asInstanceOf[SignalTrait] -> dataOut,
+    nonlinearity.segment.bypass.asInstanceOf[SignalTrait] -> ri.disableNonlinearity
+  )
+  instance(nonlinearity.createEntity,s"sigmoid",connect)
+
+  // Parallel output of the blocks containing all the taps
+
+  /- ("Assign the tap outputs")
+  for (i <- 0 until depth) {
+    val sl = (32*(i+1)-1,32*i)
+    fullOut1(sl) := neuronOut(i)
+  }
+  fullOut := fullOut1 $at(clk)
+
 
 
   override def document =
@@ -106,140 +251,6 @@ dataOut        := internalSignal plus bias
 
 """
 
-  val tapGain = signal("tap_gain",WIRE,U(8))
-  val biasGain = signal("bias_gain",WIRE,U(8))
-
-  tapGain := 4
-  biasGain := 4
-
-  val share  = dataIn.length
-  val depth  = tapIn.length
-
-  def inputs = biasIn :: tapIn :: first :: clk.allSignals(INPUT) ::: dataIn.toList
-
-  sigs(inputs.map(_.changeType(OpType.Input)))
-  signal(dataOut.changeType(OpType.Output))
-  signal(dataOutBias.changeType(OpType.Output))
-  signal(dataOutPre.changeType(OpType.Output))
-
-
-  // Input Delay Line for Backpropagation : Error is stored and rotated around
-  val neuronIn    = seq(dataOut.newSignal(name = "in_line"),REG)(numberOfNeurons)
-
-  val neuronOut      = seq(dataOut.newSignal(name = "wireOut"))(numberOfNeurons)
-  val neuronAccumIn  = seq(biasIn)(numberOfNeurons)
-
-  val dataOutDelay    = seq(dataOut.newSignal(name = "out_line"),REG)(numberOfNeurons)
-  val firstD          = Seq.tabulate(2)(x => signal(first.newSignal(name = s"first$x",REG)))
-  val errorD          = register(errorMode)(1)
-  val tapInD          = register(tapIn)(1)
-
-  // Delay the control signal for backpropagation
-  // FIXME : Need to properly control the length
-  val stageErrorBackD = register(stateErrorBack)(9)
-
-  import com.simplifide.generate.newparser.typ.SegmentParser._
-
-  /- ("Delay the Input Valid")
-  Seq(firstD(0),firstD(1)) !:= Seq(first,firstD(0)) at (clk)
-
-  // Latch the input error for backpropagation
-  neuronIn !:= ($if (first) $then tapIn.toSeq $else (neuronIn.slice(1,neuronIn.length).toList ::: List(neuronIn(0))) ) at (clk)
-
-  // Negate and shift down the error input which is input through the tap
-  for (i <- 0 until numberOfNeurons) {
-    tapConv.s(i).sgn :=  tapIn.s(i).sgn
-    tapConv.s(i).exp :=  (tapIn.s(i).exp > tapGain) ? (tapIn.s(i).exp - tapGain) :: tapIn.s(i).exp // FIXME : Programmable Gain
-    tapConv.s(i).man :=  tapIn.s(i).man
-  }
-  // Latch the error input into a storage register for the first error
-  tapLat !:= tapConv $at(clk.createEnable(errorFirst))
-
-  // During Error mode use the Error otherwise use the taps
-  // During Back propagation and data the taps are used regularly
-  tapSel !:= (errorMode & ~stageErrorBackD(2)) ? tapLat :: tapIn
-
-  // Input Selection :
-  // For error use the delated error signal stored in tapInD
-  // For Data use either previous output or 0 for first data sample
-  /- ("Select the inputs to the Neuron")
-  for (i <- 0 until depth) {
-    neuronAccumIn(i) !:= (errorD(1) & ~stageErrorBackD(2))  ? tapInD(1).s(i) :: ((firstD(0) | updateErrorFirst) ? 0 :: neuronOut(i))
-  }
-
-  // Put the Neuron outputs into a delay line to share both the adder and the non-linearity
-  // For error Mode : Use Error Output to be added to the bias
-  // For data  Mode : Use outputs
-  /- ("Create the output Delay Line\n")
-  val neuronTemp      = seq(dataOut.newSignal(name = "neuron_temp"))(numberOfNeurons)
-  for (i <- 0 until numberOfNeurons) {
-    neuronTemp(i)   !:=  neuronOut(i)
-  }
-  dataOutDelay !:= ($if (firstD(0) | updateErrorFirst) $then neuronTemp $else dataOutDelay.slice(1,dataOutDelay.length)) at (clk)
-
-  /- ("Create the bias update code")
-  val tapLat1   = signal(SignalArray.Arr("taps_lat1",FloatSignal(appendName(s"tap_lat"),REG),numberOfNeurons))
-  val biasAddInput = seq(dataOut.newSignal(name = "bias_add_input"),REG)(numberOfNeurons)
-
-  for (i <- 0 until numberOfNeurons) {
-    tapLat1.s(i).sgn !:= tapLat.s(i).sgn
-    tapLat1.s(i).man !:= tapLat.s(i).man
-    tapLat1.s(i).exp !:= (tapLat.s(i).exp > biasGain) ? (tapLat.s(i).exp - biasGain) :: tapLat.s(i).exp
-    biasAddInput(i)     !:= tapLat1.s(i)
-  }
-
-
-  val biasAddDelay    = seq(dataOut.newSignal(name = "bias_add_delay"),REG)(numberOfNeurons)
-  biasAddDelay !:= ($if (firstD(0)) $then biasAddInput $else biasAddDelay.slice(1,biasAddDelay.length)) at (clk)
-
-
-  val nIn = seq(neuron.segment.dataIn.newSignal(name = "input_data"))(numberOfNeurons)
-  List.tabulate(numberOfNeurons){x => nIn(x) !:= stageErrorBackD(2) ? neuronIn(x) :: dataIn(0)}
-
-
-  // Creation of neuron instance
-  val neuronEntity = neuron.createEntity
-  for (i <- 0 until numberOfNeurons) {
-    val connection = Map(
-      neuron.segment.dataIn  -> nIn(i),//dataIn(0),
-      neuron.segment.taps    -> tapSel.s(i),
-      neuron.segment.bias    -> neuronAccumIn(i),
-      neuron.segment.dataOut -> neuronOut(i)
-    )
-    instance(neuronEntity,s"neuron$i",connection)
-  }
-
-  // Final Adder Stage Used before Sigmoing
-  // For Data Stage uses  : Output + Bias
-  // For Error Stage uses : Bias + Error
-  val adderOut           = neuronOut(0).newSignal(appendName("adder"))
-  val adderBlock         = new StageAdder(appendName("_add"),adderOut,dataOutDelay(0),biasInR(numberOfNeurons+2))
-  instance(adderBlock)
-
-  val biasAdderOut       = neuronOut(0).newSignal(appendName("bias_adder"))
-  val biasAdderBlock     = new StageAdder(appendName("bias_add"),biasAdderOut,biasAddDelay(0),biasInR(1))
-  instance(biasAdderBlock)
-
-  /- ("Assign the outputs")
-  dataOutPre  !:= dataOutDelay(0)
-
-  /- ("Assign the bias output")
-  dataOutBias !:= biasAdderOut
-
-  val connect = Map(nonlinearity.segment.dataIn.asInstanceOf[SignalTrait] -> adderOut,
-    nonlinearity.segment.dataOut.asInstanceOf[SignalTrait] -> dataOut)
-  instance(nonlinearity.createEntity,s"sigmoid",connect)
-
-  // Parallel output of the blocks containing all the taps
-
-  /- ("Assign the tap outputs")
-  for (i <- 0 until depth) {
-    val sl = (32*(i+1)-1,32*i)
-    fullOut1(sl) := neuronOut(i)
-  }
-  fullOut := fullOut1 $at(clk)
-
-
 
 }
 
@@ -261,5 +272,25 @@ object NeuralStage {
     signal(out.asOutput)
     out        := (in1 plus in2)
   }
+
+
+  case class Register(override val name:String, gainWidth:Int,override val opType:OpType = OpType.Input) extends Struct {
+    override val packed: Boolean = true
+    override val typeName: String = s"${name}_t"
+
+    val tapGain            = SignalTrait(createName("tap_gain"),opType,FixedType.unsigned(gainWidth,0))
+    val biasGain           = SignalTrait(createName("bias_gain"),opType,FixedType.unsigned(gainWidth,0))
+    val disableNonlinearity = SignalTrait(createName("disable_non_linearity"),opType)
+
+    override val signals: List[SignalTrait] = List(tapGain, biasGain, disableNonlinearity)
+
+
+
+    /** Kind of a kludge need a better way to copy objects (shapeless maybe) */
+    override def copyStruct(n: String, o: OpType): SignalTrait = new Register(n,gainWidth,o)
+    /** Creates a New Signal (Virtual Constructor) */
+    override def newSignal(name: String, opType: OpType, fix: FixedType): SignalTrait = new Register(name,gainWidth,opType)
+  }
+
 
 }

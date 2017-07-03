@@ -19,6 +19,8 @@ trait TestEntityParser extends EntityParser with TestParser with InitialParser w
   implicit val clk:ClockControl
   implicit val parser:TestEntityParser = this
 
+
+
   def dataLocation:String = ""
 
   /** Design Under Test */
