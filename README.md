@@ -37,6 +37,8 @@ NeuralStageInfo((dataLength,outputLength), // # Inputs, # Outputs
 
 ```
 
+[Detailed Documentation](https://andywag.github.io/NeuralHDL/index.html)
+
 ## Status
 
 The project is in an alpha stage and currently only supports a fully connected network based 
@@ -45,5 +47,7 @@ verilator and have not been taken to production or protype. The design is fully 
 the underlying language/toolset has been used to take designs to production so these are 
 short term issues but this is not recommended/ready for production use yet. 
 
-For a quick look at the latest results please see : 
+
+
+For a quick look at the latest results please see 
 [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
