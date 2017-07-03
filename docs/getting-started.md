@@ -1,33 +1,33 @@
-## Getting Started
+# Getting Started
 
-All that is required for this project is scala but other tools are useful for testing of the blocks. The
-current tools used for this project are :
+Scala is the only requirement for generation of the blocks but other tools listed below are used
+in the testing of the resulting cores. Please install these tools before getting started.
 
 1. [SBT](http://www.scala-sbt.org/) : Build tool to create cores and tests
 1. [Jetbrains IDEA](https://www.jetbrains.com/idea/) : Integrated Development Environment for editting
 1. [Verilator] (https://www.veripool.org/wiki/verilator) : Free Verilog simulator
-1. [Python with Numpy]
+1. Python with Numpy and Scipy
 
-<br>
-The tools above are optional for generating the RTL and test benches. The examples currently
-are using them for both simulation and testing so are required for that purpose. The examples can
-be run either on the command line or though the idea. The command line syntax is shown below.
-<br>
 
-sbt test-only `test-name>`
-<br>
-Example : `sbt test-only com.simplifide.generate.neural.DoubleStageTest`
+## Running Basic Test
 
-## Infrastructure Limitations
+Scalatest is used for running generating the cores and running basic tests. To run a test use the
+following command or run the test inside the IDEA IDE. 
 
-The current framework is in an alpha state so there is the potential for issues with setup. There
-are also some run issues which are currently being addressed. The main one is the tests were initially
-designed to be completley handled in scala. Scala analysis tools are not at the level of numpy so the future
-top level will probably be run through python. Currently running is a 2 step process which requires generating
-and runnign the code in scala and testing in python.
+* sbt test-only `test-name`
+* `sbt test-only com.simplifide.generate.neural.DoubleStageTest`
 
-<br>
-To run the full code and test for this example follow the steps below
+To validate there are python scripts to check the results. For the case shown above.  
 
-1. `sbt test-only com.simplifide.generate.neural.DoubleStageTest`
-2. `python python/test/CheckDoubleNetwork.py`
+* `python python/test/CheckDoubleNetwork.py`
+
+## Future Directions
+
+The initial goal of this project was to have the design/test be completely self contained in a single
+environment (Scala). Scala has signal processing and math libraries but are not near the level of numpy. 
+Because of this the testing is now a hybrid between scala and python but is long term going to move 
+to python. 
+
+* `The current framework is in an alpha state and not fully productized so there is the potential for some
+issues with setup.` 
+
