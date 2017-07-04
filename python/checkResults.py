@@ -2,8 +2,8 @@ import argparse
 import test.CheckDoubleNetwork
 import test.CheckSingleNetwork
 
-TEST_SINGLE = 'Single'
-TEST_DOUBLE = 'Double'
+TEST_SINGLE = 'simple'
+TEST_DOUBLE = 'full'
 
 parser = argparse.ArgumentParser(description='Short sample app')
 parser.add_argument('-p','--plot',action='store_true',default=False)

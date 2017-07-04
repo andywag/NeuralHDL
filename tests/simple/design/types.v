@@ -156,6 +156,11 @@ typedef struct packed {
   logic                         bias_update_enable;  // <1,0>
 } simple_st0_ctrl_int_t; 
 typedef struct packed {
+  logic                 [5:0]   tap_gain          ;  // <6,0>
+  logic                 [5:0]   bias_gain         ;  // <6,0>
+  logic                         disable_non_linearity;  // <1,0>
+} simple_st0_st_reg_t; 
+typedef struct packed {
   float_24_8                    v0;  // <1,0>
   float_24_8                    v1;  // <1,0>
   float_24_8                    v2;  // <1,0>

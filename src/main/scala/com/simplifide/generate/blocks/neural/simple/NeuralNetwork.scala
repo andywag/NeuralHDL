@@ -1,7 +1,7 @@
 package com.simplifide.generate.blocks.neural.simple
 
 import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.blocks.neural.{NeuralError, NeuralStageInfo, NeuralStageInterface, NeuralStageTop}
+import com.simplifide.generate.blocks.neural._
 import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.FloatSignal
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
@@ -11,13 +11,14 @@ import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
   */
 class NeuralNetwork[T](val name:String,
                         neuralInfo:Seq[NeuralStageInfo],
-                        interface:NeuralStageInterface[T],
-                        expected:ReadyValidInterface[_]
+                        topInterface:NeuralNetworkInterface[_]
                        )(implicit clk:ClockControl) extends EntityParser {
 
   //val info = neuralInfo(0)
   import com.simplifide.generate.newparser.typ.SegmentParser._
 
+  val interface = topInterface.stage
+  val expected  = topInterface.expectedRdy
   // FIXME : Need to fix automatic connections
   // Attach the output signals
   signal(interface.inRdy.signals)

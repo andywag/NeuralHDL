@@ -13,6 +13,7 @@
 `endif
 
     module sigmoid(
+  input                         bypass,
   input                         clk,
   input float_24_8              data_in,
   input                         reset,
@@ -107,7 +108,12 @@ always @(posedge clk) begin
     data_out <= 'd0;
   end
   else begin
-    data_out <= data_in;
+    if (bypass) begin
+      data_out <= data_in;
+    end
+    else begin
+      data_out <= sigmoid_int;
+    end
   end
 end
 endmodule

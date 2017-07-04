@@ -1,6 +1,7 @@
 package com.simplifide.generate.neural
 
 import com.simplifide.generate.blocks.neural
+import com.simplifide.generate.blocks.neural.NeuralNetworkInterface
 import com.simplifide.generate.blocks.neural.simple.NeuralNetwork
 import com.simplifide.generate.model.DataFileGenerator
 import com.simplifide.generate.project.NewEntity
@@ -28,9 +29,9 @@ class HiddenStageTest extends BlockScalaTest with BlockTestParser {
   val interface   = new neural.NeuralStageInterface("st",FloatSignal("a",INPUT))
 
   /** Store the taps to a file after converting the order */
-  createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps0")
-  createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps1")
-  createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps2")
+  //createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps0")
+  //createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps1")
+  //createInitialTaps(BasicTestInformation.getRandomTaps,s"$dataLocation/init_taps2")
 
   // Store the initial data and taps to a file.
   //val dataData     = BasicTestInformation.getTrainIdent(6,6)
@@ -42,9 +43,10 @@ class HiddenStageTest extends BlockScalaTest with BlockTestParser {
   // Create the interface for the expected data
   val expectedData = FloatSignal("expected",INPUT)
   val expectedRdy  = new ReadyValidInterface(expectedData)
+  val topInterface = new NeuralNetworkInterface("int",interface)
 
   override val dutParser = new NeuralNetwork(blockName, information,
-    interface,expectedRdy)
+    topInterface)
 
   /** Design Under Test */
   override val dut: NewEntity = dutParser.createEntity
@@ -117,6 +119,7 @@ class HiddenStageTest extends BlockScalaTest with BlockTestParser {
 
 
   interface.outRdy.rdy := 1
+
 
 
   /** Method used to reorder taps and output them to files.It is an overly complex transpose

@@ -50,6 +50,7 @@ object BasicTestInformation {
     6,
     Some(s"${dataLocation}/init_taps1"))
 
+  def getSingleInformation(loc:String) = Seq(getInformation(loc))
   def getDualInformation(loc:String) = Seq(getInformation(loc),getInformation2(loc))
   def getThreeInformation(loc:String) = Seq(getInformation(loc),getInformationH(loc),getInformation2(loc))
 
@@ -218,11 +219,9 @@ def getTrainIdent(a:Int,b:Int) = {
     input
   }
 
-  def getRandomTaps = {
 
-    //val data1 = arr.split("\n")
-    //val data2 = data1.map(x => hl(x))
-    val input =  Nd4j.randn(12,6).mul(.25)
+  def getRandomTaps(x:Int, y:Int) = {
+    val input =  Nd4j.randn(x,y).mul(.25)
     input
   }
 

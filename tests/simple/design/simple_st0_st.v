@@ -18,6 +18,7 @@
   input                         reset,
   input float_24_8              simple_st0_st_bias,
   input float_24_8              simple_st0_st_data,
+  input simple_st0_st_reg_t     simple_st0_st_reg,
   input                         stage_error_back,
   input                         stage_error_first,
   input                         stage_error_mode,
@@ -35,7 +36,6 @@
 
 // Wires 
 
-  wire                  [7:0]   bias_gain         ;  // <8,0>
   float_24_8                    input_data_w0;  // <1,0>
   float_24_8                    input_data_w1;  // <1,0>
   float_24_8                    input_data_w2;  // <1,0>
@@ -56,7 +56,6 @@
   float_24_8                    simple_st0_st_bias_w4;  // <1,0>
   float_24_8                    simple_st0_st_bias_w5;  // <1,0>
   wire                  [191:0] simple_st0_st_tap_out_int;  // <192,0>
-  wire                  [7:0]   tap_gain          ;  // <8,0>
   simple_st0_st_tap_lat_typ_6   taps_select;  // <1,0>
   float_24_8                    wireOut_w0;  // <1,0>
   float_24_8                    wireOut_w1;  // <1,0>
@@ -283,13 +282,12 @@ simple_st0_st_bias_add simple_st0_st_bias_add (
 ////////////////////////////////////////////////////////////////////////////////
 
 sigmoid sigmoid (
+    .bypass(simple_st0_st_reg.disable_non_linearity),
     .clk(clk),
     .data_in(simple_st0_st_adder),
     .data_out(simple_st0_st_data_out),
     .reset(reset));
 
-assign tap_gain = 8'd4;
-assign bias_gain = 8'd4;
 
 // Delay the Input Valid
 always @(posedge clk) begin
@@ -331,22 +329,22 @@ always @(posedge clk) begin
   end
 end
 always @* taps_conv.v0.sgn <= taps.v0.sgn;
-always @* taps_conv.v0.exp <= (taps.v0.exp > tap_gain) ? taps.v0.exp[7:0] - tap_gain[7:0] : taps.v0.exp;
+always @* taps_conv.v0.exp <= (taps.v0.exp > simple_st0_st_reg.tap_gain) ? taps.v0.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v0.exp;
 always @* taps_conv.v0.man <= taps.v0.man;
 always @* taps_conv.v1.sgn <= taps.v1.sgn;
-always @* taps_conv.v1.exp <= (taps.v1.exp > tap_gain) ? taps.v1.exp[7:0] - tap_gain[7:0] : taps.v1.exp;
+always @* taps_conv.v1.exp <= (taps.v1.exp > simple_st0_st_reg.tap_gain) ? taps.v1.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v1.exp;
 always @* taps_conv.v1.man <= taps.v1.man;
 always @* taps_conv.v2.sgn <= taps.v2.sgn;
-always @* taps_conv.v2.exp <= (taps.v2.exp > tap_gain) ? taps.v2.exp[7:0] - tap_gain[7:0] : taps.v2.exp;
+always @* taps_conv.v2.exp <= (taps.v2.exp > simple_st0_st_reg.tap_gain) ? taps.v2.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v2.exp;
 always @* taps_conv.v2.man <= taps.v2.man;
 always @* taps_conv.v3.sgn <= taps.v3.sgn;
-always @* taps_conv.v3.exp <= (taps.v3.exp > tap_gain) ? taps.v3.exp[7:0] - tap_gain[7:0] : taps.v3.exp;
+always @* taps_conv.v3.exp <= (taps.v3.exp > simple_st0_st_reg.tap_gain) ? taps.v3.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v3.exp;
 always @* taps_conv.v3.man <= taps.v3.man;
 always @* taps_conv.v4.sgn <= taps.v4.sgn;
-always @* taps_conv.v4.exp <= (taps.v4.exp > tap_gain) ? taps.v4.exp[7:0] - tap_gain[7:0] : taps.v4.exp;
+always @* taps_conv.v4.exp <= (taps.v4.exp > simple_st0_st_reg.tap_gain) ? taps.v4.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v4.exp;
 always @* taps_conv.v4.man <= taps.v4.man;
 always @* taps_conv.v5.sgn <= taps.v5.sgn;
-always @* taps_conv.v5.exp <= (taps.v5.exp > tap_gain) ? taps.v5.exp[7:0] - tap_gain[7:0] : taps.v5.exp;
+always @* taps_conv.v5.exp <= (taps.v5.exp > simple_st0_st_reg.tap_gain) ? taps.v5.exp[7:0] - {1'd0,simple_st0_st_reg.tap_gain} : taps.v5.exp;
 always @* taps_conv.v5.man <= taps.v5.man;
 always @(posedge clk) begin
   if (reset) begin
@@ -405,27 +403,27 @@ end
 // Create the bias update code
 always @* taps_lat1.v0.sgn <= taps_lat.v0.sgn;
 always @* taps_lat1.v0.man <= taps_lat.v0.man;
-always @* taps_lat1.v0.exp <= (taps_lat.v0.exp > bias_gain) ? taps_lat.v0.exp[7:0] - bias_gain[7:0] : taps_lat.v0.exp;
+always @* taps_lat1.v0.exp <= (taps_lat.v0.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v0.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v0.exp;
 always @* bias_add_input_w0 <= taps_lat1.v0;
 always @* taps_lat1.v1.sgn <= taps_lat.v1.sgn;
 always @* taps_lat1.v1.man <= taps_lat.v1.man;
-always @* taps_lat1.v1.exp <= (taps_lat.v1.exp > bias_gain) ? taps_lat.v1.exp[7:0] - bias_gain[7:0] : taps_lat.v1.exp;
+always @* taps_lat1.v1.exp <= (taps_lat.v1.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v1.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v1.exp;
 always @* bias_add_input_w1 <= taps_lat1.v1;
 always @* taps_lat1.v2.sgn <= taps_lat.v2.sgn;
 always @* taps_lat1.v2.man <= taps_lat.v2.man;
-always @* taps_lat1.v2.exp <= (taps_lat.v2.exp > bias_gain) ? taps_lat.v2.exp[7:0] - bias_gain[7:0] : taps_lat.v2.exp;
+always @* taps_lat1.v2.exp <= (taps_lat.v2.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v2.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v2.exp;
 always @* bias_add_input_w2 <= taps_lat1.v2;
 always @* taps_lat1.v3.sgn <= taps_lat.v3.sgn;
 always @* taps_lat1.v3.man <= taps_lat.v3.man;
-always @* taps_lat1.v3.exp <= (taps_lat.v3.exp > bias_gain) ? taps_lat.v3.exp[7:0] - bias_gain[7:0] : taps_lat.v3.exp;
+always @* taps_lat1.v3.exp <= (taps_lat.v3.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v3.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v3.exp;
 always @* bias_add_input_w3 <= taps_lat1.v3;
 always @* taps_lat1.v4.sgn <= taps_lat.v4.sgn;
 always @* taps_lat1.v4.man <= taps_lat.v4.man;
-always @* taps_lat1.v4.exp <= (taps_lat.v4.exp > bias_gain) ? taps_lat.v4.exp[7:0] - bias_gain[7:0] : taps_lat.v4.exp;
+always @* taps_lat1.v4.exp <= (taps_lat.v4.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v4.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v4.exp;
 always @* bias_add_input_w4 <= taps_lat1.v4;
 always @* taps_lat1.v5.sgn <= taps_lat.v5.sgn;
 always @* taps_lat1.v5.man <= taps_lat.v5.man;
-always @* taps_lat1.v5.exp <= (taps_lat.v5.exp > bias_gain) ? taps_lat.v5.exp[7:0] - bias_gain[7:0] : taps_lat.v5.exp;
+always @* taps_lat1.v5.exp <= (taps_lat.v5.exp > simple_st0_st_reg.bias_gain) ? taps_lat.v5.exp[7:0] - {1'd0,simple_st0_st_reg.bias_gain} : taps_lat.v5.exp;
 always @* bias_add_input_w5 <= taps_lat1.v5;
 always @(posedge clk) begin
   if (reset) begin

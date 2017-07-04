@@ -38,7 +38,7 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:138];  // <32,0>
+  reg                   [31:0]  expected_mem[0:36];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
   reg                   [31:0]  rtl_bias_fptr     ;  // <32,0>
@@ -50,7 +50,7 @@
   reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
   reg                   [31:0]  rtl_tap_fptr      ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:138];  // <32,0>
+  reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
@@ -62,6 +62,7 @@
 
   float_24_8                    expected;  // <1,0>
   simple_st0_ctrl_int_t         simple_st0_ctrl_int;  // <1,0>
+  simple_st0_st_reg_t           simple_st0_st_reg;  // <1,0>
   float_24_8                    st_data;  // <1,0>
   float_24_8                    st_data_out;  // <1,0>
   float_24_8                    st_data_out_pre;  // <1,0>
@@ -82,6 +83,7 @@ simple simple (
     .reset(reset),
     .simple_st0_ctrl_data_fifo_data_ready(simple_st0_ctrl_data_fifo_data_ready),
     .simple_st0_ctrl_int(simple_st0_ctrl_int),
+    .simple_st0_st_reg(simple_st0_st_reg),
     .st_data(st_data),
     .st_data_fst(st_data_fst),
     .st_data_out(st_data_out),
