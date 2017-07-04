@@ -7,6 +7,7 @@ import com.simplifide.generate.project.NewEntity
 import com.simplifide.generate.signal.FloatSignal
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.test2.blocktest.{BlockScalaTest, BlockTestParser}
+import com.simplifide.generate.util.{InternalLogger, ProcessOps}
 import org.nd4j.linalg.api.ndarray.INDArray
 
 /**
@@ -125,6 +126,8 @@ class DoubleStageTest extends BlockScalaTest with BlockTestParser {
   }
 
   override def postRun = {
+    val result = ProcessOps.exec("python python/checkResults.py -t Double -th 0.05")(ln => InternalLogger.booleanMessage(ln))
+    assert(result == true)
 
   }
 }
