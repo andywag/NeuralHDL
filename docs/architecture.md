@@ -52,9 +52,30 @@ graph LR
 
 This architecture was selected for simplicity but is not required. Sharing between stages as well as setting up resource pools for sharing is possible. For the current use cases there didn't seem to be advantages due to the full loading of the memories. 
 
-# Memory Layout 
+## Memory Layout 
 
 The memory for each stage is split into 3 separate memories based on their size and frequency of use. 
+1. Data Memory
+1. Bias Memory
+1. Tap and Error Memory
+
+The memory size and depths have been calculated to keep the network fully utilized. Cutting down the depths of the network can cut down the utilization of the network. 
+
+### Data Memory
+The data memory contains the input data to the stage. This information is required for both the feedforward operation of the stage and the error updates. 
+
+1. The memory requires one memory read for each cycle the stage is in use. 
+1. The depth requirement is a function of the length of time for the error to propagate back
+
+### Bias Memory
+The bias memory contains the bias values from the network. 
+1. The memory requires one memory read for each cycle the stage is in use. 
+1. The depth requirement is equivalent to the size of the network
+
+### Tap and Error Memory
+The tap and error memory are shared in a single unit to simplify the interface to the neural stage as well as limit the memories used. 
+1. The memory requires one parallel read (number of neurons width) for each operation of the neural stage
+1. The depth of the memory is equivalent to the size of the taps plus the required error storage. The error depth is small because this data is utlized as quickly as possible to minimize required memory usage in the network. 
 
 # Neural Core Architecture 
 
