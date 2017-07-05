@@ -7,6 +7,23 @@ The worst decision was the use of floating point which was actually a new additi
 
 # Top Level Architecture 
 
+The top level architecture for this design consists of a 
+
+The building block for the design in terms of interfaces is shown below.  
+```mermaid
+graph LR;
+input-->IFifo[Input Fifo]
+
+Core-->Output
+error[Input Error]-->ErrorFifo
+Core-->oerror[Output Error]
+IFifo-->Memory
+ErrorFifo-->Memory[Internal Memory]
+Memory-->Core
+Control-->Memory
+```
+Each stage of the network has an interface which consists of the following main interfaces. All of the interfaces use a ready valid 
+format to gate the data. To ease the design complexity the blocks stream the outputs once the operation begins to avoid contention with the underlying core algorithms. 
 
 # Memory Layout Architecture
 TBD
