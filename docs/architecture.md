@@ -1,13 +1,13 @@
 # Hardware Architecture
 
-There are many different architectures possible for neural networks and all are possible using
-this toolset. This section defines the initial architecture chosen which minimizes complexity
-for the current example design.
+There are many different architectures possible for neural networks. This section defines the initial architecture chosen usign this toolset which minimizes complexity for the example design. Like most hardware designs the proper algorithmic solution varies depending
+on the use case. There are also some faults and bad initial decisions for this architecture which were not found until later in the design effort so have been left there to be fixed/changed at a later time. 
 
-A neural network consists of chaining stages together. 
+The worst decision was the use of floating point which was actually a new addition to this toolset. The initial thought would be it would simplify the design from an algorithmic perspective but in reality just led to issues in complicating debug. This is first on the list for removal for a practical design. Further discussion of architectural choices can be found at the bottom of this section. 
 
 # Top Level Architecture 
-TBD
+
+
 # Memory Layout Architecture
 TBD
 
@@ -168,3 +168,4 @@ which is shown in the table below.
 | Data1         | E1      |   E0   |   ..   | ..      | ..      |
 | DataK         | E2      |   E2   |   ..   | ..      | ..      |
 
+# Future Directions for Architecture
