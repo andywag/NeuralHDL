@@ -23,12 +23,40 @@ Memory-->Core
 Control-->Memory
 ```
 Each stage of the network has an interface which consists of the following main interfaces. All of the interfaces use a ready valid 
-format to gate the data. To ease the design complexity the blocks stream the outputs once the operation begins to avoid contention with the underlying core algorithms. 
+format to gate the data. Currently the inputs to the stages contain fifos for flow control with the outputs streaming even though the interfaces are ready valid. The assumption currently is that a full operation is completed before it is interrupted. 
 
-# Memory Layout Architecture
-TBD
+## Operation
 
-# Neural Stage 
+The operation of the network is straightforward and does not have any external control. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
+
+1. Error Back Propagation
+1. Tap/Bias Updates
+1. Feedforward Propagation
+
+This order of operations should lead to the maximum network throughput while minimizing memory access. This operation is shared to due to it's access of the same information from memory. Parallel operation is also possible but would require more complicated and higher rate memory access. While sharing this unit is possible, it is probalby more efficient to add parallel stages working on different data rather than attempting to speed up these operations. 
+
+## Neural Network Stage
+
+Each stage of the network is self contained block which contains a set of control as well as memory. A high level block diagram is shown below. 
+
+graph LR
+    Input-->IF
+    IF[Input Fifo]-->DM[Data Memory]
+    Error-->EF[Error Fifo]
+    EF-->TM[Tap Memory]
+    TM-->Core
+    DM-->Core
+    Core-->Output
+    Core-->E[Error Out]
+    BM[Bias Memory]-->Core
+
+This architecture was selected for simplicity but is not required. Sharing between stages as well as setting up resource pools for sharing is possible. For the current use cases there didn't seem to be advantages due to the full loading of the memories. 
+
+# Memory Layout 
+
+The memory for each stage is split into 3 separate memories based on their size and frequency of use. 
+
+# Neural Core Architecture 
 
 This block contains a set of Neurons and is designed in a way to support the 3 basic Network operations using the same structure 
 driving the inputs slightly differently. The different algorithms are all Matrix operations so the structure is designed to handle the 3 
