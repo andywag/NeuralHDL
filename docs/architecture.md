@@ -187,9 +187,7 @@ The access ordering is shown in the table below for an example which has K MAC u
 
 ## Error Update operation
 
-The error update calculation uses the same structure as above with a slightly different input configuration 
-to the MAC units and some addition glue logic to handle this operation. The error update operation is also
-a matrix multiply operation but uses error as input to the matrix multiply instead of the taps. 
+The error update calculation uses the same structure as the feedforward operation with a different input configuration. For this case the values used in the update equation are the error and the taps instead of the taps and data. 
 
 The block diagram of the operation is shown below. 
 
@@ -224,23 +222,24 @@ graph LR
 ```
     
 The operation shown above is very similar to the feedforward operation with the following differences 
-1. The tap input is the error. This is made more efficient by storing the tap and error in the same memory
+
+1. The tap input is the error (This is made more efficient by storing the tap and error in the same memory)
 2. The output of the block is parallel and is written to the tap memory
-3. The bias update is not shown but is done in a similar fashion as the tap update using a parallel 
-adder
+3. The bias update is a scalar addition not shown in the diagram which uses the error directly
 
 The ordering of the operations is shown below
 
 | Type          | 0       | 1      | K      | K+1     | N       |
 | ------------- |:-------:| ------:| ------:| -------:| -------:|
-| Tap (Vector)  | E0      |   E1   |   EK   | E(K+1)  | EN      |
+| Tap (Vector)  | E0      |   E0   |   E0   | E1      | E1      |
 | Data          | D0      |   D1   |   DK   | D0      | DK      |
 | Bias          | B0      |   B1   |   BK   | B0      | BK      |
 
+For this case, the error is kept constant while the data is changing at the input. 
+
 ## Back Propagation
 
-Back propagation is also a matrix multiplication operation between the taps and the error and like 
-the previous two updates uses the same basic structure and ordering. 
+Back propagation is similar in operation to both feedforward operation and the tap updates. This algorithm differs in that it uses the transpose of the taps which requires some reordering to avoid the need for an adder tree. This operation uses the transpose of the taps in the tap location and the error in the data port. 
 
 ```mermaid
 graph LR
@@ -272,9 +271,10 @@ graph LR
     Nonlinearity-->Output
 ```
 
-There is an issue with this algorithm in that it uses the transpose of the taps which slightly complicates the memory access. To get around 
-this problem while keeping the same structure the taps are accessed from memory in an offset fashion 
-which is shown in the table below. 
+There is an issue with this algorithm in that it uses the transpose of the taps which slightly complicates the memory access. To get around this problem while keeping the same structure the taps are accessed from memory in an interleaved fashion as shown below. The table below shows this operation which does the following things : 
+
+1. Rotates the tap address on a per tap basis
+1. Rotates the data as well using a delay line
 
 | Type          | 0       | 1      | K      | K+1     | N       |
 | ------------- |:-------:| ------:| ------:| -------:| -------:|
@@ -282,7 +282,7 @@ which is shown in the table below.
 | Tap1          | T1      |   T2   |   T0   | T(K+1)  | TN      |
 | TapK          | TK      |   T0   |   T1   | T(K+1)  | TN      |
 | Data0         | E0      |   E1   |   EK   | ..      | ..      |
-| Data1         | E1      |   E0   |   ..   | ..      | ..      |
-| DataK         | E2      |   E2   |   ..   | ..      | ..      |
+| Data1         | E1      |   E0   |   E1   | ..      | ..      |
+| DataK         | E2      |   E2   |   EK+1 | ..      | ..      |
 
 # Future Directions for Architecture
