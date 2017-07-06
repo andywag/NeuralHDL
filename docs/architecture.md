@@ -135,9 +135,9 @@ graph LR
 ## Feedforward operation
 
 
-For feedforward the operation is just a simple matrix multiplication with a bias addition. The ordering of this block was selected to keep memory access at a minimal level and to keep the 
-operations running at a lower rate (bias addition, non-linearity) to be time shared. A block diagram
-of the operation is shown below. 
+The feedforward operation is a matrix multiplication with a bias addition.  The data flow is ordered to always work with MAC operations and avoid the use of an adder tree. 
+
+A block diagram of the operation is shown below. 
 
 ```mermaid
 graph LR
@@ -168,10 +168,15 @@ graph LR
         BiasAdd-->Output
 ```
 
-The block contains N MAC units which are shared for the operations. The data is ordered in a way to share the accumulator and limit memory accesses. 
-The access is shown in the table below for a matrix with K MAC units and N total operations. The operation
-order is always done so that K total outputs are completely computed before starting the next calculation. 
-This ordering allows all the lower rate elements to be shared. 
+The block contains N shared MAC units, a delay line, a bias addition and a nonlinearity. The data flow operates as follows : 
+
+1. The input data is multiplied by the tap 
+2. The result is accumulated unless it is the first operation
+3. When the operation is complete the data is latched at the output into the delay line
+4. This delay line is then fed into the bias addition serially. `This could/should be done using the accumulator`
+5. The output of the bias addition block is fed into the nonlinearity and output
+
+The access ordering is shown in the table below for an example which has K MAC units and N total inputs. The ordering is always done so that an output is completed without having to be stored back into memory. 
 
 | Type          | 0       | 1      | K      | K+1     | N       |
 | ------------- |:-------:| ------:| ------:| -------:| -------:|
@@ -179,8 +184,6 @@ This ordering allows all the lower rate elements to be shared.
 | Data          | D0      |   D1   |   DK   | D0      | DK      |
 | Bias          | B0      |   B1   |   BK   | B0      | BK      |
 
-The advantage of the ordering above is that the data is accessed linearily to minimize access 
-and the accumulator is always used to update the outputs avoiding the use of an adder tree. 
 
 ## Error Update operation
 
