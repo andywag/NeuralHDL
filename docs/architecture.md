@@ -62,34 +62,75 @@ This architecture was selected for simplicity but is not required. Sharing betwe
 ## Memory Layout 
 
 The memory for each stage is split into 3 separate memories based on their size and frequency of use. 
+
 1. Data Memory
 1. Bias Memory
 1. Tap and Error Memory
 
-The memory size and depths have been calculated to keep the network fully utilized. Cutting down the depths of the network can cut down the utilization of the network. 
+The memory size and depths have been calculated to keep the network fully utilized. The internal network parameters are somewhat obvious as they are directly related to the size of the network operation. The depths of the error and data are less obvious and directly effect the throughput of the network. This is due to the data being required for the tap updates so must be accessible when the error is fedback. 
 
 ### Data Memory
 The data memory contains the input data to the stage. This information is required for both the feedforward operation of the stage and the error updates. 
 
-1. The memory requires one memory read for each cycle the stage is in use. 
-1. The depth requirement is a function of the length of time for the error to propagate back
+1. The memory read requires one data sample per stage calculation. 
+1. The depth of the memory is a function of the maximum error feedback time and throughput requirements
 
 ### Bias Memory
+
 The bias memory contains the bias values from the network. 
-1. The memory requires one memory read for each cycle the stage is in use. 
-1. The depth requirement is equivalent to the size of the network
+
+1. The memory read requires one data sample per stage calculation. 
+1. The depth of this memory is equivalent to the amount of neurons in the stage
 
 ### Tap and Error Memory
-The tap and error memory are shared in a single unit to simplify the interface to the neural stage as well as limit the memories used. 
+This is a parallel memory which has an output width which is a multiple of the number of MAC units used in the stage. The tap memory contains both the tap values for the stage as well as the error which simplifies the interface to the stage and reduces the memory requirements. 
+
 1. The memory requires one parallel read (number of neurons width) for each operation of the neural stage
-1. The depth of the memory is equivalent to the size of the taps plus the required error storage. The error depth is small because this data is utlized as quickly as possible to minimize required memory usage in the network. 
+1. The depth of the memory is equivalent to the size of the taps plus the required error storage. 
 
-# Neural Core Architecture 
+The memory is assumed to have read/write access to individaul taps as well as the full set of parallel taps. This is used for 
 
-This block contains a set of Neurons and is designed in a way to support the 3 basic Network operations using the same structure 
-driving the inputs slightly differently. The different algorithms are all Matrix operations so the structure is designed to handle the 3 
-operations with slightly different orderings. 
+1. Loading the Error into memory
+2. Reading the Transposed Taps out for BackPropagation
 
+## Neural Core Architecture 
+
+The core of the neural stage contains a set of MAC units and some glue logic which supports the required network operations. 
+
+* Feedforward operation
+* Error Backpropagation
+* Tap/Bias Updates
+
+These are all matrix operations and utilize the same basic underlying set of MAC units with different ordering of the inputs. In general the block has the structure shown below with slight variations to handle the different matrix operations. 
+
+```mermaid
+graph LR
+    Add(+)
+        Mult(*)
+    
+        subgraph MACN
+        Mult-->Add
+        Data0-->Mult
+        Tap-->Mult
+        end
+    
+       subgraph MAC0
+        Mult1(*)-->Add1(+)
+        DataN-->Mult1
+        Tap1-->Mult1
+        end
+        
+        subgraph DelayLine
+        Add-->Rn
+        Add1-->R0
+        end
+    
+        Data-->Data0
+        Data-->DataN
+        R0 -->BiasAdd(+)
+        Bias-->BiasAdd
+        BiasAdd-->Output
+```
 
 ## Feedforward operation
 
