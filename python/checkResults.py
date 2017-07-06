@@ -12,9 +12,9 @@ parser.add_argument('-th','--threshold',type=float)
 
 def runTest(args) :
     if (args.test==TEST_DOUBLE) :
-        test.CheckDoubleNetwork.test(args)
+        test.CheckDoubleNetwork.test(args,2,"full")
     elif (args.test==TEST_SINGLE) :
-        test.CheckSingleNetwork.test(args)
+        test.CheckDoubleNetwork.test(args,1,"simple")
     else :
         print (str(args))
 

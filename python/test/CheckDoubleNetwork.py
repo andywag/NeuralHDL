@@ -6,7 +6,8 @@ import utils.PlotUtil as pu
 from scipy import signal
 import sys
 
-base = "/home/andy/projects/NeuralHDL/tests/full/data/"
+#base = "/home/andy/projects/NeuralHDL/tests/full/data/"
+base = "/home/andy/projects/NeuralHDL/tests/"
 
 def check(error,threshold) :
     if (threshold is not None) :
@@ -14,10 +15,12 @@ def check(error,threshold) :
             print("Error Greater than Threshold " + str(error) + " > " + str(threshold))
             sys.exit(1)
 
-def test(args) :
-    err0 = pu.handleStage(base,0,args.plot)
-    err1 = pu.handleStage(base,1,args.plot)
-    errors = [err0,err1]
+def test(args, number, location) :
+    full = base + location + "/data/"
+    errors = [pu.handleStage(full,x,args.plot) for x in range(number)]
+    #err0 = pu.handleStage(base,0,args.plot)
+    #err1 = pu.handleStage(base,1,args.plot)
+    #errors = [err0,err1]
     if (args.plot) :
         plt.show()
     [check(x,args.threshold) for x in errors]

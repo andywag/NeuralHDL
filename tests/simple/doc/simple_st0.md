@@ -21,8 +21,8 @@ the size and shape of this stage.
 * output stage_0_data_out    : Output of the block following the equal to dataIn*taps + bias
 * output stage_0_data_out_pre : Output of the block before the non-linearity (for testing)
 
-* input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@503fbbc6)   : Data Input of the Block
-* input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@55f45b92)     : Neural Tap input of the Block
+* input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@57f64f5e)   : Data Input of the Block
+* input ReadyValidInterface(com.simplifide.generate.signal.sv.ReadyValid$ReadyValidSignal@415e0bcb)     : Neural Tap input of the Block
 * Various other input controls are input to this block to configure the lengths used for controlling the
 * MAC units
 

@@ -10,6 +10,7 @@ The worst decision was the use of floating point which was actually a new additi
 The top level architecture for this design consists of a 
 
 The building block for the design in terms of interfaces is shown below.  
+
 ```mermaid
 graph LR;
 input-->IFifo[Input Fifo]
@@ -22,10 +23,14 @@ ErrorFifo-->Memory[Internal Memory]
 Memory-->Core
 Control-->Memory
 ```
-Each stage of the network has an interface which consists of the following main interfaces. All of the interfaces use a ready valid 
-format to gate the data. Currently the inputs to the stages contain fifos for flow control with the outputs streaming even though the interfaces are ready valid. The assumption currently is that a full operation is completed before it is interrupted. 
 
-## Operation
+Each stage of the network has an interface which consists of the following main interfaces. 
+All of the interfaces use a ready valid format to gate the data. 
+Currently the inputs to the stages contain fifos for flow control with the outputs streaming even 
+though the interfaces are ready valid. The assumption currently is that a full operation is completed 
+before it is interrupted. 
+
+### Operation
 
 The operation of the network is straightforward and does not have any external control. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
 
@@ -39,6 +44,7 @@ This order of operations should lead to the maximum network throughput while min
 
 Each stage of the network is self contained block which contains a set of control as well as memory. A high level block diagram is shown below. 
 
+```mermaid
 graph LR
     Input-->IF
     IF[Input Fifo]-->DM[Data Memory]
@@ -49,6 +55,7 @@ graph LR
     Core-->Output
     Core-->E[Error Out]
     BM[Bias Memory]-->Core
+```
 
 This architecture was selected for simplicity but is not required. Sharing between stages as well as setting up resource pools for sharing is possible. For the current use cases there didn't seem to be advantages due to the full loading of the memories. 
 

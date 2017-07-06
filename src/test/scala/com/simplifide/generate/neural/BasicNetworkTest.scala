@@ -25,9 +25,13 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.IDENT_TYPE
   val plot:Boolean = false
   val failThreshold:Option[Double] = None
+  lazy val gain:Int = 3
 
   val information:Seq[NeuralStageInfo] = getInformation
 
+  // Path to the highest level block under the test
+  val topPathName = s"${name}.${blockName}"
+  def stagePath(i:Int) = s"${topPathName}.${blockName}_st${i}"
 
 
   // Tap Generation for the test
@@ -66,6 +70,29 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   expRdyCount := ($iff (expRdyCount === inputSize-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
   expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
+
+
+  // Setup controls for the stages
+  for (i <- 0 until information.size) {
+    dutParser.mStage(i).control.controlInterface.tapEnable     := 1
+    dutParser.mStage(i).control.controlInterface.biasEnable    := 1
+    dutParser.mStage(i).control.controlInterface.inputStage    := (if (i == 0) 1 else 0)
+    dutParser.mStage(i).stage.ri.tapGain                       := gain
+    dutParser.mStage(i).stage.ri.biasGain                      := gain
+    dutParser.mStage(i).stage.ri.disableNonlinearity           := (if (i == information.size-1) 1 else 0)
+  }
+
+  // Generic Output Dumps for the test
+  for (i <- 0 until information.size) {
+    dutParser.interfaces(i).errorRdy ---->(s"$dataLocation/rtl_error$i",Some(topPathName))
+    dutParser.mStage(i).memory.biasStructW ---->(s"$dataLocation/rtl_bias$i",Some(stagePath(i)))
+    dutParser.mStage(i).memory.tapStructW ---->(s"$dataLocation/rtl_tap$i",Some(stagePath(i)))
+    dutParser.interfaces(0).outRdy ---->(s"$dataLocation/rtl_st$i",Some(topPathName))
+  }
+
+  // Output signals
+  interface.outRdy.rdy := 1
+
 
 
   /** Method used to reorder taps and output them to files.It is an overly complex transpose

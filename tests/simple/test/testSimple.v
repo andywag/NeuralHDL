@@ -41,14 +41,10 @@
   reg                   [31:0]  expected_mem[0:36];  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
-  reg                   [31:0]  rtl_bias_fptr     ;  // <32,0>
-  reg                   [31:0]  rtl_error_fptr    ;  // <32,0>
-  reg                   [31:0]  rtl_expected_fptr ;  // <32,0>
-  reg                   [31:0]  rtl_in_fptr       ;  // <32,0>
-  reg                   [31:0]  rtl_mem_fptr      ;  // <32,0>
-  reg                   [31:0]  rtl_out_fptr      ;  // <32,0>
-  reg                   [31:0]  rtl_pre_fptr      ;  // <32,0>
-  reg                   [31:0]  rtl_tap_fptr      ;  // <32,0>
+  reg                   [31:0]  rtl_bias0_fptr    ;  // <32,0>
+  reg                   [31:0]  rtl_error0_fptr   ;  // <32,0>
+  reg                   [31:0]  rtl_st0_fptr      ;  // <32,0>
+  reg                   [31:0]  rtl_tap0_fptr     ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
   reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
   reg                           st_data_out_pre_rdy;  // <1,0>
@@ -155,66 +151,30 @@ initial begin
 end
 
 assign expected = exp_rdy_count[31] ? 'd0 : expected_mem[exp_rdy_count];
+assign simple_st0_ctrl_int.tap_update_enable = 'd1;
+assign simple_st0_ctrl_int.bias_update_enable = 'd1;
+assign simple_st0_ctrl_int.input_stage = 'd1;
+assign simple_st0_st_reg.tap_gain = 6'd3;
+assign simple_st0_st_reg.bias_gain = 6'd3;
+assign simple_st0_st_reg.disable_non_linearity = 'd1;
 
-// Store Store st_data
+// Store Store 
 initial begin
-  rtl_in_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_in.hex","w");
+  rtl_error0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_error0.hex","w");
 end
 
 always @(posedge clk) begin
   if (reset) begin
     
   end
-  else if ((st_data_rdy & st_data_vld)) begin 
-    $fdisplay(rtl_in_fptr,"%h ",st_data);
-  end
-end
-
-// Store Store st_data_out
-initial begin
-  rtl_out_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_out.hex","w");
-end
-
-always @(posedge clk) begin
-  if (reset) begin
-    
-  end
-  else if (st_data_out_vld) begin 
-    $fdisplay(rtl_out_fptr,"%h ",st_data_out);
-  end
-end
-
-// Store Store st_data_out_pre
-initial begin
-  rtl_pre_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_pre.hex","w");
-end
-
-always @(posedge clk) begin
-  if (reset) begin
-    
-  end
-  else if (st_data_out_pre_vld) begin 
-    $fdisplay(rtl_pre_fptr,"%h ",st_data_out_pre);
+  else if ((testSimple.simple.stage_0_error_vld & testSimple.simple.stage_0_error_rdy)) begin 
+    $fdisplay(rtl_error0_fptr,"%h ",testSimple.simple.stage_0_error);
   end
 end
 
 // Store Store 
 initial begin
-  rtl_error_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_error.hex","w");
-end
-
-always @(posedge clk) begin
-  if (reset) begin
-    
-  end
-  else if ((testSimple.simple.simple_err.stage_0_error_vld & testSimple.simple.simple_err.stage_0_error_rdy)) begin 
-    $fdisplay(rtl_error_fptr,"%h ",testSimple.simple.simple_err.stage_0_error);
-  end
-end
-
-// Store Store 
-initial begin
-  rtl_bias_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_bias.hex","w");
+  rtl_bias0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_bias0.hex","w");
 end
 
 always @(posedge clk) begin
@@ -222,13 +182,13 @@ always @(posedge clk) begin
     
   end
   else if ((testSimple.simple.simple_st0.bias_int.wr_vld & ~testSimple.simple.simple_st0.bias_int.sub_vld)) begin 
-    $fdisplay(rtl_bias_fptr,"%h ",testSimple.simple.simple_st0.bias_int_wr_data);
+    $fdisplay(rtl_bias0_fptr,"%h ",testSimple.simple.simple_st0.bias_int_wr_data);
   end
 end
 
 // Store Store 
 initial begin
-  rtl_tap_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_tap.hex","w");
+  rtl_tap0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_tap0.hex","w");
 end
 
 always @(posedge clk) begin
@@ -236,44 +196,28 @@ always @(posedge clk) begin
     
   end
   else if ((testSimple.simple.simple_st0.tap_int.wr_vld & ~testSimple.simple.simple_st0.tap_int.sub_vld)) begin 
-    $fdisplay(rtl_tap_fptr,"%h ",testSimple.simple.simple_st0.tap_int_wr_data);
-  end
-end
-
-// Store Store expected
-initial begin
-  rtl_expected_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_expected.hex","w");
-end
-
-always @(posedge clk) begin
-  if (reset) begin
-    
-  end
-  else if ((expected_vld & expected_rdy)) begin 
-    $fdisplay(rtl_expected_fptr,"%h ",expected);
+    $fdisplay(rtl_tap0_fptr,"%h ",testSimple.simple.simple_st0.tap_int_wr_data);
   end
 end
 
 // Store Store 
 initial begin
-  rtl_mem_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_mem.hex","w");
+  rtl_st0_fptr = $fopen("/home/andy/projects/NeuralHDL/tests/simple/data/rtl_st0.hex","w");
 end
 
 always @(posedge clk) begin
   if (reset) begin
     
   end
-  else if (testSimple.simple.simple_st0.data_int.rd_vld) begin 
-    $fdisplay(rtl_mem_fptr,"%h ",testSimple.simple.simple_st0.data_int_rd_data);
+  else if ((testSimple.simple.stage_0_data_out_vld & testSimple.simple.stage_0_data_out_rdy)) begin 
+    $fdisplay(rtl_st0_fptr,"%h ",testSimple.simple.stage_0_data_out);
   end
 end
+assign st_data_out_rdy = 'd1;
 assign simple_st0_ctrl_int.error_length = 4'd11;
 assign simple_st0_ctrl_int.load_length = 3'd5;
 assign simple_st0_ctrl_int.load_depth = 3'd5;
 assign simple_st0_ctrl_int.state_length = 'd1;
-assign simple_st0_ctrl_int.input_stage = 'd1;
-assign simple_st0_ctrl_int.tap_update_enable = 'd1;
-assign simple_st0_ctrl_int.bias_update_enable = 'd1;
 
 // Counter to Index Test
 always @(posedge clk) begin
