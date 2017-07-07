@@ -24,7 +24,7 @@
   input                         stage_error_mode,
   input full_st1_st_tap_typ_6   taps,
   input                         update_error_first,
-  output reg            [191:0] full_st1_st_tap_out,
+  output reg            [191:0]  full_st1_st_tap_out,
   output float_24_8             full_st1_st_bias_adder,
   output float_24_8             full_st1_st_data_out,
   output float_24_8             full_st1_st_data_out_bias,
@@ -43,7 +43,7 @@
   float_24_8                    full_st1_st_bias_w3;  // <1,0>
   float_24_8                    full_st1_st_bias_w4;  // <1,0>
   float_24_8                    full_st1_st_bias_w5;  // <1,0>
-  wire                  [191:0] full_st1_st_tap_out_int;  // <192,0>
+  wire                  [191:0]  full_st1_st_tap_out_int  ;  // <192,0>
   float_24_8                    input_data_w0;  // <1,0>
   float_24_8                    input_data_w1;  // <1,0>
   float_24_8                    input_data_w2;  // <1,0>
@@ -101,16 +101,16 @@
   float_24_8                    out_line_w3;  // <1,0>
   float_24_8                    out_line_w4;  // <1,0>
   float_24_8                    out_line_w5;  // <1,0>
-  reg                           stage_error_back_r1;  // <1,0>
-  reg                           stage_error_back_r2;  // <1,0>
-  reg                           stage_error_back_r3;  // <1,0>
-  reg                           stage_error_back_r4;  // <1,0>
-  reg                           stage_error_back_r5;  // <1,0>
-  reg                           stage_error_back_r6;  // <1,0>
-  reg                           stage_error_back_r7;  // <1,0>
-  reg                           stage_error_back_r8;  // <1,0>
-  reg                           stage_error_back_r9;  // <1,0>
-  reg                           stage_error_mode_r1;  // <1,0>
+  reg                           stage_error_back_r1  ;  // <1,0>
+  reg                           stage_error_back_r2  ;  // <1,0>
+  reg                           stage_error_back_r3  ;  // <1,0>
+  reg                           stage_error_back_r4  ;  // <1,0>
+  reg                           stage_error_back_r5  ;  // <1,0>
+  reg                           stage_error_back_r6  ;  // <1,0>
+  reg                           stage_error_back_r7  ;  // <1,0>
+  reg                           stage_error_back_r8  ;  // <1,0>
+  reg                           stage_error_back_r9  ;  // <1,0>
+  reg                           stage_error_mode_r1  ;  // <1,0>
   full_st1_st_tap_lat_typ_6     taps_conv;  // <1,0>
   full_st1_st_tap_lat_typ_6     taps_lat;  // <1,0>
   full_st1_st_tap_lat_typ_6     taps_lat1;  // <1,0>

@@ -6,14 +6,13 @@ package com.simplifide.generate.blocks.neural
 /**
   *
   * @param tapDimension    : Size of the Matrix Multiplication (Input x Output)
-  * @param dataLength      : Length of the Input Data (Column of Matrix)
   * @param dataFill        : Amount of memory for Data storage
   * @param errorFill       : Amount of extra tap storage used to contain the errors
   * @param numberNeurons   : Number of MAC Units for this Stage
   * @param dataLocation    : Location where the initial taps are stored for test
   */
 case class NeuralStageInfo(tapDimension:(Int,Int),
-                           dataLength:Int,
+                           //dataLength:Int,
                            dataFill:Int,
                            numberNeurons:Int,
                            errorFill:Int,
@@ -22,6 +21,8 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
                            errorLength:Int = 12,
                            tapLocation:Option[String] = None
                           ) {
+
+  val dataLength = tapDimension._1
 
   def logWidth(input:Int) = {
     math.ceil(math.log(input)/math.log(2)).toInt
@@ -46,7 +47,9 @@ case class NeuralStageInfo(tapDimension:(Int,Int),
   val stateWidth       = logWidth(stateLength)
   // Width of tap address
   val tapAddressLength = (tapDimension._1*tapDimension._2)/numberNeurons
-  val tapAddressWidth   = logWidth(tapAddressLength)
+  val totalTapAddressLength = tapAddressLength + errorFill
+
+  val tapAddressWidth   = logWidth(totalTapAddressLength)
   // Width of Bias
   val biasLength       = numberNeurons
   val biasAddressWidth  = dataSingleWidth

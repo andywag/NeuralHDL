@@ -29,8 +29,8 @@
 
 // Registers 
 
-  reg                   [31:0]  memory_32_7_memory[0:128];  // <32,0>
-  reg                   [6:0]   memory_32_7_read_address;  // <7,0>
+  reg                   [31:0]  memory_32_7_memory [0:128] ;  // <32,0>
+  reg                   [6:0]   memory_32_7_read_address  ;  // <7,0>
 
 
 // Other

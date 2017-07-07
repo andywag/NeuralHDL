@@ -64,13 +64,13 @@ typedef struct packed {
   logic                 [2:0]   load_length       ;  // <3,0>
   logic                 [3:0]   error_length      ;  // <4,0>
   logic                         input_stage       ;  // <1,0>
-  logic                         tap_update_enable ;  // <1,0>
-  logic                         bias_update_enable;  // <1,0>
+  logic                         tap_update_enable  ;  // <1,0>
+  logic                         bias_update_enable  ;  // <1,0>
 } full_st0_ctrl_int_t; 
 typedef struct packed {
   logic                 [5:0]   tap_gain          ;  // <6,0>
   logic                 [5:0]   bias_gain         ;  // <6,0>
-  logic                         disable_non_linearity;  // <1,0>
+  logic                         disable_non_linearity  ;  // <1,0>
 } full_st0_st_reg_t; 
 typedef struct packed {
   float_24_8                    v0;  // <1,0>
@@ -94,13 +94,13 @@ typedef struct packed {
   logic                 [3:0]   load_length       ;  // <4,0>
   logic                 [3:0]   error_length      ;  // <4,0>
   logic                         input_stage       ;  // <1,0>
-  logic                         tap_update_enable ;  // <1,0>
-  logic                         bias_update_enable;  // <1,0>
+  logic                         tap_update_enable  ;  // <1,0>
+  logic                         bias_update_enable  ;  // <1,0>
 } full_st1_ctrl_int_t; 
 typedef struct packed {
   logic                 [5:0]   tap_gain          ;  // <6,0>
   logic                 [5:0]   bias_gain         ;  // <6,0>
-  logic                         disable_non_linearity;  // <1,0>
+  logic                         disable_non_linearity  ;  // <1,0>
 } full_st1_st_reg_t; 
 typedef struct packed {
   float_24_8                    v0;  // <1,0>
@@ -144,6 +144,17 @@ typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                         sub_addr          ;  // <1,0>
   logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} m_32_5; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                         sub_addr          ;  // <1,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
   logic                 [5:0]   rd_address        ;  // <6,0>
   logic                         wr_vld            ;  // <1,0>
   logic                 [5:0]   wr_address        ;  // <6,0>
@@ -173,6 +184,17 @@ typedef struct packed {
   logic                         inter             ;  // <1,0>
   logic                         inter_first       ;  // <1,0>
 } mem_int_0_192_4; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_0_192_5; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                         sub_addr          ;  // <1,0>
@@ -232,6 +254,17 @@ typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                 [2:0]   sub_addr          ;  // <3,0>
   logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_1_192_5; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
   logic                 [3:0]   rd_address        ;  // <4,0>
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
@@ -239,6 +272,17 @@ typedef struct packed {
   logic                         inter             ;  // <1,0>
   logic                         inter_first       ;  // <1,0>
 } mem_int_2_192_4; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_2_192_5; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                 [2:0]   sub_addr          ;  // <3,0>
@@ -254,6 +298,17 @@ typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                 [2:0]   sub_addr          ;  // <3,0>
   logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_3_192_5; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
   logic                 [3:0]   rd_address        ;  // <4,0>
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
@@ -261,6 +316,17 @@ typedef struct packed {
   logic                         inter             ;  // <1,0>
   logic                         inter_first       ;  // <1,0>
 } mem_int_4_192_4; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_4_192_5; 
 typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                 [2:0]   sub_addr          ;  // <3,0>
@@ -276,6 +342,17 @@ typedef struct packed {
   logic                         sub_vld           ;  // <1,0>
   logic                 [2:0]   sub_addr          ;  // <3,0>
   logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} mem_int_5_192_5; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
   logic                 [3:0]   rd_address        ;  // <4,0>
   logic                         wr_vld            ;  // <1,0>
   logic                 [3:0]   wr_address        ;  // <4,0>
@@ -283,6 +360,17 @@ typedef struct packed {
   logic                         inter             ;  // <1,0>
   logic                         inter_first       ;  // <1,0>
 } tap_int_192_4; 
+typedef struct packed {
+  logic                         sub_vld           ;  // <1,0>
+  logic                 [2:0]   sub_addr          ;  // <3,0>
+  logic                 [31:0]  sub_data          ;  // <32,0>
+  logic                 [4:0]   rd_address        ;  // <5,0>
+  logic                         wr_vld            ;  // <1,0>
+  logic                 [4:0]   wr_address        ;  // <5,0>
+  logic                         rd_vld            ;  // <1,0>
+  logic                         inter             ;  // <1,0>
+  logic                         inter_first       ;  // <1,0>
+} tap_int_192_5; 
 typedef struct packed {
   float_24_8                    v0;  // <1,0>
   float_24_8                    v1;  // <1,0>

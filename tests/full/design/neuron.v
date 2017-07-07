@@ -41,12 +41,12 @@
   wire          signed  [48:0]  data_out_sh_out   ;  // <49,0>
   wire                  [7:0]   data_out_shift    ;  // <8,0>
   float_24_8                    data_out_tap_data_out;  // <1,0>
-  wire                  [23:0]  data_out_tap_data_out_man1;  // <24,0>
-  wire                  [23:0]  data_out_tap_data_out_man2;  // <24,0>
-  wire                  [47:0]  data_out_tap_data_out_res;  // <48,0>
-  wire                  [47:0]  data_out_tap_data_out_res_im;  // <48,0>
-  wire                  [1:0]   data_out_tap_data_out_sh;  // <2,0>
-  wire                  [7:0]   data_out_tap_data_out_tot_exp;  // <8,0>
+  wire                  [23:0]  data_out_tap_data_out_man1  ;  // <24,0>
+  wire                  [23:0]  data_out_tap_data_out_man2  ;  // <24,0>
+  wire                  [47:0]  data_out_tap_data_out_res  ;  // <48,0>
+  wire                  [47:0]  data_out_tap_data_out_res_im  ;  // <48,0>
+  wire                  [1:0]   data_out_tap_data_out_sh  ;  // <2,0>
+  wire                  [7:0]   data_out_tap_data_out_tot_exp  ;  // <8,0>
 
 
 // Registers 

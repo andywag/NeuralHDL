@@ -41,7 +41,7 @@
   input float_24_8              full_st0_st_data_out,
   input float_24_8              full_st0_st_data_out_bias,
   input float_24_8              full_st0_st_data_out_pre,
-  input                 [191:0] full_st0_st_tap_out,
+  input                 [191:0]  full_st0_st_tap_out,
   input                         read_finish,
   input                         reset,
   input                         stage_0_data_out_pre_rdy,
@@ -49,7 +49,7 @@
   input                         stage_0_error_out_rdy,
   input                 [3:0]   tap_address,
   input                         tap_enable,
-  input                 [191:0] tap_int_rd_data,
+  input                 [191:0]  tap_int_rd_data,
   input                         zerror_int_rdy,
   output bias_int_32_4          bias_int,
   output                [31:0]  bias_int_wr_data,
@@ -70,8 +70,8 @@
   output                        stage_error_back,
   output                        stage_error_first,
   output                        stage_error_mode,
-  output tap_int_192_4          tap_int,
-  output                [191:0] tap_int_wr_data,
+  output tap_int_192_5          tap_int,
+  output                [191:0]  tap_int_wr_data,
   output taps_typ_6             taps,
   output                        update_error_first,
   output float_24_8             zerror_int,
@@ -91,29 +91,29 @@
 
 // Registers 
 
-  reg                           active_start_d_r1 ;  // <1,0>
-  reg                           active_start_d_r2 ;  // <1,0>
-  reg                           error_tap_update_out_r1;  // <1,0>
-  reg                           error_tap_update_out_r10;  // <1,0>
-  reg                           error_tap_update_out_r2;  // <1,0>
-  reg                           error_tap_update_out_r3;  // <1,0>
-  reg                           error_tap_update_out_r4;  // <1,0>
-  reg                           error_tap_update_out_r5;  // <1,0>
-  reg                           error_tap_update_out_r6;  // <1,0>
-  reg                           error_tap_update_out_r7;  // <1,0>
-  reg                           error_tap_update_out_r8;  // <1,0>
-  reg                           error_tap_update_out_r9;  // <1,0>
-  reg                   [3:0]   rd_address_wire_r1;  // <4,0>
-  reg                   [3:0]   rd_address_wire_r2;  // <4,0>
-  reg                   [3:0]   rd_address_wire_r3;  // <4,0>
-  reg                   [3:0]   rd_address_wire_r4;  // <4,0>
-  reg                   [3:0]   rd_address_wire_r5;  // <4,0>
-  reg                           wr_address_vld_r1 ;  // <1,0>
-  reg                           wr_address_vld_r2 ;  // <1,0>
-  reg                           wr_address_vld_r3 ;  // <1,0>
-  reg                           wr_address_vld_r4 ;  // <1,0>
-  reg                           wr_address_vld_r5 ;  // <1,0>
-  reg                           wr_address_vld_r6 ;  // <1,0>
+  reg                           active_start_d_r1  ;  // <1,0>
+  reg                           active_start_d_r2  ;  // <1,0>
+  reg                           error_tap_update_out_r1  ;  // <1,0>
+  reg                           error_tap_update_out_r10  ;  // <1,0>
+  reg                           error_tap_update_out_r2  ;  // <1,0>
+  reg                           error_tap_update_out_r3  ;  // <1,0>
+  reg                           error_tap_update_out_r4  ;  // <1,0>
+  reg                           error_tap_update_out_r5  ;  // <1,0>
+  reg                           error_tap_update_out_r6  ;  // <1,0>
+  reg                           error_tap_update_out_r7  ;  // <1,0>
+  reg                           error_tap_update_out_r8  ;  // <1,0>
+  reg                           error_tap_update_out_r9  ;  // <1,0>
+  reg                   [3:0]   rd_address_wire_r1  ;  // <4,0>
+  reg                   [3:0]   rd_address_wire_r2  ;  // <4,0>
+  reg                   [3:0]   rd_address_wire_r3  ;  // <4,0>
+  reg                   [3:0]   rd_address_wire_r4  ;  // <4,0>
+  reg                   [3:0]   rd_address_wire_r5  ;  // <4,0>
+  reg                           wr_address_vld_r1  ;  // <1,0>
+  reg                           wr_address_vld_r2  ;  // <1,0>
+  reg                           wr_address_vld_r3  ;  // <1,0>
+  reg                           wr_address_vld_r4  ;  // <1,0>
+  reg                           wr_address_vld_r5  ;  // <1,0>
+  reg                           wr_address_vld_r6  ;  // <1,0>
 
 
 // Other
@@ -201,7 +201,7 @@ assign data_int.rd_address = data_read_addr;
 assign data_int.rd_vld = active_normal;
 
 // Tap Output Memory Control
-assign tap_int.rd_address = error_update_first ? 4'd12 + {1'd0,error_phase_read} : tap_address;
+assign tap_int.rd_address = error_update_first ? 5'd12 + {2'd0,error_phase_read} : tap_address;
 assign tap_int.rd_vld = active_normal;
 
 // Tap Input Update Control
@@ -209,7 +209,7 @@ assign rd_address_wire = tap_int.rd_address;
 assign wr_address_vld = (error_update_latch & ~error_update_first);
 
 // Tap Input Memmory Control
-assign tap_int.wr_address = wr_address_vld_r5 ? rd_address_wire_r5 : 4'd12 + {1'd0,error_phase};
+assign tap_int.wr_address = wr_address_vld_r5 ? rd_address_wire_r5 : 5'd12 + {2'd0,error_phase};
 assign error_tap_write = (~error_tap_update_out_r5 & (tap_enable & wr_address_vld_r5));
 assign tap_int.wr_vld = (error_valid | error_tap_write);
 assign tap_int.sub_vld = wr_address_vld_r5 ? 'd0 : error_valid;

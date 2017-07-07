@@ -36,19 +36,23 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
 
   // Tap Generation for the test
   // FIXME : Need to generalize tap length and create function of (x,y) passed to generator
-  val taps = tapType match {
-    case BasicNetworkTest.RAND_TAPS  => BasicTestInformation.getRandomTaps(12,6)
-    case BasicNetworkTest.IDENT_TAPS => BasicTestInformation.getInitTaps
 
-  }
   information.zipWithIndex.foreach(x => {
-    createInitialTaps(taps,s"$dataLocation/init_taps${x._2}",12,6)
+    val t1 = x._1.tapDimension._1
+    val t2 = x._1.tapDimension._2
+    val taps = tapType match {
+      case BasicNetworkTest.RAND_TAPS  => BasicTestInformation.getRandomTaps(t2,t1)
+      case BasicNetworkTest.IDENT_TAPS => BasicTestInformation.getTapIdent(t2,t1)
+    }
+    createInitialTaps(taps,s"$dataLocation/init_taps${x._2}",t2,t1)
   })
 
 
+  val inputLength  = information(0).tapDimension._1
+  val outputLength = information(information.length-1).tapDimension._2
   // Data Generation for the test
   val dataData     = inputType match {
-    case BasicNetworkTest.IDENT_TYPE  =>  BasicTestInformation.getTrainIdent (6, 6)
+    case BasicNetworkTest.IDENT_TYPE  =>  BasicTestInformation.getTrainIdent2(inputLength, outputLength)
     case BasicNetworkTest.BRAILE_TYPE => BasicTestInformation.getTrainTest
   }
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
@@ -80,6 +84,13 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     dutParser.mStage(i).stage.ri.tapGain                       := gain
     dutParser.mStage(i).stage.ri.biasGain                      := gain
     dutParser.mStage(i).stage.ri.disableNonlinearity           := (if (i == information.size-1) 1 else 0)
+
+    dutParser.mStage(i).control.controlInterface.loadLength   := information(i).dataLength-1
+    dutParser.mStage(i).control.controlInterface.loadDepth    := information(i).dataFill-1
+    dutParser.mStage(i).control.controlInterface.errorLength  := information(i).errorTapLength-1
+    dutParser.mStage(i).control.controlInterface.stateLength  := information(0).stateLength-1
+
+
   }
 
   // Generic Output Dumps for the test
@@ -114,7 +125,8 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   override def postRun = {
     val plotStr = if (plot) "-p " else ""
     val thrStr  = failThreshold.map(x => s"-th ${x.toString} ").getOrElse("")
-    val command = s"python python/checkResults.py ${plotStr}${thrStr}-t ${blockName}"
+    val stStr   = s"-s ${information.size}"
+    val command = s"python python/checkResults.py ${plotStr}${thrStr}-t ${blockName} $stStr"
     println (s"Running Command $command")
     val result = ProcessOps.exec(command)(ln => InternalLogger.booleanMessage(ln))
     assert(result == true)

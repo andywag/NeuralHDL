@@ -61,9 +61,9 @@
   reg                   [5:0]   output_counter    ;  // <6,0>
   float_24_8                    stage_0_data_out_r1;  // <1,0>
   float_24_8                    stage_0_data_out_r2;  // <1,0>
-  reg                           stage_0_data_out_vld_r1;  // <1,0>
-  reg                           stage_0_data_out_vld_r2;  // <1,0>
-  reg                           stage_0_data_out_vld_r3;  // <1,0>
+  reg                           stage_0_data_out_vld_r1  ;  // <1,0>
+  reg                           stage_0_data_out_vld_r2  ;  // <1,0>
+  reg                           stage_0_data_out_vld_r3  ;  // <1,0>
   float_24_8                    zctrl_int;  // <1,0>
   float_24_8                    zctrl_register;  // <1,0>
 

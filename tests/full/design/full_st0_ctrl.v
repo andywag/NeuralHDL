@@ -20,7 +20,7 @@
   input float_24_8              full_st0_st_data_out,
   input float_24_8              full_st0_st_data_out_bias,
   input float_24_8              full_st0_st_data_out_pre,
-  input                 [191:0] full_st0_st_tap_out,
+  input                 [191:0]  full_st0_st_tap_out,
   input                         reset,
   input float_24_8              stage_0_data,
   input                         stage_0_data_fst,
@@ -31,7 +31,7 @@
   input float_24_8              tap_in,
   input                         tap_in_fst,
   input                         tap_in_vld,
-  input                 [191:0] tap_int_rd_data,
+  input                 [191:0]  tap_int_rd_data,
   output bias_int_32_4          bias_int,
   output                [31:0]  bias_int_wr_data,
   output data_int_32_6          data_int,
@@ -56,8 +56,8 @@
   output                        stage_error_first,
   output                        stage_error_mode,
   output                        tap_in_rdy,
-  output tap_int_192_4          tap_int,
-  output                [191:0] tap_int_wr_data,
+  output tap_int_192_5          tap_int,
+  output                [191:0]  tap_int_wr_data,
   output taps_typ_6             taps,
   output                        update_error_first,
   output float_24_8             zerror_int,
@@ -88,12 +88,12 @@
   wire                          error_finish_tap  ;  // <1,0>
   wire                  [1:0]   error_phase       ;  // <2,0>
   wire                  [1:0]   error_phase_read  ;  // <2,0>
-  wire                  [31:0]  error_sub_address ;  // <32,0>
+  wire                  [31:0]  error_sub_address  ;  // <32,0>
   wire                  [3:0]   error_tap_length  ;  // <4,0>
-  wire                          error_tap_update_out;  // <1,0>
-  wire                          error_update_first;  // <1,0>
-  wire                          error_update_latch;  // <1,0>
-  wire                          error_update_mode ;  // <1,0>
+  wire                          error_tap_update_out  ;  // <1,0>
+  wire                          error_update_first  ;  // <1,0>
+  wire                          error_update_latch  ;  // <1,0>
+  wire                          error_update_mode  ;  // <1,0>
   wire                          error_valid       ;  // <1,0>
   wire                  [31:0]  error_value       ;  // <32,0>
   float_24_8                    full_st0_st_data_out;  // <1,0>
@@ -103,14 +103,14 @@
   wire                  [2:0]   load_depth        ;  // <3,0>
   wire                  [2:0]   load_length       ;  // <3,0>
   wire                          read_finish       ;  // <1,0>
-  wire                          stage_0_data_out_pre_rdy;  // <1,0>
-  wire                          stage_0_data_out_rdy;  // <1,0>
-  wire                          stage_0_error_out_rdy;  // <1,0>
+  wire                          stage_0_data_out_pre_rdy  ;  // <1,0>
+  wire                          stage_0_data_out_rdy  ;  // <1,0>
+  wire                          stage_0_error_out_rdy  ;  // <1,0>
   wire                          state_finish      ;  // <1,0>
   wire                          state_length      ;  // <1,0>
   wire                  [3:0]   tap_address       ;  // <4,0>
   wire                          tap_enable        ;  // <1,0>
-  wire                  [191:0] tap_int_rd_data   ;  // <192,0>
+  wire                  [191:0]  tap_int_rd_data  ;  // <192,0>
   wire                          zerror_int_rdy    ;  // <1,0>
 
 

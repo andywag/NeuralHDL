@@ -86,10 +86,10 @@
   reg                           err_finish_r2     ;  // <1,0>
   reg                           err_finish_r3     ;  // <1,0>
   reg                           err_finish_r4     ;  // <1,0>
-  reg                   [2:0]   error_update_count;  // <3,0>
-  reg                           error_update_mode_r1;  // <1,0>
-  reg                           error_update_mode_r2;  // <1,0>
-  reg                           error_update_mode_r3;  // <1,0>
+  reg                   [2:0]   error_update_count  ;  // <3,0>
+  reg                           error_update_mode_r1  ;  // <1,0>
+  reg                           error_update_mode_r2  ;  // <1,0>
+  reg                           error_update_mode_r3  ;  // <1,0>
   reg                           fifo_empty_reg    ;  // <1,0>
   reg                   [2:0]   fifo_input_depth  ;  // <3,0>
   reg                   [2:0]   load_depth_count  ;  // <3,0>

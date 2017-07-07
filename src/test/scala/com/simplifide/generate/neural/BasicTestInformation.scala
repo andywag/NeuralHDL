@@ -19,7 +19,6 @@ object BasicTestInformation {
 
   // First Stage of data contains a 6x12 network stage
   def getInformation(dataLocation:String) = NeuralStageInfo((dataLength,outputLength),
-    dataLength,
     dataFill,
     numberNeurons,
     errorFill,
@@ -30,7 +29,6 @@ object BasicTestInformation {
 
   // First Stage of data contains a 6x12 network stage
   def getInformationH(dataLocation:String) = NeuralStageInfo((outputLength,outputLength),
-    outputLength,
     dataFill,
     numberNeurons,
     errorFill,
@@ -41,7 +39,6 @@ object BasicTestInformation {
 
   // Second Stage of data contains a 12x6 network stage
   def getInformation2(dataLocation:String) = NeuralStageInfo((outputLength,dataLength),
-    outputLength,
     dataFill,
     numberNeurons,
     errorFill,
@@ -65,12 +62,23 @@ val trainingData =
 def inIdent(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
   if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0)
 
+def getTapIdent(a:Int,b:Int) = {
+  Nd4j.create(inIdent(a,b))
+}
+
 def getTrainIdent(a:Int,b:Int) = {
 
   val input =  Nd4j.create(inIdent(a,a))
   val output = Nd4j.create(inIdent(b,a))
   (input,output)
 }
+
+  def getTrainIdent2(a:Int,b:Int) = {
+
+    val input =  Nd4j.create(inIdent(a,a))
+    val output = Nd4j.create(inIdent(a,b))
+    (input,output)
+  }
 
   /*
   def inTest(a:Int,b:Int,o:Int=0)  = Array.tabulate(a,b)((x,y) =>

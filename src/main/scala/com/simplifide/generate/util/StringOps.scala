@@ -29,8 +29,8 @@ object StringOps {
     val builder = new StringBuilder()
     items.foreach {
       x => {
-        val result = if (total < x._2) List.fill(x._2 - total)(" ").reduceLeft(_+_) + x._1
-                     else x._1
+        val result = if (total < x._2) List.fill(math.max(x._2 - total,1))(" ").reduceLeft(_+_)  + x._1
+                     else " " + x._1
         builder.append(result)
         total += result.length
       }

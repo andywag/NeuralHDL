@@ -15,9 +15,9 @@
     module simple_st0_mem_tap(
   input                         clk,
   input                         reset,
-  input tap_int_192_4           tap_int,
-  input                 [191:0] tap_int_wr_data,
-  output                [191:0] tap_int_rd_data);
+  input tap_int_192_5           tap_int,
+  input                 [191:0]  tap_int_wr_data,
+  output                [191:0]  tap_int_rd_data);
 
 // Parameters 
 
@@ -25,31 +25,31 @@
 
 // Wires 
 
-  mem_int_0_192_4               mem_int_0;  // <1,0>
-  mem_int_1_192_4               mem_int_1;  // <1,0>
-  mem_int_2_192_4               mem_int_2;  // <1,0>
-  mem_int_3_192_4               mem_int_3;  // <1,0>
-  mem_int_4_192_4               mem_int_4;  // <1,0>
-  mem_int_5_192_4               mem_int_5;  // <1,0>
-  wire                  [3:0]   rd_offset         ;  // <4,0>
-  wire                  [3:0]   rd_offset0_0      ;  // <4,0>
-  wire                  [3:0]   rd_offset0_1      ;  // <4,0>
-  wire                  [3:0]   rd_offset0_2      ;  // <4,0>
-  wire                  [3:0]   rd_offset0_3      ;  // <4,0>
-  wire                  [3:0]   rd_offset0_4      ;  // <4,0>
-  wire                  [3:0]   rd_offset0_5      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_0      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_1      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_2      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_3      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_4      ;  // <4,0>
-  wire                  [3:0]   rd_offset1_5      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w0      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w1      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w2      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w3      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w4      ;  // <4,0>
-  wire                  [3:0]   rd_offset_w5      ;  // <4,0>
+  mem_int_0_192_5               mem_int_0;  // <1,0>
+  mem_int_1_192_5               mem_int_1;  // <1,0>
+  mem_int_2_192_5               mem_int_2;  // <1,0>
+  mem_int_3_192_5               mem_int_3;  // <1,0>
+  mem_int_4_192_5               mem_int_4;  // <1,0>
+  mem_int_5_192_5               mem_int_5;  // <1,0>
+  wire                  [4:0]   rd_offset         ;  // <5,0>
+  wire                  [4:0]   rd_offset0_0      ;  // <5,0>
+  wire                  [4:0]   rd_offset0_1      ;  // <5,0>
+  wire                  [4:0]   rd_offset0_2      ;  // <5,0>
+  wire                  [4:0]   rd_offset0_3      ;  // <5,0>
+  wire                  [4:0]   rd_offset0_4      ;  // <5,0>
+  wire                  [4:0]   rd_offset0_5      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_0      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_1      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_2      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_3      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_4      ;  // <5,0>
+  wire                  [4:0]   rd_offset1_5      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w0      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w1      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w2      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w3      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w4      ;  // <5,0>
+  wire                  [4:0]   rd_offset_w5      ;  // <5,0>
   wire                  [31:0]  read_0            ;  // <32,0>
   wire                  [31:0]  read_1            ;  // <32,0>
   wire                  [31:0]  read_2            ;  // <32,0>
@@ -67,9 +67,9 @@
 
 // Registers 
 
-  reg                   [3:0]   inter_base        ;  // <4,0>
-  reg                   [3:0]   inter_count_0     ;  // <4,0>
-  reg                   [3:0]   inter_count_1     ;  // <4,0>
+  reg                   [4:0]   inter_base        ;  // <5,0>
+  reg                   [4:0]   inter_count_0     ;  // <5,0>
+  reg                   [4:0]   inter_count_1     ;  // <5,0>
 
 
 // Other
@@ -80,7 +80,7 @@
 // simple_st0_mem_tap_0
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_0 (
+memory_32_5 simple_st0_mem_tap_0 (
     .clk(clk),
     .m(mem_int_0),
     .m_rd_data(read_0),
@@ -91,7 +91,7 @@ memory_32_4 simple_st0_mem_tap_0 (
 // simple_st0_mem_tap_1
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_1 (
+memory_32_5 simple_st0_mem_tap_1 (
     .clk(clk),
     .m(mem_int_1),
     .m_rd_data(read_1),
@@ -102,7 +102,7 @@ memory_32_4 simple_st0_mem_tap_1 (
 // simple_st0_mem_tap_2
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_2 (
+memory_32_5 simple_st0_mem_tap_2 (
     .clk(clk),
     .m(mem_int_2),
     .m_rd_data(read_2),
@@ -113,7 +113,7 @@ memory_32_4 simple_st0_mem_tap_2 (
 // simple_st0_mem_tap_3
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_3 (
+memory_32_5 simple_st0_mem_tap_3 (
     .clk(clk),
     .m(mem_int_3),
     .m_rd_data(read_3),
@@ -124,7 +124,7 @@ memory_32_4 simple_st0_mem_tap_3 (
 // simple_st0_mem_tap_4
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_4 (
+memory_32_5 simple_st0_mem_tap_4 (
     .clk(clk),
     .m(mem_int_4),
     .m_rd_data(read_4),
@@ -135,7 +135,7 @@ memory_32_4 simple_st0_mem_tap_4 (
 // simple_st0_mem_tap_5
 ////////////////////////////////////////////////////////////////////////////////
 
-memory_32_4 simple_st0_mem_tap_5 (
+memory_32_5 simple_st0_mem_tap_5 (
     .clk(clk),
     .m(mem_int_5),
     .m_rd_data(read_5),
@@ -144,48 +144,48 @@ memory_32_4 simple_st0_mem_tap_5 (
 
 always @(posedge clk) begin
   if (reset) begin
-    inter_count_0 <= 4'd0;
+    inter_count_0 <= 5'd0;
   end
   else if (tap_int.inter) begin 
     if ((tap_int.inter_first | (inter_count_0 == 'd5))) begin
-      inter_count_0 <= 4'd0;
+      inter_count_0 <= 5'd0;
     end
     else begin
-      inter_count_0 <= inter_count_0[3:0] + 4'd1;
+      inter_count_0 <= inter_count_0[4:0] + 5'd1;
     end
   end
 end
 always @(posedge clk) begin
   if (reset) begin
-    inter_count_1 <= 4'd0;
+    inter_count_1 <= 5'd0;
   end
   else if ((tap_int.inter_first | (inter_count_0 == 'd5))) begin 
     if (tap_int.inter_first) begin
-      inter_count_1 <= 4'd0;
+      inter_count_1 <= 5'd0;
     end
     else begin
-      inter_count_1 <= inter_count_1[3:0] + 4'd6;
+      inter_count_1 <= inter_count_1[4:0] + 5'd6;
     end
   end
 end
-assign rd_offset1_0 = inter_count_0[3:0] + 4'd0;
-assign rd_offset0_0 = (rd_offset1_0 < 'd6) ? rd_offset1_0 : rd_offset1_0[3:0] - 4'd6;
-assign rd_offset_w0 = rd_offset0_0[3:0] + inter_count_1[3:0];
-assign rd_offset1_1 = inter_count_0[3:0] + 4'd1;
-assign rd_offset0_1 = (rd_offset1_1 < 'd6) ? rd_offset1_1 : rd_offset1_1[3:0] - 4'd6;
-assign rd_offset_w1 = rd_offset0_1[3:0] + inter_count_1[3:0];
-assign rd_offset1_2 = inter_count_0[3:0] + 4'd2;
-assign rd_offset0_2 = (rd_offset1_2 < 'd6) ? rd_offset1_2 : rd_offset1_2[3:0] - 4'd6;
-assign rd_offset_w2 = rd_offset0_2[3:0] + inter_count_1[3:0];
-assign rd_offset1_3 = inter_count_0[3:0] + 4'd3;
-assign rd_offset0_3 = (rd_offset1_3 < 'd6) ? rd_offset1_3 : rd_offset1_3[3:0] - 4'd6;
-assign rd_offset_w3 = rd_offset0_3[3:0] + inter_count_1[3:0];
-assign rd_offset1_4 = inter_count_0[3:0] + 4'd4;
-assign rd_offset0_4 = (rd_offset1_4 < 'd6) ? rd_offset1_4 : rd_offset1_4[3:0] - 4'd6;
-assign rd_offset_w4 = rd_offset0_4[3:0] + inter_count_1[3:0];
-assign rd_offset1_5 = inter_count_0[3:0] + 4'd5;
-assign rd_offset0_5 = (rd_offset1_5 < 'd6) ? rd_offset1_5 : rd_offset1_5[3:0] - 4'd6;
-assign rd_offset_w5 = rd_offset0_5[3:0] + inter_count_1[3:0];
+assign rd_offset1_0 = inter_count_0[4:0] + 5'd0;
+assign rd_offset0_0 = (rd_offset1_0 < 'd6) ? rd_offset1_0 : rd_offset1_0[4:0] - 5'd6;
+assign rd_offset_w0 = rd_offset0_0[4:0] + inter_count_1[4:0];
+assign rd_offset1_1 = inter_count_0[4:0] + 5'd1;
+assign rd_offset0_1 = (rd_offset1_1 < 'd6) ? rd_offset1_1 : rd_offset1_1[4:0] - 5'd6;
+assign rd_offset_w1 = rd_offset0_1[4:0] + inter_count_1[4:0];
+assign rd_offset1_2 = inter_count_0[4:0] + 5'd2;
+assign rd_offset0_2 = (rd_offset1_2 < 'd6) ? rd_offset1_2 : rd_offset1_2[4:0] - 5'd6;
+assign rd_offset_w2 = rd_offset0_2[4:0] + inter_count_1[4:0];
+assign rd_offset1_3 = inter_count_0[4:0] + 5'd3;
+assign rd_offset0_3 = (rd_offset1_3 < 'd6) ? rd_offset1_3 : rd_offset1_3[4:0] - 5'd6;
+assign rd_offset_w3 = rd_offset0_3[4:0] + inter_count_1[4:0];
+assign rd_offset1_4 = inter_count_0[4:0] + 5'd4;
+assign rd_offset0_4 = (rd_offset1_4 < 'd6) ? rd_offset1_4 : rd_offset1_4[4:0] - 5'd6;
+assign rd_offset_w4 = rd_offset0_4[4:0] + inter_count_1[4:0];
+assign rd_offset1_5 = inter_count_0[4:0] + 5'd5;
+assign rd_offset0_5 = (rd_offset1_5 < 'd6) ? rd_offset1_5 : rd_offset1_5[4:0] - 5'd6;
+assign rd_offset_w5 = rd_offset0_5[4:0] + inter_count_1[4:0];
 assign write_sub[0] = ((tap_int.sub_addr == 'd0) & tap_int.sub_vld);
 assign write_0 = write_sub[0] ? tap_int.sub_data : tap_int_wr_data[31:0];
 assign mem_int_0.rd_address = (tap_int.inter & ~tap_int.inter_first) ? rd_offset_w0 : tap_int.rd_address;
@@ -196,7 +196,7 @@ assign tap_int_rd_data[31:0] = read_0;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_0.hex",simple_st0_mem_tap_0.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_0.hex",simple_st0_mem_tap_0.memory_32_5_memory);
 end
 
 assign write_sub[1] = ((tap_int.sub_addr == 'd1) & tap_int.sub_vld);
@@ -209,7 +209,7 @@ assign tap_int_rd_data[63:32] = read_1;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_1.hex",simple_st0_mem_tap_1.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_1.hex",simple_st0_mem_tap_1.memory_32_5_memory);
 end
 
 assign write_sub[2] = ((tap_int.sub_addr == 'd2) & tap_int.sub_vld);
@@ -222,7 +222,7 @@ assign tap_int_rd_data[95:64] = read_2;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_2.hex",simple_st0_mem_tap_2.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_2.hex",simple_st0_mem_tap_2.memory_32_5_memory);
 end
 
 assign write_sub[3] = ((tap_int.sub_addr == 'd3) & tap_int.sub_vld);
@@ -235,7 +235,7 @@ assign tap_int_rd_data[127:96] = read_3;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_3.hex",simple_st0_mem_tap_3.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_3.hex",simple_st0_mem_tap_3.memory_32_5_memory);
 end
 
 assign write_sub[4] = ((tap_int.sub_addr == 'd4) & tap_int.sub_vld);
@@ -248,7 +248,7 @@ assign tap_int_rd_data[159:128] = read_4;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_4.hex",simple_st0_mem_tap_4.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_4.hex",simple_st0_mem_tap_4.memory_32_5_memory);
 end
 
 assign write_sub[5] = ((tap_int.sub_addr == 'd5) & tap_int.sub_vld);
@@ -261,7 +261,7 @@ assign tap_int_rd_data[191:160] = read_5;
 
 // Optional Memory Load for Memory /home/andy/projects/NeuralHDL/tests/simple/data/init_taps0
 initial begin
-  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_5.hex",simple_st0_mem_tap_5.memory_32_4_memory);
+  $readmemh("/home/andy/projects/NeuralHDL/tests/simple/data/init_taps0_5.hex",simple_st0_mem_tap_5.memory_32_5_memory);
 end
 
 endmodule

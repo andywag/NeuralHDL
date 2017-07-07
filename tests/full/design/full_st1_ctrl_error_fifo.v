@@ -47,37 +47,37 @@
   wire                          error_fifo_full   ;  // <1,0>
   wire                          error_finish      ;  // <1,0>
   wire                          error_tap_update  ;  // <1,0>
-  wire                          error_update_first_internal;  // <1,0>
-  wire                          error_update_last_internal;  // <1,0>
-  wire                          real_error_finish ;  // <1,0>
+  wire                          error_update_first_internal  ;  // <1,0>
+  wire                          error_update_last_internal  ;  // <1,0>
+  wire                          real_error_finish  ;  // <1,0>
   wire                          wr_address_vld    ;  // <1,0>
 
 
 // Registers 
 
   reg                   [2:0]   error_fifo_depth  ;  // <3,0>
-  reg                           error_update_first_internal_r1;  // <1,0>
-  reg                           error_update_first_internal_r2;  // <1,0>
-  reg                           error_update_first_internal_r3;  // <1,0>
-  reg                           error_update_first_internal_r4;  // <1,0>
-  reg                           error_update_last_internal_r1;  // <1,0>
-  reg                           error_update_last_internal_r2;  // <1,0>
-  reg                           error_update_last_internal_r3;  // <1,0>
-  reg                           error_update_last_internal_r4;  // <1,0>
-  reg                           error_update_latch;  // <1,0>
-  reg                           error_update_latch_r1;  // <1,0>
-  reg                           error_update_latch_r2;  // <1,0>
-  reg                           error_update_latch_r3;  // <1,0>
-  reg                           error_update_latch_r4;  // <1,0>
-  reg                           error_update_latch_r5;  // <1,0>
-  reg                           error_update_latch_r6;  // <1,0>
-  reg                   [3:0]   error_write_count ;  // <4,0>
-  reg                           wr_address_vld_r1 ;  // <1,0>
-  reg                           wr_address_vld_r2 ;  // <1,0>
-  reg                           wr_address_vld_r3 ;  // <1,0>
-  reg                           wr_address_vld_r4 ;  // <1,0>
-  reg                           wr_address_vld_r5 ;  // <1,0>
-  reg                           wr_address_vld_r6 ;  // <1,0>
+  reg                           error_update_first_internal_r1  ;  // <1,0>
+  reg                           error_update_first_internal_r2  ;  // <1,0>
+  reg                           error_update_first_internal_r3  ;  // <1,0>
+  reg                           error_update_first_internal_r4  ;  // <1,0>
+  reg                           error_update_last_internal_r1  ;  // <1,0>
+  reg                           error_update_last_internal_r2  ;  // <1,0>
+  reg                           error_update_last_internal_r3  ;  // <1,0>
+  reg                           error_update_last_internal_r4  ;  // <1,0>
+  reg                           error_update_latch  ;  // <1,0>
+  reg                           error_update_latch_r1  ;  // <1,0>
+  reg                           error_update_latch_r2  ;  // <1,0>
+  reg                           error_update_latch_r3  ;  // <1,0>
+  reg                           error_update_latch_r4  ;  // <1,0>
+  reg                           error_update_latch_r5  ;  // <1,0>
+  reg                           error_update_latch_r6  ;  // <1,0>
+  reg                   [3:0]   error_write_count  ;  // <4,0>
+  reg                           wr_address_vld_r1  ;  // <1,0>
+  reg                           wr_address_vld_r2  ;  // <1,0>
+  reg                           wr_address_vld_r3  ;  // <1,0>
+  reg                           wr_address_vld_r4  ;  // <1,0>
+  reg                           wr_address_vld_r5  ;  // <1,0>
+  reg                           wr_address_vld_r6  ;  // <1,0>
 
 
 // Other

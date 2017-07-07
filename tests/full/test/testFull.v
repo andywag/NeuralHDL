@@ -23,12 +23,12 @@
 // Wires 
 
   wire                          expected_rdy      ;  // <1,0>
-  wire                          full_st0_ctrl_data_fifo_data_ready;  // <1,0>
-  wire                          full_st1_ctrl_data_fifo_data_ready;  // <1,0>
+  wire                          full_st0_ctrl_data_fifo_data_ready  ;  // <1,0>
+  wire                          full_st1_ctrl_data_fifo_data_ready  ;  // <1,0>
   wire                          load_finish       ;  // <1,0>
   wire                          st_data_out_fst   ;  // <1,0>
-  wire                          st_data_out_pre_fst;  // <1,0>
-  wire                          st_data_out_pre_vld;  // <1,0>
+  wire                          st_data_out_pre_fst  ;  // <1,0>
+  wire                          st_data_out_pre_vld  ;  // <1,0>
   wire                          st_data_out_vld   ;  // <1,0>
   wire                          st_data_rdy       ;  // <1,0>
   wire                          tap_in_rdy        ;  // <1,0>
@@ -39,7 +39,7 @@
   reg                   [31:0]  counter           ;  // <32,0>
   reg                   [31:0]  exp_rdy_count     ;  // <32,0>
   reg                           expected_fst      ;  // <1,0>
-  reg                   [31:0]  expected_mem[0:36];  // <32,0>
+  reg                   [31:0]  expected_mem [0:36] ;  // <32,0>
   reg                           expected_vld      ;  // <1,0>
   reg                   [31:0]  in_rdy_count      ;  // <32,0>
   reg                   [31:0]  rtl_bias0_fptr    ;  // <32,0>
@@ -51,8 +51,8 @@
   reg                   [31:0]  rtl_tap0_fptr     ;  // <32,0>
   reg                   [31:0]  rtl_tap1_fptr     ;  // <32,0>
   reg                           st_data_fst       ;  // <1,0>
-  reg                   [31:0]  st_data_mem[0:36] ;  // <32,0>
-  reg                           st_data_out_pre_rdy;  // <1,0>
+  reg                   [31:0]  st_data_mem [0:36] ;  // <32,0>
+  reg                           st_data_out_pre_rdy  ;  // <1,0>
   reg                           st_data_out_rdy   ;  // <1,0>
   reg                           st_data_vld       ;  // <1,0>
   reg                           tap_in_fst        ;  // <1,0>
@@ -167,12 +167,20 @@ assign full_st0_ctrl_int.input_stage = 'd1;
 assign full_st0_st_reg.tap_gain = 6'd3;
 assign full_st0_st_reg.bias_gain = 6'd3;
 assign full_st0_st_reg.disable_non_linearity = 'd0;
+assign full_st0_ctrl_int.load_length = 3'd5;
+assign full_st0_ctrl_int.load_depth = 3'd5;
+assign full_st0_ctrl_int.error_length = 4'd11;
+assign full_st0_ctrl_int.state_length = 'd1;
 assign full_st1_ctrl_int.tap_update_enable = 'd1;
 assign full_st1_ctrl_int.bias_update_enable = 'd1;
 assign full_st1_ctrl_int.input_stage = 'd0;
 assign full_st1_st_reg.tap_gain = 6'd3;
 assign full_st1_st_reg.bias_gain = 6'd3;
 assign full_st1_st_reg.disable_non_linearity = 'd1;
+assign full_st1_ctrl_int.load_length = 4'd11;
+assign full_st1_ctrl_int.load_depth = 3'd5;
+assign full_st1_ctrl_int.error_length = 4'd5;
+assign full_st1_ctrl_int.state_length = 'd1;
 
 // Store Store 
 initial begin
@@ -286,15 +294,6 @@ always @(posedge clk) begin
   end
 end
 assign st_data_out_rdy = 'd1;
-assign full_st0_ctrl_int.load_length = 3'd5;
-assign full_st0_ctrl_int.load_depth = 3'd5;
-assign full_st0_ctrl_int.state_length = 'd1;
-assign full_st0_ctrl_int.error_length = 4'd11;
-assign full_st0_ctrl_int.input_stage = 'd1;
-assign full_st1_ctrl_int.load_length = 4'd11;
-assign full_st1_ctrl_int.load_depth = 3'd5;
-assign full_st1_ctrl_int.state_length = 'd1;
-assign full_st1_ctrl_int.error_length = 4'd5;
 
 // Counter to Index Test
 always @(posedge clk) begin

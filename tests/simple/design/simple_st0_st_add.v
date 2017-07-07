@@ -25,20 +25,20 @@
 
 // Wires 
 
-  wire          signed  [48:0]  simple_st0_st_adder_abs_out;  // <49,0>
-  wire          signed  [48:0]  simple_st0_st_adder_add_out;  // <49,0>
-  wire          signed  [25:0]  simple_st0_st_adder_ain1;  // <26,0>
-  wire          signed  [25:0]  simple_st0_st_adder_ain2;  // <26,0>
-  wire                  [8:0]   simple_st0_st_adder_del;  // <9,0>
-  wire                  [7:0]   simple_st0_st_adder_exp;  // <8,0>
-  wire          signed  [25:0]  simple_st0_st_adder_nsh_in;  // <26,0>
-  wire          signed  [48:0]  simple_st0_st_adder_nsh_out;  // <49,0>
-  wire          signed  [48:0]  simple_st0_st_adder_rnd_bit;  // <49,0>
-  wire                          simple_st0_st_adder_sgn;  // <1,0>
-  wire          signed  [48:0]  simple_st0_st_adder_sh_in;  // <49,0>
-  wire          signed  [25:0]  simple_st0_st_adder_sh_in1;  // <26,0>
-  wire          signed  [48:0]  simple_st0_st_adder_sh_out;  // <49,0>
-  wire                  [7:0]   simple_st0_st_adder_shift;  // <8,0>
+  wire          signed  [48:0]  simple_st0_st_adder_abs_out  ;  // <49,0>
+  wire          signed  [48:0]  simple_st0_st_adder_add_out  ;  // <49,0>
+  wire          signed  [25:0]  simple_st0_st_adder_ain1  ;  // <26,0>
+  wire          signed  [25:0]  simple_st0_st_adder_ain2  ;  // <26,0>
+  wire                  [8:0]   simple_st0_st_adder_del  ;  // <9,0>
+  wire                  [7:0]   simple_st0_st_adder_exp  ;  // <8,0>
+  wire          signed  [25:0]  simple_st0_st_adder_nsh_in  ;  // <26,0>
+  wire          signed  [48:0]  simple_st0_st_adder_nsh_out  ;  // <49,0>
+  wire          signed  [48:0]  simple_st0_st_adder_rnd_bit  ;  // <49,0>
+  wire                          simple_st0_st_adder_sgn  ;  // <1,0>
+  wire          signed  [48:0]  simple_st0_st_adder_sh_in  ;  // <49,0>
+  wire          signed  [25:0]  simple_st0_st_adder_sh_in1  ;  // <26,0>
+  wire          signed  [48:0]  simple_st0_st_adder_sh_out  ;  // <49,0>
+  wire                  [7:0]   simple_st0_st_adder_shift  ;  // <8,0>
 
 
 // Registers 

@@ -53,63 +53,63 @@
   float_24_8                    stage_0_data;  // <1,0>
   wire                          stage_0_data_fst  ;  // <1,0>
   float_24_8                    stage_0_data_out;  // <1,0>
-  wire                          stage_0_data_out_fst;  // <1,0>
+  wire                          stage_0_data_out_fst  ;  // <1,0>
   float_24_8                    stage_0_data_out_pre;  // <1,0>
-  wire                          stage_0_data_out_pre_fst;  // <1,0>
-  wire                          stage_0_data_out_pre_rdy;  // <1,0>
-  wire                          stage_0_data_out_pre_vld;  // <1,0>
-  wire                          stage_0_data_out_rdy;  // <1,0>
-  wire                          stage_0_data_out_vld;  // <1,0>
+  wire                          stage_0_data_out_pre_fst  ;  // <1,0>
+  wire                          stage_0_data_out_pre_rdy  ;  // <1,0>
+  wire                          stage_0_data_out_pre_vld  ;  // <1,0>
+  wire                          stage_0_data_out_rdy  ;  // <1,0>
+  wire                          stage_0_data_out_vld  ;  // <1,0>
   wire                          stage_0_data_rdy  ;  // <1,0>
   wire                          stage_0_data_vld  ;  // <1,0>
   float_24_8                    stage_0_error;  // <1,0>
-  wire                          stage_0_error_fst ;  // <1,0>
+  wire                          stage_0_error_fst  ;  // <1,0>
   float_24_8                    stage_0_error_out;  // <1,0>
-  wire                          stage_0_error_out_fst;  // <1,0>
-  wire                          stage_0_error_out_rdy;  // <1,0>
-  wire                          stage_0_error_out_vld;  // <1,0>
-  wire                          stage_0_error_rdy ;  // <1,0>
-  wire                          stage_0_error_vld ;  // <1,0>
+  wire                          stage_0_error_out_fst  ;  // <1,0>
+  wire                          stage_0_error_out_rdy  ;  // <1,0>
+  wire                          stage_0_error_out_vld  ;  // <1,0>
+  wire                          stage_0_error_rdy  ;  // <1,0>
+  wire                          stage_0_error_vld  ;  // <1,0>
   float_24_8                    stage_1_data;  // <1,0>
   wire                          stage_1_data_fst  ;  // <1,0>
   float_24_8                    stage_1_data_out;  // <1,0>
-  wire                          stage_1_data_out_fst;  // <1,0>
+  wire                          stage_1_data_out_fst  ;  // <1,0>
   float_24_8                    stage_1_data_out_pre;  // <1,0>
-  wire                          stage_1_data_out_pre_fst;  // <1,0>
-  wire                          stage_1_data_out_pre_rdy;  // <1,0>
-  wire                          stage_1_data_out_pre_vld;  // <1,0>
-  wire                          stage_1_data_out_rdy;  // <1,0>
-  wire                          stage_1_data_out_vld;  // <1,0>
+  wire                          stage_1_data_out_pre_fst  ;  // <1,0>
+  wire                          stage_1_data_out_pre_rdy  ;  // <1,0>
+  wire                          stage_1_data_out_pre_vld  ;  // <1,0>
+  wire                          stage_1_data_out_rdy  ;  // <1,0>
+  wire                          stage_1_data_out_vld  ;  // <1,0>
   wire                          stage_1_data_rdy  ;  // <1,0>
   wire                          stage_1_data_vld  ;  // <1,0>
   float_24_8                    stage_1_error;  // <1,0>
-  wire                          stage_1_error_fst ;  // <1,0>
+  wire                          stage_1_error_fst  ;  // <1,0>
   float_24_8                    stage_1_error_out;  // <1,0>
-  wire                          stage_1_error_out_fst;  // <1,0>
-  wire                          stage_1_error_out_rdy;  // <1,0>
-  wire                          stage_1_error_out_vld;  // <1,0>
-  wire                          stage_1_error_rdy ;  // <1,0>
-  wire                          stage_1_error_vld ;  // <1,0>
+  wire                          stage_1_error_out_fst  ;  // <1,0>
+  wire                          stage_1_error_out_rdy  ;  // <1,0>
+  wire                          stage_1_error_out_vld  ;  // <1,0>
+  wire                          stage_1_error_rdy  ;  // <1,0>
+  wire                          stage_1_error_vld  ;  // <1,0>
   float_24_8                    stage_2_data;  // <1,0>
   wire                          stage_2_data_fst  ;  // <1,0>
   float_24_8                    stage_2_data_out;  // <1,0>
-  wire                          stage_2_data_out_fst;  // <1,0>
+  wire                          stage_2_data_out_fst  ;  // <1,0>
   float_24_8                    stage_2_data_out_pre;  // <1,0>
-  wire                          stage_2_data_out_pre_fst;  // <1,0>
-  wire                          stage_2_data_out_pre_rdy;  // <1,0>
-  wire                          stage_2_data_out_pre_vld;  // <1,0>
-  wire                          stage_2_data_out_rdy;  // <1,0>
-  wire                          stage_2_data_out_vld;  // <1,0>
+  wire                          stage_2_data_out_pre_fst  ;  // <1,0>
+  wire                          stage_2_data_out_pre_rdy  ;  // <1,0>
+  wire                          stage_2_data_out_pre_vld  ;  // <1,0>
+  wire                          stage_2_data_out_rdy  ;  // <1,0>
+  wire                          stage_2_data_out_vld  ;  // <1,0>
   wire                          stage_2_data_rdy  ;  // <1,0>
   wire                          stage_2_data_vld  ;  // <1,0>
   float_24_8                    stage_2_error;  // <1,0>
-  wire                          stage_2_error_fst ;  // <1,0>
+  wire                          stage_2_error_fst  ;  // <1,0>
   float_24_8                    stage_2_error_out;  // <1,0>
-  wire                          stage_2_error_out_fst;  // <1,0>
-  wire                          stage_2_error_out_rdy;  // <1,0>
-  wire                          stage_2_error_out_vld;  // <1,0>
-  wire                          stage_2_error_rdy ;  // <1,0>
-  wire                          stage_2_error_vld ;  // <1,0>
+  wire                          stage_2_error_out_fst  ;  // <1,0>
+  wire                          stage_2_error_out_rdy  ;  // <1,0>
+  wire                          stage_2_error_out_vld  ;  // <1,0>
+  wire                          stage_2_error_rdy  ;  // <1,0>
+  wire                          stage_2_error_vld  ;  // <1,0>
 
 
 // Registers 

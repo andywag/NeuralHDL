@@ -30,7 +30,7 @@
 
 // Wires 
 
-  wire                  [6:0]   fifo_read_address_e;  // <7,0>
+  wire                  [6:0]   fifo_read_address_e  ;  // <7,0>
   zctrl_typ_128                 internal;  // <1,0>
 
 
@@ -38,8 +38,8 @@
 
   reg                   [7:0]   fifo_depth        ;  // <8,0>
   reg                   [7:0]   fifo_e_depth      ;  // <8,0>
-  reg                   [6:0]   fifo_read_address ;  // <7,0>
-  reg                   [6:0]   fifo_write_address;  // <7,0>
+  reg                   [6:0]   fifo_read_address  ;  // <7,0>
+  reg                   [6:0]   fifo_write_address  ;  // <7,0>
 
 
 // Other

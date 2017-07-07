@@ -20,10 +20,10 @@
   input                 [31:0]  data_int_wr_data,
   input                         reset,
   input tap_int_192_4           tap_int,
-  input                 [191:0] tap_int_wr_data,
+  input                 [191:0]  tap_int_wr_data,
   output                [31:0]  bias_int_rd_data,
   output                [31:0]  data_int_rd_data,
-  output                [191:0] tap_int_rd_data);
+  output                [191:0]  tap_int_rd_data);
 
 // Parameters 
 

@@ -24,7 +24,7 @@ class NeuralErrorTest extends BlockScalaTest with BlockTestParser {
   val errorFill     = 4
   val outputFill    = 4
 
-  val information = NeuralStageInfo((dataLength,outputLength),dataLength,dataFill,
+  val information = NeuralStageInfo((dataLength,outputLength),dataFill,
     numberNeurons,errorFill,outputFill,dataLocation)
 
   override def getTestLength = outputLength*12

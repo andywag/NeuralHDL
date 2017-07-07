@@ -62,16 +62,16 @@
   float_24_8                    full_st1_st_data_out;  // <1,0>
   float_24_8                    full_st1_st_data_out_bias;  // <1,0>
   float_24_8                    full_st1_st_data_out_pre;  // <1,0>
-  wire                  [191:0] full_st1_st_tap_out;  // <192,0>
-  wire                          stage_1_error_out_rdy;  // <1,0>
+  wire                  [191:0]  full_st1_st_tap_out  ;  // <192,0>
+  wire                          stage_1_error_out_rdy  ;  // <1,0>
   wire                          stage_error_back  ;  // <1,0>
-  wire                          stage_error_first ;  // <1,0>
+  wire                          stage_error_first  ;  // <1,0>
   wire                          stage_error_mode  ;  // <1,0>
   tap_int_192_4                 tap_int;  // <1,0>
-  wire                  [191:0] tap_int_rd_data   ;  // <192,0>
-  wire                  [191:0] tap_int_wr_data   ;  // <192,0>
+  wire                  [191:0]  tap_int_rd_data  ;  // <192,0>
+  wire                  [191:0]  tap_int_wr_data  ;  // <192,0>
   taps_typ_6                    taps;  // <1,0>
-  wire                          update_error_first;  // <1,0>
+  wire                          update_error_first  ;  // <1,0>
   float_24_8                    zerror_int;  // <1,0>
   wire                          zerror_int_fst    ;  // <1,0>
   wire                          zerror_int_vld    ;  // <1,0>

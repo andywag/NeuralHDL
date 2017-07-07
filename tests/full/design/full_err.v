@@ -35,9 +35,9 @@
 // Wires 
 
   expected_int_32_6             expected_int;  // <1,0>
-  wire                  [31:0]  expected_int_rd_data;  // <32,0>
-  wire                  [31:0]  expected_int_wr_data;  // <32,0>
-  wire                          stage_1_error_rdy ;  // <1,0>
+  wire                  [31:0]  expected_int_rd_data  ;  // <32,0>
+  wire                  [31:0]  expected_int_wr_data  ;  // <32,0>
+  wire                          stage_1_error_rdy  ;  // <1,0>
   float_24_8                    zctrl;  // <1,0>
   wire                          zctrl_fst         ;  // <1,0>
   wire                          zctrl_rdy         ;  // <1,0>
