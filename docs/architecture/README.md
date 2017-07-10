@@ -41,7 +41,7 @@ Memory-->Core
 Control-->Memory
 ```
 
-### Operation
+## Operation
 
 The operation of the network is straightforward and does not have any external control. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
 
@@ -49,6 +49,7 @@ The operation of the network is straightforward and does not have any external c
 1. Tap/Bias Updates
 1. Feedforward Propagation
 
-This order of operations should lead to the maximum network throughput while minimizing memory access. This operation is shared to due to it's access of the same information from memory. Parallel operation is also possible but would require more complicated and higher rate memory access. While sharing this unit is possible, it is probalby more efficient to add parallel stages working on different data rather than attempting to speed up these operations. 
+The precedence of these operations was selected to maximize network throughput and minimize memory depth by giving precedence to feeding the error backward. This choice is because the tap updates require both the data and error to be used together so longer network delays requires larger memory depth. 
+
 
 
