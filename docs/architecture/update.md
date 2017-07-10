@@ -1,6 +1,8 @@
-## Error Update operation
+# Error Update operation
 
-The error update calculation uses the same structure as the feedforward operation with a different input configuration. For this case the values used in the update equation are the error and the taps instead of the taps and data. 
+The error update calculation uses the same structure as the feedforward operation with a different input configuration. 
+
+* Equation TBD
 
 The block diagram of the operation is shown below. 
 
@@ -40,6 +42,16 @@ The operation shown above is very similar to the feedforward operation with the 
 2. The output of the block is parallel and is written to the tap memory
 3. The bias update is a scalar addition not shown in the diagram which uses the error directly
 
+## Data Flow
+
+The data flow for this operation is as follows : 
+
+1. The error data is fed to the block through the tap input and stored
+1. The tap data is fed through the tap port like normal operation
+1. The input data (scala) is multiplied by error (vector)
+1. The bias input is fed with the tap inputs 
+1. The output of the accumulator is fed back to the memory
+
 The ordering of the operations is shown below
 
 | Type          | 0       | 1      | K      | K+1     | N       |
@@ -48,4 +60,3 @@ The ordering of the operations is shown below
 | Data          | D0      |   D1   |   DK   | D0      | DK      |
 | Bias          | B0      |   B1   |   BK   | B0      | BK      |
 
-For this case, the error is kept constant while the data is changing at the input. 
