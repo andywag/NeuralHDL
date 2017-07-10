@@ -31,7 +31,7 @@ The testing of the blocks is done using :
 * Verilator       : Runs a verilog simulator when the test is complete
 * Numpy           : Analyzes the results by looking at the output, taps, and error. Declares an error when the MSE of the error is greater than a user defined threshold
 
-### Single Stage Neural Network
+## Single Stage Neural Network
 
 This is a simple test case which contains a network with a single stage with 6 inputs, 12 outputs utilizing 6 MAC blocks.
 
@@ -48,7 +48,7 @@ graph LR
 * [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/simple)
 * [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/SingleStageTest.scala)
 
-### Two Stage Neural Network
+## Two Stage Neural Network
 
 This is a simple test case which contains a network with 2 fully connected stages.
 
@@ -72,7 +72,7 @@ graph LR
 * [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/full)
 * [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/DoubleStageTest.scala)
 
-### Three Stage Neural Network
+## Three Stage Neural Network
 
 This is the first realistic test case which contains a 3 stage network with 12 hidden neurons.
 
