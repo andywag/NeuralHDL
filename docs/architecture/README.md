@@ -1,15 +1,32 @@
 # Hardware Architecture
 
-There are many different architectures possible for neural networks. This section defines the initial architecture chosen usign this toolset which minimizes complexity for the example design. Like most hardware designs the proper algorithmic solution varies depending
-on the use case. There are also some faults and bad initial decisions for this architecture which were not found until later in the design effort so have been left there to be fixed/changed at a later time. 
+There are many different architectural tradeoffs which are possible for neural networks. This section defines an architecture chosen which minimizes complexity for the example design and most likely a large subset of designs. Like most hardware designs the proper architectural solution varies depending on the use case so different configurations are possible. 
 
-The worst decision was the use of floating point which was actually a new addition to this toolset. The initial thought would be it would simplify the design from an algorithmic perspective but in reality just led to issues in complicating debug. This is first on the list for removal for a practical design. Further discussion of architectural choices can be found at the bottom of this section. 
+This section will discuss the architecturce which was selected for the initial design as well as follow up with possible future improvements. 
 
 # Top Level Architecture 
 
-The top level architecture for this design consists of a 
+The top level architecture for this design consists of a set of a top level which contains a set of independent stages attached using FIFOs on the block input path and streaming interfaces on the outputs. A basic block diagram is shown below. 
 
-The building block for the design in terms of interfaces is shown below.  
+graph LR;
+
+input-->stage0
+stage0-->|output|stage1
+stage1-->|error|stage0
+stage1-->|output|stageN
+stageN-->|error|stage1
+stageN-->|output|error
+error-->|error|stageN
+
+Each block outputs the results of the feedforward operation and inputs the error from the future block in the chain for use in back-propagation mode for the network. 
+
+## Main Building Block
+
+The building block for the design is shown in the block diagram below at a high level below. The block consists of 
+
+* Fifos for the inputs (Input Data forward, Error Data Backward)
+* Memories to store the state of the model
+* Core Neuron Logic which contains the MAC, Nonlinearity and required glue logic
 
 ```mermaid
 graph LR;
@@ -23,12 +40,6 @@ ErrorFifo-->Memory[Internal Memory]
 Memory-->Core
 Control-->Memory
 ```
-
-Each stage of the network has an interface which consists of the following main interfaces. 
-All of the interfaces use a ready valid format to gate the data. 
-Currently the inputs to the stages contain fifos for flow control with the outputs streaming even 
-though the interfaces are ready valid. The assumption currently is that a full operation is completed 
-before it is interrupted. 
 
 ### Operation
 
