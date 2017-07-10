@@ -4,7 +4,7 @@ The purpose of the examples in this section are to prove out the hardware design
 
 The first test created was based on a Braille example shown below so many of the tests use configurations based on these sizes. This example was chosen since it was not based on a power of 2 and had unity outputs which made debugging of the design more straightforward. 
 
-[Braille Example] : http://neuroph.sourceforge.net/tutorials/Braille/RecognitionOfBrailleAlphabetUsingNeuralNetworks.html
+[Braille Example](http://neuroph.sourceforge.net/tutorials/Braille/RecognitionOfBrailleAlphabetUsingNeuralNetworks.html)
 
 ## Example Configuration
 
@@ -16,12 +16,12 @@ The framework for all designs is common so each of the examples below are based 
 
 Given the nature of the tests and number of configurations, the scala code for the tests is being refactored down to only the smallest changes for the tests. The basic building blocks for the network configurations can be found in the following locations. 
 
-* [Test Generator Location] (https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural)
-* [Main Generator Test Block] (https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/BasicNetworkTest.scala)
+* [Test Generator Location](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural)
+* [Main Generator Test Block](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/BasicNetworkTest.scala)
 
 The generator code is based on an existing generic DSL for RTL generation and is a bit more complicated. The basic building blocks for the neural network blocks ban be found in the following location : 
 
-* [Generator Location] (https://github.com/andywag/NeuralHDL/tree/master/src/main/scala/com/simplifide/generate/blocks/neural)
+* [Generator Location](https://github.com/andywag/NeuralHDL/tree/master/src/main/scala/com/simplifide/generate/blocks/neural)
 
 ## Basic Example Testing
 
