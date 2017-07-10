@@ -15,8 +15,12 @@ graph LR
     BM[Bias Memory]-->Core
 ```
 
-This architecture was selected for simplicity but is not required. Sharing between stages as well as setting up resource pools for sharing is possible. For the current use cases there didn't seem to be advantages due to the full loading of the memories. 
+This architecture was selected for simplicity with the blocks containing the resources (memory and MAC units) as well as the control. This could easily be changed to allow: 
 
+1. Using pool of resources (memory and MAC) units
+2. Sharing the neural stage structure for different stages
+
+The change is not complicated but reduces visibility into the design makign it less clear and harder to debug. 
 
 ## Neural Core Architecture 
 
