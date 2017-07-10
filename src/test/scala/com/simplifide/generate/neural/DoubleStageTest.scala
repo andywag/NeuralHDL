@@ -20,13 +20,13 @@ class DoubleStageTest extends BasicNetworkTest {
   /** Design Under Test */
 
 
-  override lazy val inputSize = 36
+  //override lazy val inputSize = 36
 
   // Control signals used for network stage
 
   override lazy val gain = 3
 
 
-
-
 }
+
+

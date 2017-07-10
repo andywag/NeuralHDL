@@ -57,7 +57,9 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   }
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
-  lazy val inputSize = expected.data.length()
+
+  val inputSize = dataData._1.length()
+  val expectedSize = dataData._2.length()
 
 
   override val dutParser = new NeuralNetwork(blockName, information,
@@ -71,7 +73,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
-  expRdyCount := ($iff (expRdyCount === inputSize-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
+  expRdyCount := ($iff (expRdyCount === expectedSize-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
   expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
