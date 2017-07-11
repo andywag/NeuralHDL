@@ -1,7 +1,7 @@
 # Feedforward operation
 
 
-The feedforward operation consists of a matrix multiplication followed by a bias addition using the equation shown below. 
+The feedforward operation consists of a matrix multiplication, a vector bias addition and a non-linear operation. The operation has a serial input and output with parallel operations done using the MAC units.  
 
 * equation TBD
 
