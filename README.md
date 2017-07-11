@@ -10,7 +10,9 @@ The results of a simple example project can be seen below.
 
 [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
 
-A simple stage in caffe which is a json description is shown below. 
+## Basic Operation
+
+A simple stage in caffe which is described in JSON is shown below. 
 
 ```json
 layer {
@@ -26,7 +28,7 @@ layer {
 }
 ```
 
-A similar description for a network stage for this tool is shown below. JSON if not CAFFE syntax could be easily implemented to support this structure but most like longer term a more descriptive DSL will be added.  
+A similar description for a network stage for this tool is shown below.  
 
 ```scala
 NeuralStageInfo((dataLength,outputLength), // # Inputs, # Outputs
