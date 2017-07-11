@@ -1,12 +1,12 @@
 # Hardware Architecture
 
-There are many different architectural tradeoffs which are possible for neural networks. This section defines an architecture chosen which minimizes complexity for the example designs used and most likely a large subset of designs. Like most hardware designs the proper architectural solution varies depending on the use case. Larger scale architectural changes are possible but require some coding of the sub-blocks using the DSL.  
-
-This section will discuss the architecturce which was selected for the initial design as well as follow up with possible future improvements. 
+There are many different architectural tradeoffs which are possible for neural networks. This section defines an architecture chosen which minimizes complexity for the example designs used and most likely a large subset of designs. Like most hardware designs the proper architectural solution varies depending on the use case. The infrastructure supports architectural changes so that designs can be targetted to the exact requirements. 
 
 # Top Level Architecture 
 
-The top level architecture for this design consists of a set of a top level which contains a set of independent stages attached using FIFOs on the block input path and streaming interfaces on the outputs. A basic block diagram is shown below. 
+The top level architecture for this design consists of a set of a top level which contains a set of independent stages attached using FIFOs on the block input path and streaming interfaces on the outputs. This choice was selected to avoid the complexity of having the internal neural stages support different operations in parallel. Each stage does the complete feedforward operation, tap update or back propagation work until complete. The pipeline stages and timing differ between operations making handling parallelism difficult. 
+
+A basic block diagram is shown below. 
 
 graph LR;
 
