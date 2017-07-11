@@ -1,6 +1,6 @@
 ## Back Propagation
 
-Back propagation uses the same basic structure as the feedforward and tap update algorithm using the equation below : 
+Back propagation uses the same structure as the feedforward and tap update algorithm using the equation below : 
 
 * Equation : TBD
 
