@@ -91,7 +91,7 @@
   reg                           error_update_mode_r2  ;  // <1,0>
   reg                           error_update_mode_r3  ;  // <1,0>
   reg                           fifo_empty_reg    ;  // <1,0>
-  reg                   [2:0]   fifo_input_depth  ;  // <3,0>
+  reg                   [3:0]   fifo_input_depth  ;  // <4,0>
   reg                   [2:0]   load_depth_count  ;  // <3,0>
   reg                   [2:0]   load_width_count  ;  // <3,0>
   reg                           output_valid_r1   ;  // <1,0>
@@ -282,17 +282,17 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
   if (reset) begin
-    fifo_input_depth <= 3'd0;
+    fifo_input_depth <= 4'd0;
   end
   else begin
     if ((load_input_done & error_finish_tap)) begin
       fifo_input_depth <= fifo_input_depth;
     end
     else if (load_input_done) begin 
-      fifo_input_depth <= fifo_input_depth[2:0] + 3'd1;
+      fifo_input_depth <= fifo_input_depth[3:0] + 4'd1;
     end
     else if (error_finish_tap) begin 
-      fifo_input_depth <= fifo_input_depth[2:0] - 3'd1;
+      fifo_input_depth <= fifo_input_depth[3:0] - 4'd1;
     end
   end
 end
@@ -300,7 +300,7 @@ end
 // Internal Counter for which state the operation is in
 assign read_finish = (read_width_count == load_length);
 assign state_finish = ((read_state_count == state_length) & read_finish);
-assign data_start = ((read_finish | ((load_input_done & ~error_update_mode) & ~error_update_latch)) & (fifo_input_depth >= 'd0));
+assign data_start = ((read_finish | (((load_input_done & ~error_update_mode) & ~error_update_latch) & (read_width_count == 'd0))) & (fifo_input_depth >= 'd0));
 assign data_active = ((((fifo_input_depth > 'd0) & ~(fifo_empty_reg | fifo_empty)) | error_update_mode) | error_update_latch);
 assign temp = ((fifo_input_depth > 'd0) & ~(fifo_empty_reg | fifo_empty));
 assign output_valid = (~error_update_latch & temp);

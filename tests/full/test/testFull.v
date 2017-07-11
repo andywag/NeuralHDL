@@ -162,7 +162,7 @@ end
 
 assign expected = exp_rdy_count[31] ? 'd0 : expected_mem[exp_rdy_count];
 assign full_st0_ctrl_int.tap_update_enable = 'd1;
-assign full_st0_ctrl_int.bias_update_enable = 'd1;
+assign full_st0_ctrl_int.bias_update_enable = 'd0;
 assign full_st0_ctrl_int.input_stage = 'd1;
 assign full_st0_st_reg.tap_gain = 6'd3;
 assign full_st0_st_reg.bias_gain = 6'd3;
@@ -172,7 +172,7 @@ assign full_st0_ctrl_int.load_depth = 3'd5;
 assign full_st0_ctrl_int.error_length = 4'd11;
 assign full_st0_ctrl_int.state_length = 'd1;
 assign full_st1_ctrl_int.tap_update_enable = 'd1;
-assign full_st1_ctrl_int.bias_update_enable = 'd1;
+assign full_st1_ctrl_int.bias_update_enable = 'd0;
 assign full_st1_ctrl_int.input_stage = 'd0;
 assign full_st1_st_reg.tap_gain = 6'd3;
 assign full_st1_st_reg.bias_gain = 6'd3;

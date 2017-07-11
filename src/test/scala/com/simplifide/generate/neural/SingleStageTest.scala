@@ -70,8 +70,24 @@ class Single4x4 extends Ident(4) {
 
 }
 
-class Single8x8 extends Ident(8) {
 
+class Single8x8 extends Ident(8) {
+  //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
+  override lazy val dataFill      = 6
+  override lazy val errorFill     = 8
+  override lazy val outputFill    = 6
+  override def waveformEnable = true
+  //override def getTestLength = 256
+
+}
+
+class Single10x10 extends Ident(10) {
+  override lazy val dataFill      = 8
+  override lazy val errorFill     = 8
+  override lazy val outputFill    = 6
+  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
+  override def waveformEnable = true
+  override def getTestLength = 256*4
 }
 
 /*
@@ -85,14 +101,11 @@ class Single6x6 extends SingleStageTest{
 }
 */
 
-class Single5x5 extends SingleStageTest{
+class Single5x5 extends Ident(5) {
   override def blockName: String = "simple5"
   //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
 
-  override lazy val inputLen      = 5
-  override def outputLen     = 5
-  override lazy val errorLength = 5
-  override lazy val numberNeurons = 5
+
 
 }
 

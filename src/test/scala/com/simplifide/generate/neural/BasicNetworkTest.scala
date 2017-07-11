@@ -81,7 +81,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   // Setup controls for the stages
   for (i <- 0 until information.size) {
     dutParser.mStage(i).control.controlInterface.tapEnable     := 1
-    dutParser.mStage(i).control.controlInterface.biasEnable    := 1
+    dutParser.mStage(i).control.controlInterface.biasEnable    := 0
     dutParser.mStage(i).control.controlInterface.inputStage    := (if (i == 0) 1 else 0)
     dutParser.mStage(i).stage.ri.tapGain                       := gain
     dutParser.mStage(i).stage.ri.biasGain                      := gain

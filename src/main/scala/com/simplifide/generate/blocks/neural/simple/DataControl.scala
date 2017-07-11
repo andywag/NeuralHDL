@@ -62,7 +62,7 @@ case class DataControl(override val name:String,
   /- ("Control signals for the Read/Write Fifo Operation")
   val fifoEmpty           = signal("fifo_empty")
   val fifoEmptyReg        = signal("fifo_empty_reg",REG)
-  val fifoInputDepth      = signal("fifo_input_depth",  REG,U(params.inputWidth2))
+  val fifoInputDepth      = signal("fifo_input_depth",  REG,U(params.inputWidth2+1))
   //val fifoReadDepth       = signal("fifo_read_depth",  REG,U(params.inputWidth2))
 
   /- ("Fifo Controls - Used to Gate Inputs")
@@ -89,7 +89,8 @@ case class DataControl(override val name:String,
   val data_active      = register("data_active",WIRE)(params.inputLength1 + 6)
   val outputValid      = register("output_valid",WIRE)(params.inputLength1 + 6)
 
-  data_start(0)        := (readFinish | (loadInputDone & ~errorUpdateMode & ~errorUpdateLatch)) & (fifoInputDepth >= 0)
+  data_start(0)        := (readFinish | (loadInputDone & ~errorUpdateMode & ~errorUpdateLatch & readWidthCount === 0)) & (fifoInputDepth >= 0)
+  //data_start(0)        := (readFinish) & (fifoInputDepth >= 0)
 
   val dup = register(ErrorToData.errorUpdateMode)(3)
   // Data Active is either data is ready or error data is ready
@@ -108,6 +109,7 @@ case class DataControl(override val name:String,
   gateValidE := errorUpdateLatch & (readWidthCount >= (loadLength - params.inputLength2 )) & (readWidthCount < (loadLength))
   if (params.inputLength2 < params.inputLength1) gateValid  := gateValidD | gateValidE
   else gateValid  := 1
+  //gateValid := 1
 
   val full_active      = (data_active | data_active(params.inputLength1))
 

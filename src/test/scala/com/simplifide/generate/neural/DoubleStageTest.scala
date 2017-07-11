@@ -16,6 +16,7 @@ class DoubleStageTest extends BasicNetworkTest {
   override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.IDENT_TYPE
   override val plot:Boolean = true
   override val failThreshold = Some(0.1)
+  //override def waveformEnable = true
 
   /** Design Under Test */
 

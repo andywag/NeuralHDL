@@ -97,4 +97,4 @@ graph LR
 
 * [Results](results/DoubleStage.jpynb)
 * [Output Directory - Generated Source and Results](../../tests/hidden)
-* [Block Generator](../src/test/scala/com/simplifide/generate/neural/HiddenStageTest.scala)
+* [Block Generator](../../src/test/scala/com/simplifide/generate/neural/HiddenStageTest.scala)
