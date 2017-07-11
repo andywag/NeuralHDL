@@ -14,6 +14,19 @@ The data memory contains the input data to the stage. This information is requir
 1. The memory read requires one data sample per stage calculation. 
 1. The depth of the memory is a function of the maximum error feedback time and throughput requirements
 
+| Address       | Data         |
+| ------------- |:------------:| 
+| 0             | Data0        |  
+| 1             | Data1        |  
+| K             | DataK        | 
+| K+1           | 0            | 
+| ...           | 0            | 
+| N             | Data(K+1)    |
+| ...           | ...          |
+
+The current memory is stored inefficiently using the scheme above where K is the length of the input data and N is th
+
+
 ## Bias Memory
 
 The bias memory contains the bias values from the network. 
