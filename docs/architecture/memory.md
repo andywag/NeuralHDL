@@ -24,11 +24,12 @@ The data memory contains the input data to the stage. This information is requir
 | N             | Data(K+1)    |
 | ...           | ...          |
 
-The current memory is stored inefficiently using the scheme above where K is the length of the input data and N is th
+The current memory is stored inefficiently using the mapping above where 
 
-| Address | 0    | 1    | K    | K+1 | ... | N      | ... | 
-| Data    | D(0) | D(1) | D(K) | 0   | 0   | D(K+1) | ... |
+* K is the length of the input data vector
+* N is ceil(log2(K))
 
+This mapping is innefficient but greatly eases both the addressing design as well as the debugging. This is used as a prototyping test and will be left as a mode for debug as well. 
 
 ## Bias Memory
 
