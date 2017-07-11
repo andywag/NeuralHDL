@@ -10,35 +10,6 @@ The results of a simple example project can be seen below.
 
 [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
 
-## Basic Operation
-
-A simple stage in caffe which is described in JSON is shown below. 
-
-```json
-layer {
-  name: "conv1"
-  type: "Convolution"
-  param { lr_mult: 1 }
-  param { lr_mult: 2 }
-  convolution_param {
-    num_output: 20
-   }
-  bottom: "data"
-  top: "conv1"
-}
-```
-
-A similar description for a network stage for this tool is shown below.  
-
-```scala
-NeuralStageInfo((dataLength,outputLength), // # Inputs, # Outputs
-    dataFill,                              // Fifo Depth for Input
-    numberNeurons,                         // Number of MAC Units to Share
-    errorFill,                             // Fifo Depth for Error Feedback
-    outputFill)                            // Fifo Depth for expected values
-
-```
-
 
 
 
