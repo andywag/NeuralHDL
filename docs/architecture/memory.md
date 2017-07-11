@@ -46,6 +46,16 @@ This is a parallel memory which has an output width which is a multiple of the n
 1. The memory requires one parallel read (number of neurons width) for each operation of the neural stage
 1. The depth of the memory is equivalent to the size of the taps plus the required error storage. 
 
+| Address       | Memory0      | Memory 1     | ...          | Memory K |
+| ------------- |:------------:|------------- |:------------:|---------:| 
+| 0             | H(0,0)       | H(0,1)       | ...          | H(0,K)   |
+| 1             | H(1,0)       | H(1,1)       | ...          | H(1,K)   |
+| 2             | H(2,0)       | H(2,1)       | ...          | H(2,K)   |
+| K             | H(K,0)       | H(K,1)       | ...          | H(K,K)   |
+| K+1           | E(0,0)       | E(0,1)       | ...          | E(0,K)   |
+| K+2           | E(1,0)       | E(1,1)       | ...          | E(1,K)   |
+| ...           | ...          | ...          | ...          | ...      |
+
 The memory is assumed to have read/write access to individaul taps as well as the full set of parallel taps. This is used for 
 
 1. Loading the Error into memory
