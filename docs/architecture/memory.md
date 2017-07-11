@@ -29,7 +29,7 @@ The current memory is stored inefficiently using the mapping above where
 * K is the length of the input data vector
 * N is ceil(log2(K))
 
-This mapping is innefficient but greatly eases both the addressing design as well as the debugging. This is used as a prototyping test and will be left as a mode for debug as well. 
+`This mapping is innefficient but greatly eases both the addressing design as well as the debugging. This is used as a prototyping test and will be left as a mode for debug as well. `
 
 ## Bias Memory
 
