@@ -43,7 +43,7 @@ Control-->Memory
 
 ## Operation
 
-The operation of the network is straightforward and does not have any external control. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
+The operation of the network is self contained. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
 
 1. Error Back Propagation
 1. Tap/Bias Updates
