@@ -26,6 +26,9 @@ The data memory contains the input data to the stage. This information is requir
 
 The current memory is stored inefficiently using the scheme above where K is the length of the input data and N is th
 
+| Address | 0    | 1    | K    | K+1 | ... | N      | ... | 
+| Data    | D(0) | D(1) | D(K) | 0   | 0   | D(K+1) | ... |
+
 
 ## Bias Memory
 
