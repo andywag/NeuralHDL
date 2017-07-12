@@ -1,6 +1,6 @@
 # Basic Examples
 
-The purpose of the examples in this section are to prove out the hardware design created by generated and not to delve into the signal processings of the network. All of the networks created use the same basic infrastructure which is generalized to test different settings in terms of inputs and outputs. The examples also contain building block tests which are used to verify the functionallity of the network by testing each stage individually. The testing starts with a single stage and then is expanded to larger networks. 
+The purpose of the examples in this section are to prove out the hardware design created by generated and not delve into the signal processings of the network. All of the networks created use the same basic infrastructure which are generalized to test network configurations. The examples also contain building block tests which are used to verify the functionallity of the network by testing each stage individually. The examples shown below starts with a single stage network and then is expanded to larger networks. 
 
 The first test created was based on a Braille example shown below so many of the tests use configurations based on these sizes. This example was chosen since it was not based on a power of 2 and had unity outputs which made debugging of the design more straightforward. 
 
@@ -55,6 +55,7 @@ This is a simple test case which contains a network with 2 fully connected stage
 1. The first stage has 6 inputs and 12 outputs and uses 6 MAC units
 1. The second stage has 12 inputs and 6 outputs and uses 6 MAC units
 
+
 ```mermaid
 graph LR
     Stage0[Stage - 6x12]
@@ -76,9 +77,11 @@ graph LR
 
 This is the first realistic test case which contains a 3 stage network with 12 hidden neurons.
 
+
 1. The first stage has 6 inputs and 12 outputs and uses 6 MAC units
 1. The second stage contains 12 inputs and 12 outputs and uses 6 MAC units
 1. The third stage has 12 inputs and 6 outputs and uses 6 MAC units
+
 
 ```mermaid
 graph LR
