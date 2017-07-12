@@ -1,6 +1,6 @@
 # Memory Layout 
 
-The memory for each stage is split into 3 separate memories based on their size and frequency of use. Different memory architectures can be selected depending on the frequency of use and properites of the memories. This architecture assumes a memory running at the same rate as the neural stage and a dual port memory.
+The memory for each stage is split into 3 separate memories based on their size and frequency of use. This architecture assumes a dual port memory running at the same rate as the neural stage.  Different memory architectures can be selected depending on the frequency of use and properites of the memories as well as the properties of the data stored. 
 
 1. Data Memory
 1. Bias Memory
@@ -14,6 +14,7 @@ The data memory contains the input data to the stage. This information is requir
 1. The memory read requires one data sample per stage calculation. 
 1. The depth of the memory is a function of the maximum error feedback time and throughput requirements
 
+
 | Address       | Data         |
 | ------------- |:------------:| 
 | 0             | Data0        |  
@@ -24,6 +25,7 @@ The data memory contains the input data to the stage. This information is requir
 | N             | Data(K+1)    |
 | ...           | ...          |
 
+
 The current memory is stored inefficiently using the mapping above where 
 
 * K is the length of the input data vector
@@ -33,15 +35,19 @@ The current memory is stored inefficiently using the mapping above where
 
 ## Bias Memory
 
+
 The bias memory contains the bias values from the network. 
+
 
 1. The memory read requires one data sample per stage calculation. 
 1. The depth of this memory is equivalent to the amount of neurons in the stage
 
+
 The use of the bias term occurs at a later time than the data operation so there is the potential to delay the data with the read and write addresses. The effectiveness of this is limited somewhat by the bias update and bias use having different pipeline delays. 
 
+
 ## Tap and Error Memory
-This is a parallel memory which has an output width which is a multiple of the number of MAC units used in the stage. The tap memory contains both the tap values for the stage as well as the error which simplifies the interface to the stage and reduces the memory requirements. 
+The tap memory is a parallel memory which has an output width which is a multiple of the number of MAC units used in the stage. The tap memory contains both the tap values for the stage as well as the error which simplifies the interface to the stage and reduces the memory requirements.
 
 1. The memory requires one parallel read (number of neurons width) for each operation of the neural stage
 1. The depth of the memory is equivalent to the size of the taps plus the required error storage. 
@@ -59,7 +65,7 @@ The memory is assumed to have read/write access to individaul taps as well as th
 | K+2           | E(1,0)       | E(1,1)       | ...          | E(1,K)   |
 | ...           | ...          | ...          | ...          | ...      |
 
-The contents of the tap and error memory is shown above. The memory contains a reshaped version of the taps with the row width equal to the number of neurons. 
+The contents of the tap and error memory is shown above. The memory contains a reshaped version of the taps with the row width equal to the number of neurons. This internal format makes operation of the network more straightforward. 
 
 
 
