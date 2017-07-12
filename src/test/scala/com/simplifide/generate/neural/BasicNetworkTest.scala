@@ -79,14 +79,23 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
 
+  lazy val tapEnable  = List.tabulate(information.size)(x => 1)
+  lazy val biasEnable = List.tabulate(information.size)(x => 1)
+  lazy val disableNonlinearity = false
+
   // Setup controls for the stages
   for (i <- 0 until information.size) {
-    dutParser.mStage(i).control.controlInterface.tapEnable     := 1
-    dutParser.mStage(i).control.controlInterface.biasEnable    := 0
+    dutParser.mStage(i).control.controlInterface.tapEnable     := tapEnable(i)
+    dutParser.mStage(i).control.controlInterface.biasEnable    := biasEnable(i)
     dutParser.mStage(i).control.controlInterface.inputStage    := (if (i == 0) 1 else 0)
     dutParser.mStage(i).stage.ri.tapGain                       := gain
     dutParser.mStage(i).stage.ri.biasGain                      := gain
-    dutParser.mStage(i).stage.ri.disableNonlinearity           := (if (i == information.size-1) 1 else 0)
+    if (disableNonlinearity) {
+      dutParser.mStage(i).stage.ri.disableNonlinearity           := 1
+    }
+    else {
+      dutParser.mStage(i).stage.ri.disableNonlinearity           := (if (i == information.size-1) 1 else 0)
+    }
 
     dutParser.mStage(i).control.controlInterface.loadLength   := information(i).dataLength-1
     dutParser.mStage(i).control.controlInterface.loadDepth    := information(i).dataFill-1
@@ -101,7 +110,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     dutParser.interfaces(i).errorRdy ---->(s"$dataLocation/rtl_error$i",Some(topPathName))
     dutParser.mStage(i).memory.biasStructW ---->(s"$dataLocation/rtl_bias$i",Some(stagePath(i)))
     dutParser.mStage(i).memory.tapStructW ---->(s"$dataLocation/rtl_tap$i",Some(stagePath(i)))
-    dutParser.interfaces(0).outRdy ---->(s"$dataLocation/rtl_st$i",Some(topPathName))
+    dutParser.interfaces(i).outRdy ---->(s"$dataLocation/rtl_st$i",Some(topPathName))
   }
 
   // Output signals

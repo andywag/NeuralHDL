@@ -88,7 +88,7 @@ class Single8x8 extends Ident(8) {
 
 }
 
-class Single10x10 extends Ident(11) {
+class Single12x12 extends Ident(12) {
   //override lazy val dataFill      = 20
   //override lazy val errorFill     = 20
   //override lazy val outputFill    = 20

@@ -5,7 +5,7 @@ import com.simplifide.generate.blocks.neural.NeuralStageInfo
 /**
   * Created by andy on 7/10/17.
   */
-class TwoStageTest extends BasicNetworkTest{
+class TwoStageTest() extends BasicNetworkTest{
   /** Clock for the testbench */
   override def blockName: String = "two"
 
@@ -42,6 +42,13 @@ class TwoStageTest extends BasicNetworkTest{
 class Two6x6x6 extends TwoStageTest {
   override def blockName: String = "two6x6"
   override lazy val dimensions = Seq((6,6),(6,6))
-  override def waveformEnable = true
+  //override def waveformEnable = true
+  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
+
+  override lazy val tapEnable = List(1,0)
+  override lazy val biasEnable = List(1,0)
+  override lazy val gain = 3
+  override def getTestLength = BasicTestInformation.tapLength*512
+  override lazy val disableNonlinearity = true
 
 }
