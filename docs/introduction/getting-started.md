@@ -1,6 +1,6 @@
 # Getting Started
 
-The code generator is writtin in Scala and uses SBT as a build tool.  
+The code generator is written in Scala and uses SBT as a build tool. To get started you need to download and install the following tools. For limited use in generating cores without simulation only SBT or IDEA is required.   
 
 * [SBT](http://www.scala-sbt.org/) : Build tool to create cores and tests
 * [Jetbrains IDEA](https://www.jetbrains.com/idea/) : Integrated Development Environment for editting
@@ -14,7 +14,7 @@ The resulting designs are simulated and verified using open source tools.
 
 Both the generation and testing of the resulting cores is handled by scalaTest. 
 
-* sbt test-only `test-name` --- `sbt test-only com.simplifide.generate.neural.DoubleStageTest`
+* sbt test-only `test-name` --- `sbt test-only com.simplifide.generate.neural.TwoStageTest`
 
 An example section of the test code is shown below. 
 
