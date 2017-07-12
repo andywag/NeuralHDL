@@ -63,7 +63,7 @@ def inIdent(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
   if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0)
 
 def getTapIdent(a:Int,b:Int) = {
-  Nd4j.create(inIdent(a,b))
+  Nd4j.create(inIdent(a,b)).mul(.5)
 }
 
 def getTrainIdent(a:Int,b:Int) = {

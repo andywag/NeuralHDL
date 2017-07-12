@@ -79,10 +79,10 @@
   wire                  [31:0]  bias_int_rd_data  ;  // <32,0>
   wire                  [3:0]   bias_wr_address   ;  // <4,0>
   wire                  [31:0]  data_int_rd_data  ;  // <32,0>
-  wire                  [5:0]   data_read_addr    ;  // <6,0>
+  wire                  [6:0]   data_read_addr    ;  // <7,0>
   wire                          data_valid        ;  // <1,0>
   wire                  [31:0]  data_value        ;  // <32,0>
-  wire                  [5:0]   data_write_addr   ;  // <6,0>
+  wire                  [6:0]   data_write_addr   ;  // <7,0>
   wire                          err_finish_i      ;  // <1,0>
   wire                  [3:0]   error_count       ;  // <4,0>
   wire                          error_finish_tap  ;  // <1,0>

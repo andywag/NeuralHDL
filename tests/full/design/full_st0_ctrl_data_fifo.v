@@ -32,10 +32,10 @@
   output                        active_start_d,
   output                [3:0]   bias_address,
   output                [3:0]   bias_wr_address,
-  output                [5:0]   data_read_addr,
+  output                [6:0]   data_read_addr,
   output                        data_valid,
   output                [31:0]  data_value,
-  output                [5:0]   data_write_addr,
+  output                [6:0]   data_write_addr,
   output                        err_finish_i,
   output                        full_st0_ctrl_data_fifo_data_ready,
   output                        load_finish,
@@ -91,8 +91,8 @@
   reg                           error_update_mode_r2  ;  // <1,0>
   reg                           error_update_mode_r3  ;  // <1,0>
   reg                           fifo_empty_reg    ;  // <1,0>
-  reg                   [3:0]   fifo_input_depth  ;  // <4,0>
-  reg                   [2:0]   load_depth_count  ;  // <3,0>
+  reg                   [4:0]   fifo_input_depth  ;  // <5,0>
+  reg                   [3:0]   load_depth_count  ;  // <4,0>
   reg                   [2:0]   load_width_count  ;  // <3,0>
   reg                           output_valid_r1   ;  // <1,0>
   reg                           output_valid_r10  ;  // <1,0>
@@ -106,8 +106,8 @@
   reg                           output_valid_r7   ;  // <1,0>
   reg                           output_valid_r8   ;  // <1,0>
   reg                           output_valid_r9   ;  // <1,0>
-  reg                   [2:0]   read_depth_count  ;  // <3,0>
-  reg                   [2:0]   read_error_count  ;  // <3,0>
+  reg                   [3:0]   read_depth_count  ;  // <4,0>
+  reg                   [3:0]   read_error_count  ;  // <4,0>
   reg                           read_state_count  ;  // <1,0>
   reg                   [2:0]   read_width_count  ;  // <3,0>
   reg                   [3:0]   tap_address_r1    ;  // <4,0>
@@ -256,14 +256,14 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
   if (reset) begin
-    load_depth_count <= 3'd0;
+    load_depth_count <= 4'd0;
   end
   else if (load_input_done) begin 
     if ((load_depth_count == load_depth)) begin
-      load_depth_count <= 3'd0;
+      load_depth_count <= 4'd0;
     end
     else begin
-      load_depth_count <= load_depth_count[2:0] + 3'd1;
+      load_depth_count <= load_depth_count[3:0] + 4'd1;
     end
   end
 end
@@ -282,17 +282,17 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
   if (reset) begin
-    fifo_input_depth <= 4'd0;
+    fifo_input_depth <= 5'd0;
   end
   else begin
     if ((load_input_done & error_finish_tap)) begin
       fifo_input_depth <= fifo_input_depth;
     end
     else if (load_input_done) begin 
-      fifo_input_depth <= fifo_input_depth[3:0] + 4'd1;
+      fifo_input_depth <= fifo_input_depth[4:0] + 5'd1;
     end
     else if (error_finish_tap) begin 
-      fifo_input_depth <= fifo_input_depth[3:0] - 4'd1;
+      fifo_input_depth <= fifo_input_depth[4:0] - 5'd1;
     end
   end
 end
@@ -304,8 +304,8 @@ assign data_start = ((read_finish | (((load_input_done & ~error_update_mode) & ~
 assign data_active = ((((fifo_input_depth > 'd0) & ~(fifo_empty_reg | fifo_empty)) | error_update_mode) | error_update_latch);
 assign temp = ((fifo_input_depth > 'd0) & ~(fifo_empty_reg | fifo_empty));
 assign output_valid = (~error_update_latch & temp);
-assign gate_valid_d = (~error_update_latch & (read_width_count >= load_length - 'd6 + 'd1));
-assign gate_valid_e = ((error_update_latch & (read_width_count >= load_length - 'd6)) & (read_width_count < load_length));
+assign gate_valid_d = (~error_update_latch & (read_width_count >= load_length - 'd12 + 'd1));
+assign gate_valid_e = ((error_update_latch & (read_width_count >= load_length - 'd12)) & (read_width_count < load_length));
 assign gate_valid = 'd1;
 assign update_counter = ((data_active | data_active_r6) & (~error_update_first | (~error_update_latch & temp)));
 always @(posedge clk) begin
@@ -331,7 +331,7 @@ always @(posedge clk) begin
     end
   end
 end
-always @* err_finish <= (error_update_count == 'd5);
+always @* err_finish <= (error_update_count == 'd11);
 always @(posedge clk) begin
   if (reset) begin
     error_update_count <= 3'd0;
@@ -347,27 +347,27 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
   if (reset) begin
-    read_depth_count <= 3'd0;
+    read_depth_count <= 4'd0;
   end
   else if ((state_finish & output_valid)) begin 
     if ((read_depth_count == load_depth)) begin
-      read_depth_count <= 3'd0;
+      read_depth_count <= 4'd0;
     end
     else begin
-      read_depth_count <= read_depth_count[2:0] + 3'd1;
+      read_depth_count <= read_depth_count[3:0] + 4'd1;
     end
   end
 end
 always @(posedge clk) begin
   if (reset) begin
-    read_error_count <= 3'd0;
+    read_error_count <= 4'd0;
   end
   else if (((state_finish & ~error_tap_update_out) & error_update_latch)) begin 
     if ((read_error_count == load_depth)) begin
-      read_error_count <= 3'd0;
+      read_error_count <= 4'd0;
     end
     else begin
-      read_error_count <= read_error_count[2:0] + 3'd1;
+      read_error_count <= read_error_count[3:0] + 4'd1;
     end
   end
 end

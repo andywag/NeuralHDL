@@ -97,7 +97,7 @@ object MemoryStruct {
     val inter       = SignalTrait(createName("inter"),opType)
     val interFirst  = SignalTrait(createName("inter_first"),opType)
 
-    val addressSubSize  = if (memoryRepeat.length > 1) math.ceil(math.log(memoryRepeat(1)/math.log(2.0))).toInt else 1
+    val addressSubSize  = if (memoryRepeat.length > 1) math.ceil(math.log(memoryRepeat(1)/math.log(2.0))).toInt+1 else 1
     val subAddress = SignalTrait(createName("sub_addr"),opType,FixedType.unsigned(addressSubSize,0))
     val subData    = SignalTrait(createName("sub_data"),opType,FixedType.unsigned(memoryRepeat(0),0))
 

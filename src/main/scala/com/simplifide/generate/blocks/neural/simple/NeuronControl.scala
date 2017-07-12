@@ -66,7 +66,7 @@ case class NeuronControl[T](override val name:String,
 
   // Create the Data Input FIFO
   val params = DataControl.Params(info.dataLength,
-    info.dataFill,
+    info.tapDimension._2,
     info.stateLength,
     info.tapAddressLength,
     info.errorFill,

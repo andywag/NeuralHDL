@@ -62,6 +62,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   val expectedSize = dataData._2.length()
 
 
+
   override val dutParser = new NeuralNetwork(blockName, information,
     topInterface)
   override val dut: NewEntity = dutParser.createEntity
