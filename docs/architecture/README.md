@@ -4,7 +4,7 @@ There are many different architectural tradeoffs which are possible for neural n
 
 # Top Level Architecture 
 
-The top level architecture for this design consists of a set of a top level which contains a set of independent stages attached using FIFOs on the block input path and streaming interfaces on the outputs. This choice was selected to avoid the complexity of having the internal neural stages support different operations in parallel. Each stage does the complete feedforward operation, tap update or back propagation work until complete. The pipeline stages and timing differ between operations making handling parallelism difficult. 
+The top level architecture for this design consists of a set of independent stages attached using FIFOs on the block input path and streaming interfaces on the outputs. This choice was selected to avoid the complexity of having the internal neural stages support different operations in parallel. Each stage does the complete feedforward operation, tap update or back propagation work until complete.  
 
 A basic block diagram is shown below. 
 
@@ -18,15 +18,19 @@ stageN-->|error|stage1
 stageN-->|output|error
 error-->|error|stageN
 
+
 Each block outputs the results of the feedforward operation and inputs the error from the future block in the chain for use in back-propagation mode for the network. 
+
 
 ## Main Building Block
 
 The building block for the design is shown in the block diagram below at a high level below. The block consists of 
 
+
 * Fifos for the inputs (Input Data forward, Error Data Backward)
 * Memories to store the state of the model
 * Core Neuron Logic which contains the MAC, Nonlinearity and required glue logic
+
 
 ```mermaid
 graph LR;
@@ -43,7 +47,7 @@ Control-->Memory
 
 ## Operation
 
-The operation of the network is self contained. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
+The operation of each stage of the network is self contained. Each stage of the network does 3 basic operations which are done using the same hardware and are time multiplexed based on the ordering below. 
 
 1. Error Back Propagation
 1. Tap/Bias Updates
