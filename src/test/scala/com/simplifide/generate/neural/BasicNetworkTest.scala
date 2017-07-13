@@ -26,6 +26,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   val plot:Boolean = false
   val failThreshold:Option[Double] = None
   lazy val gain:Int = 3
+  lazy val biasGain:Int = gain
 
   val information:Seq[NeuralStageInfo] = getInformation
 
@@ -58,7 +59,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
-  val inputSize = dataData._1.length()
+  val inputSize    = dataData._1.length()
   val expectedSize = dataData._2.length()
 
 
@@ -89,7 +90,7 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     dutParser.mStage(i).control.controlInterface.biasEnable    := biasEnable(i)
     dutParser.mStage(i).control.controlInterface.inputStage    := (if (i == 0) 1 else 0)
     dutParser.mStage(i).stage.ri.tapGain                       := gain
-    dutParser.mStage(i).stage.ri.biasGain                      := gain
+    dutParser.mStage(i).stage.ri.biasGain                      := biasGain
     if (disableNonlinearity) {
       dutParser.mStage(i).stage.ri.disableNonlinearity           := 1
     }

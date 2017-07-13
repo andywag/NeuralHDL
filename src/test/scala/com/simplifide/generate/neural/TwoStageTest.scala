@@ -25,11 +25,11 @@ class TwoStageTest() extends BasicNetworkTest{
   lazy val outputFill    = 3
 
 
-  lazy val numberNeurons = 6
+  lazy val numberNeurons = Seq(6,6)
   lazy val dimensions = Seq((6,12),(12,6))
 
   def getInformation = dimensions.zipWithIndex.map(x => {
-    NeuralStageInfo(x._1,dataFill,numberNeurons,errorFill,
+    NeuralStageInfo(x._1,dataFill,numberNeurons(x._2),errorFill,
       outputFill,dataLocation,x._1._2,
       Some(s"${dataLocation}/init_taps${x._2}")
     )
@@ -41,14 +41,36 @@ class TwoStageTest() extends BasicNetworkTest{
 
 class Two6x6x6 extends TwoStageTest {
   override def blockName: String = "two6x6"
-  override lazy val dimensions = Seq((6,6),(6,6))
+  override lazy val numberNeurons = Seq(12,6)
+  override lazy val dimensions = Seq((12,12),(12,6))
   //override def waveformEnable = true
+  //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
+
+  override lazy val tapEnable = List(1,1)
+  override lazy val biasEnable = List(1,1)
+  override lazy val gain = 3
+  override def getTestLength = BasicTestInformation.tapLength*2048
+  override lazy val disableNonlinearity = false
+
+}
+
+class Three6x6x6 extends TwoStageTest {
+
+  override lazy val dataFill      = 16
+  override lazy val errorFill     = 14
+  override lazy val outputFill    = 13
+
+  override def blockName: String = "three6x6"
+  override lazy val numberNeurons = Seq(6,12,6)
+  override lazy val dimensions = Seq((6,12),(12,12),(12,6))
+  override def waveformEnable = true
   override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
 
-  override lazy val tapEnable = List(1,0)
-  override lazy val biasEnable = List(1,0)
+  override lazy val tapEnable = List(0,0,0)
+  override lazy val biasEnable = List(0,0,0)
   override lazy val gain = 3
-  override def getTestLength = BasicTestInformation.tapLength*512
+  override lazy val biasGain = 3
+  override def getTestLength = BasicTestInformation.tapLength*256
   override lazy val disableNonlinearity = true
 
 }

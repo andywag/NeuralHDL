@@ -48,12 +48,8 @@ case class OutputCtrl(override val name:String,
   signal(errorIntRdy.reverse)
 
   val enable_feedback = signal(parent.tapEnable.asInput)
-  //val enable_feedback     = signal("enable_feedback")
   val enable_bias_feedback = signal(parent.biasEnable.asInput)
-  //val enable_bias_feedback = signal("enable_bias_feedback")
 
-  //enable_feedback      := 1
-  //enable_bias_feedback := 1
 
   val tapErrorLength        = signal("error_tap_length",INPUT,U(info.tapAddressWidth,0))
 
@@ -108,7 +104,6 @@ case class OutputCtrl(override val name:String,
   /- ("Output Driving Control")
   parent.parent.stage.stateErrorBack := ErrorControl.errorTapUpdateOut
   parent.parent.stage.first       := dataToOutput.activeStartD
-  parent.parent.stage.updateErrorFirst := dataToOutput.errFinish
   parent.parent.stage.dataIn(0)   := parent.parent.memory.dataBank.input.rdData
   parent.parent.stage.biasIn(0)   := parent.parent.memory.biasBank.input.rdData
   for (i <- 0 until info.numberNeurons) {
@@ -136,12 +131,21 @@ case class OutputCtrl(override val name:String,
   biasMem.ctrl.wrVld     := enable_bias_feedback & rdAddressVldDelay(4)
   biasMem.wrData         := parent.parent.stage.dataOutBias
 
+  val update = signal("errorUpdateRemove")
+  update := ErrorControl.errorTapUpdateOut & ~ErrorControl.errorUpdateFirst
+  val newErrorUpdate = register(update)(info.tapDimension._2 + 4)
+
 
   /- ("Error Output Control")
   errorInt        := parent.parent.stage.dataOutPre
   val delayFirst = register(dataToOutput.activeStartD)(2)
-  //delayFirst := dataToOutput.activeStartD $at clk
-  errorIntRdy.vld := errorTapUpdateD(10) & ~delayFirst(2)
 
+  //errorIntRdy.vld := errorTapUpdateD(10) & ~delayFirst(2)
+  //parent.parent.stage.updateErrorFirst := dataToOutput.errFinish
+
+  errorIntRdy.vld := newErrorUpdate(info.tapDimension._2 + 4)//errorTapUpdateD(10) & ~delayFirst(2)
+  parent.parent.stage.updateErrorFirst := dataToOutput.errFinishNew
+
+  //  dataToOutput.errFinishNew
 }
 

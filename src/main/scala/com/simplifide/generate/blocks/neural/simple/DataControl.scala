@@ -121,6 +121,8 @@ case class DataControl(override val name:String,
 
   val errFinish    = register("err_finish",  REG)(4)
   errFinish(0)     := (errorUpdateCount === params.inputLength2-1)
+  dataToOutput.errFinishNew     := (errorUpdateCount === 2) & ErrorControl.errorTapUpdateOut
+
   errorUpdateCount := $iff (data_start | errFinish(0)) $then 0 $else_if (updateCounter) $then errorUpdateCount + 1 $at clk
 
   //readDepthCount   := $iff (stateFinish & outputValid(0)) $then readDepthCount + 1 $at clk
@@ -220,10 +222,11 @@ object DataControl {
     val biasAddress    = SignalTrait("bias_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
     val biasWrAddress = SignalTrait("bias_wr_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))
     val errFinish =   SignalTrait("err_finish_i",OpType.Input)
+    val errFinishNew = SignalTrait("err_finish_new",OpType.Input)
 
 
     override val inputs = List(activePre, active, activeNormal, dataValue, dataValid, dataWriteAdd,dataReadAdd,tapAddress,
-      activeStartD, readFinish, biasAddress, biasWrAddress, errFinish)
+      activeStartD, readFinish, biasAddress, biasWrAddress, errFinish, errFinishNew)
 
   }
 

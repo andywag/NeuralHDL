@@ -62,6 +62,15 @@ class Ident(siz:Int) extends SingleStageTest{
   override lazy val numberNeurons = siz
 }
 
+class Multi(siz:(Int,Int)) extends SingleStageTest{
+  override def blockName: String = s"simple${siz._1}_${siz._2}"
+  override lazy val inputLen      = siz._1
+  override def outputLen     = siz._2
+  override lazy val errorLength = siz._2
+  override lazy val numberNeurons = math.min(siz._1,siz._2)
+}
+
+
 class Single6x6 extends Ident(6) {
 
 }
@@ -96,6 +105,14 @@ class Single12x12 extends Ident(12) {
   override def waveformEnable = true
   //override def getTestLength = 256*4
   //override lazy val gain:Int = 0
+
+}
+
+class Single12x6 extends Multi(12,6) {
+
+  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
+  //override def waveformEnable = true
+  override def getTestLength = 256
 
 }
 
