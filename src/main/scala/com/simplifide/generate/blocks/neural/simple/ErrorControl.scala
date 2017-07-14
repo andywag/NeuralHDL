@@ -75,6 +75,9 @@ case class ErrorControl(override val name:String,
   val realErrorFinish = signal("real_error_finish")
   errorTapUpdate  := $iff (inputStage) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
   ErrorControl.errorTapUpdateOut := errorTapUpdate & ~inputStage
+
+  //errorTapUpdate  := $iff (0) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
+  //ErrorControl.errorTapUpdateOut := errorTapUpdate & ~0
   realErrorFinish := errorFinish & errorTapUpdate
 
   /- ("Input Control and Tap Addressiong")

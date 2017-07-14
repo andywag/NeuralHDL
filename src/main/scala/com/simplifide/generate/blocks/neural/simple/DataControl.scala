@@ -44,8 +44,8 @@ case class DataControl(override val name:String,
 
   // Control Parameters for loading the input data and counting
 
-  val readDepthCount  = signal("read_depth_count",  REG,U(params.inputWidth2))
-  val readErrorCount  = signal("read_error_count",  REG,U(params.inputWidth2))
+  val readDepthCount  = signal("read_depth_count",  REG,loadDepth.fixed)
+  val readErrorCount  = signal("read_error_count",  REG,loadDepth.fixed)
 
   //val tapAddress         = signal("tap_address",  REG,U(params.inputWidth1 + params.stateWidth))
 
@@ -53,7 +53,7 @@ case class DataControl(override val name:String,
   // Counter checking the length of the read inputs followed by counter checkign the number of inputs
   /- ("Data Input Burst Counter")
   val loadWidthCount   = signal("load_width_count",REG,U(params.inputWidth1)) // Counter 1 : Width
-  val loadDepthCount    = signal("load_depth_count", REG,U(params.inputWidth2)) // Counter 2 : Depth
+  val loadDepthCount    = signal("load_depth_count", REG,loadDepth.fixed) // Counter 2 : Depth
   val loadInputDone    = signal("load_input_done",WIRE) !-> (loadWidthCount === loadLength)
   loadWidthCount   := $iff (loadInputDone) $then 0 $else_if (input.rdy & input.vld) $then loadWidthCount + 1 $at clk
   ->(Counter.Length(loadDepthCount,loadDepth,Some(loadInputDone)))
@@ -62,7 +62,7 @@ case class DataControl(override val name:String,
   /- ("Control signals for the Read/Write Fifo Operation")
   val fifoEmpty           = signal("fifo_empty")
   val fifoEmptyReg        = signal("fifo_empty_reg",REG)
-  val fifoInputDepth      = signal("fifo_input_depth",  REG,U(params.inputWidth2+1))
+  val fifoInputDepth      = signal("fifo_input_depth",  REG,loadDepth.fixed)
   //val fifoReadDepth       = signal("fifo_read_depth",  REG,U(params.inputWidth2))
 
   /- ("Fifo Controls - Used to Gate Inputs")
@@ -157,9 +157,9 @@ case class DataControl(override val name:String,
     (errorUpdateLatch & ~outputValid(0)) ? Operators.Concat(readErrorCount,readWidthCount) :: Operators.Concat(readDepthCount,readWidthCount)
 
   loadFinish  := readFinish
-  dataReady   := (fifoInputDepth != loadDepth )
-  val test = signal("test")
-  test := (fifoInputDepth != loadDepth )
+  dataReady   := (fifoInputDepth != (loadDepth) )
+  //val test = signal("test")
+  //test := (fifoInputDepth != loadDepth )
 
   /- ("Data Memory Interface")
   dataToOutput.dataValid := input.rdy & input.vld
@@ -207,8 +207,8 @@ object DataControl {
     val active = SignalTrait("active", OpType.Input)
     val activeStart = SignalTrait("active_start", OpType.Input)
     val activeStartD = SignalTrait("active_start_d", OpType.Input)
-    val dataWriteAdd = SignalTrait("data_write_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2))
-    val dataReadAdd = SignalTrait("data_read_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2))
+    val dataWriteAdd = SignalTrait("data_write_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2+1))
+    val dataReadAdd = SignalTrait("data_read_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2+1))
     val loadFinish = SignalTrait("load_finish", OpType.Input)
     val dataReady = SignalTrait("data_ready", OpType.Input)
     val tapAddress = SignalTrait("tap_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))

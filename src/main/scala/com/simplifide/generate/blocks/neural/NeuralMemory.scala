@@ -24,6 +24,13 @@ case class NeuralMemory(override val name:String,
 
   override def createBody() {}
 
+  def logCeil(input:Int):Int =
+     math.pow(2.0,math.ceil(math.log(input)/math.log(2.0))).toInt
+
+  def logCeil(i:(Int,Int)):(Int,Int) = (logCeil(i._1),logCeil(i._2))
+
+  val internalTapDim:(Int,Int) = (logCeil(dimensions.tapDim._1),logCeil(dimensions.tapDim._2))
+
   //signal(clk.allSignals(INPUT))
   //signal()
 
@@ -33,11 +40,12 @@ case class NeuralMemory(override val name:String,
 
 
   val tapWidth  = Array(dimensions.memWidth,dimensions.neuronDepth)
-  val tapDim    = Array(dimensions.tapDim._1 + info.errorFill,dimensions.tapDim._2/dimensions.neuronDepth)
+  val tapDim    = Array(internalTapDim._1 + info.errorFill,internalTapDim._2/dimensions.neuronDepth)
+
 
   val tapStructW  = MemoryStruct("tap_int",tapWidth,tapDim)
-  val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._2))
-  val dataStructW = MemoryStruct("data_int",Array(dimensions.memWidth,1),Array(dimensions.tapDim._1,dimensions.dataDepth))
+  val biasStructW = MemoryStruct("bias_int",Array(dimensions.memWidth,1),Array(internalTapDim._2))
+  val dataStructW = MemoryStruct("data_int",Array(dimensions.memWidth,1),Array(internalTapDim._1,dimensions.dataDepth))
 
   val tapBank = MemoryBank(appendName("tap"),tapStructW, info.tapLocation)
   val biasBank = MemoryBank(appendName("bias"),biasStructW)

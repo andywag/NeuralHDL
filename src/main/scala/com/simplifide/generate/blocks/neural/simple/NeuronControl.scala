@@ -10,6 +10,7 @@ import com.simplifide.generate.parser.EntityParser
 import com.simplifide.generate.signal.sv.ReadyValid.ReadyValidInterface
 import com.simplifide.generate.signal.sv.SignalInterface
 import com.simplifide.generate.signal.{FixedType, OpType, SignalTrait}
+import com.simplifide.generate.util.WidthUtil
 
 /**
   * Created by andy on 5/26/17.
@@ -64,9 +65,12 @@ case class NeuronControl[T](override val name:String,
   //
 
 
+  val dim1 = info.dataLength//WidthUtil.logCeil()
+  val dim2 = info.tapDimension._2//WidthUtil.logCeil(info.tapDimension._2)
+
   // Create the Data Input FIFO
-  val params = DataControl.Params(info.dataLength,
-    info.tapDimension._2,
+  val params = DataControl.Params(dim1,
+    dim2,
     info.stateLength,
     info.tapAddressLength,
     info.errorFill,
