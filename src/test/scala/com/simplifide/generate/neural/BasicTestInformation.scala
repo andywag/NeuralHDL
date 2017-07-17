@@ -60,10 +60,13 @@ val trainingData =
 """
 
 def inIdent(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
-  if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0)
+  if (y == x) (if (x % 2 == 0) 1.0 else 1.0) else 0.0)
 
-def getTapIdent(a:Int,b:Int) = {
-  Nd4j.create(inIdent(a,b)).mul(.5)
+def inInvIdent(a:Int,b:Int)  = Array.tabulate(a,b)((x,y) =>
+    if (y == x) (if (x % 2 == 0) 1.0 else -1.0) else 0.0)
+
+def getTapIdent(a:Int,b:Int, gain:Double = .5) = {
+  Nd4j.create(inIdent(a,b)).mul(gain)
 }
 
 def getTrainIdent(a:Int,b:Int) = {
@@ -75,8 +78,8 @@ def getTrainIdent(a:Int,b:Int) = {
 
   def getTrainIdent2(a:Int,b:Int) = {
 
-    val input =  Nd4j.create(inIdent(a,a))
-    val output = Nd4j.create(inIdent(a,b))
+    val input =  Nd4j.create(inInvIdent(a,a))
+    val output = Nd4j.create(inInvIdent(a,b))
     (input,output)
   }
 
@@ -93,12 +96,12 @@ def getTrainIdent(a:Int,b:Int) = {
     })
     */
   val trainingData1 = List(
-    Array(1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+    /*Array(1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
     Array(0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0),
     Array(0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0),
     Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0),
     Array(0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
-    Array(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
+    Array(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),*/
   Array(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
   Array(1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0),
   Array(1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0),
@@ -228,8 +231,8 @@ def getTrainIdent(a:Int,b:Int) = {
   }
 
 
-  def getRandomTaps(x:Int, y:Int) = {
-    val input =  Nd4j.randn(x,y).mul(.25)
+  def getRandomTaps(x:Int, y:Int, gain:Double = 1.0) = {
+    val input =  Nd4j.randn(x,y).mul(gain)
     input
   }
 

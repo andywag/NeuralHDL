@@ -13,7 +13,7 @@ import com.simplifide.generate.signal.sv.SignalInterface
 /**
   * Created by andy on 6/8/17.
   */
-case class DataControl(override val name:String,
+case class  DataControl(override val name:String,
                        params:DataControl.Params,
                        parent:NeuronControl[_],
                        dataToOutput: DataToOutput,
@@ -89,7 +89,11 @@ case class DataControl(override val name:String,
   val data_active      = register("data_active",WIRE)(params.inputLength1 + 6)
   val outputValid      = register("output_valid",WIRE)(params.inputLength1 + 6)
 
-  data_start(0)        := (readFinish | (loadInputDone & ~errorUpdateMode & ~errorUpdateLatch & readWidthCount === 0)) & (fifoInputDepth >= 0)
+  // FIXME : The initial condition is only required at startup. Disable for now because it causes other issues
+  // during steady state
+  val cond = (loadInputDone & ~errorUpdateMode & ~errorUpdateLatch & (readWidthCount === 0) & (fifoInputDepth <= 0))
+  data_start(0)        := (readFinish | cond) & (fifoInputDepth >= 0)
+
   //data_start(0)        := (readFinish) & (fifoInputDepth >= 0)
 
   val dup = register(ErrorToData.errorUpdateMode)(3)
@@ -185,13 +189,15 @@ object DataControl {
                     val stateLength: Int,
                     val tapLength: Int,
                     val errorLength: Int,
-                    val numberOfNeurons:Int) {
+                    val numberOfNeurons:Int,
+                    val dataFill:Int) {
 
     val inputWidth1 = logWidth(inputLength1)
     val inputWidth2 = logWidth(inputLength2)
     val stateWidth = logWidth(stateLength)
     val errorWidth = logWidth(errorLength)
     val tapWidth = logWidth(tapLength)
+    val dataFillWidth = logWidth(dataFill)
 
     val dataWidth: Int = 32
 
@@ -207,8 +213,8 @@ object DataControl {
     val active = SignalTrait("active", OpType.Input)
     val activeStart = SignalTrait("active_start", OpType.Input)
     val activeStartD = SignalTrait("active_start_d", OpType.Input)
-    val dataWriteAdd = SignalTrait("data_write_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2+1))
-    val dataReadAdd = SignalTrait("data_read_addr", OpType.Input, U(params.inputWidth1 + params.inputWidth2+1))
+    val dataWriteAdd = SignalTrait("data_write_addr", OpType.Input, U(params.inputWidth1 + params.dataFillWidth))
+    val dataReadAdd = SignalTrait("data_read_addr", OpType.Input, U(params.inputWidth1 + params.dataFillWidth))
     val loadFinish = SignalTrait("load_finish", OpType.Input)
     val dataReady = SignalTrait("data_ready", OpType.Input)
     val tapAddress = SignalTrait("tap_address", OpType.Input, U(params.inputWidth1 + params.stateWidth))

@@ -31,7 +31,7 @@ class SingleStageTest extends BasicNetworkTest {
   override val failThreshold = Some(0.2)
   //override lazy val inputSize = 36
   override val plot = true
-  override lazy val gain = 3
+  override lazy val gain = Seq(3)
 
   lazy val inputLen      = 6
   def outputLen     = 12

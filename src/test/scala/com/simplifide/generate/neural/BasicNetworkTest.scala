@@ -25,8 +25,9 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.IDENT_TYPE
   val plot:Boolean = false
   val failThreshold:Option[Double] = None
-  lazy val gain:Int = 3
-  lazy val biasGain:Int = gain
+  lazy val gain:Seq[Int] = Seq(3)
+  lazy val biasGain:Seq[Int] = gain
+  lazy val tapScale:Seq[Double] = Seq(1.0)
 
   val information:Seq[NeuralStageInfo] = getInformation
 
@@ -42,8 +43,8 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     val t1 = x._1.tapDimension._1
     val t2 = x._1.tapDimension._2
     val taps = tapType match {
-      case BasicNetworkTest.RAND_TAPS  => BasicTestInformation.getRandomTaps(t2,t1)
-      case BasicNetworkTest.IDENT_TAPS => BasicTestInformation.getTapIdent(t2,t1)
+      case BasicNetworkTest.RAND_TAPS  => BasicTestInformation.getRandomTaps(t2,t1,tapScale(x._2))
+      case BasicNetworkTest.IDENT_TAPS => BasicTestInformation.getTapIdent(t2,t1,tapScale(x._2))
     }
     createInitialTaps(taps,s"$dataLocation/init_taps${x._2}",t2,t1)
   })
@@ -53,14 +54,14 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
   val outputLength = information(information.length-1).tapDimension._2
   // Data Generation for the test
   val dataData     = inputType match {
-    case BasicNetworkTest.IDENT_TYPE  =>  BasicTestInformation.getTrainIdent2(inputLength, outputLength)
+    case BasicNetworkTest.IDENT_TYPE  =>  BasicTestInformation.getTrainIdent(inputLength, outputLength)
     case BasicNetworkTest.BRAILE_TYPE => BasicTestInformation.getTrainTest
   }
   val input     = DataFileGenerator.createFlatten2(s"$dataLocation/init_data",dataData._1)
   val expected  = DataFileGenerator.createFlatten2(s"$dataLocation/init_expected",dataData._2)
 
-  val inputSize    = dataData._1.length()
-  val expectedSize = dataData._2.length()
+  val inputSize    = 6*6//dataData._1.length()
+  val expectedSize = 6*6//dataData._2.length()
 
 
 
@@ -68,15 +69,17 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     topInterface)
   override val dut: NewEntity = dutParser.createEntity
 
+  val flip = signal("flip",REG)
+  flip := ~flip $at (clk)
   /** Create the interface for the input data */
+  interface.inRdy.vld := 1//flip
   val inRdyCount = signal("in_rdy_count",REG,U(32,0))
   inRdyCount := ($iff (inRdyCount === inputSize-1) $then 0 $else (inRdyCount + 1)).$at(clk.createEnable(interface.inRdy.enable))
-  interface.inRdy.vld := 1
   interface.inRdy.value.value             <-- (input,Some(inRdyCount))
   /** Create the interface for the expected data */
   val expRdyCount = signal("exp_rdy_count",REG,U(32,0))
   expRdyCount := ($iff (expRdyCount === expectedSize-1) $then 0 $else (expRdyCount + 1)).$at(clk.createEnable(expectedRdy.enable))
-  expectedRdy.vld := 1//(index < expected.data.length()) ? 1 :: 0
+  expectedRdy.vld := 1//flip //(index < expected.data.length()) ? 1 :: 0
   expectedRdy.value.value                 <-- (expected,Some(expRdyCount))
 
 
@@ -89,8 +92,8 @@ trait BasicNetworkTest extends BlockScalaTest with BlockTestParser{
     dutParser.mStage(i).control.controlInterface.tapEnable     := tapEnable(i)
     dutParser.mStage(i).control.controlInterface.biasEnable    := biasEnable(i)
     dutParser.mStage(i).control.controlInterface.inputStage    := (if (i == 0) 1 else 0)
-    dutParser.mStage(i).stage.ri.tapGain                       := gain
-    dutParser.mStage(i).stage.ri.biasGain                      := biasGain
+    dutParser.mStage(i).stage.ri.tapGain                       := gain(i)
+    dutParser.mStage(i).stage.ri.biasGain                      := biasGain(i)
     if (disableNonlinearity) {
       dutParser.mStage(i).stage.ri.disableNonlinearity           := 1
     }

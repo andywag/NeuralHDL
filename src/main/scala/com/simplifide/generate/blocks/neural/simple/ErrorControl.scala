@@ -73,7 +73,9 @@ case class ErrorControl(override val name:String,
 
   /- ("Condition to Update Error Mode")
   val realErrorFinish = signal("real_error_finish")
-  errorTapUpdate  := $iff (inputStage) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
+  //errorTapUpdate  := $iff (inputStage) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
+  // Flow Control Fix
+  errorTapUpdate  := $iff (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)
   ErrorControl.errorTapUpdateOut := errorTapUpdate & ~inputStage
 
   //errorTapUpdate  := $iff (0) $then 1 $else_if (errorUpdateLast(0)) $then ~errorTapUpdate $at (clk)

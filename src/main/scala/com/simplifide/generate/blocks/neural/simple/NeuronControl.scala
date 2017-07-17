@@ -74,7 +74,8 @@ case class NeuronControl[T](override val name:String,
     info.stateLength,
     info.tapAddressLength,
     info.errorFill,
-  info.numberNeurons)
+  info.numberNeurons,
+  info.dataFill)
 
 
 
