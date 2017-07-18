@@ -12,18 +12,21 @@ class TwoStageTest() extends BasicNetworkTest{
   // Get the description of this network from a common location due to it's use in many tests
   //val information = BasicTestInformation.getDualInformation(dataLocation)
   // Set the test length
-  override def getTestLength = BasicTestInformation.tapLength*512
   // Use and identity matrix for the test
   override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.IDENT_TYPE
   override val plot:Boolean = true
   override val failThreshold = Some(0.1)
-  override lazy val tapScale:Seq[Double] = Seq(1.0,1.0)
+  override lazy val tapScale:Seq[Double] = Seq(.5,.5)
 
+
+  override lazy val tapEnable = List(1,1)
+  override lazy val biasEnable = List(1,1)
+  override def getTestLength = BasicTestInformation.tapLength*1024
 
   // Fifo depths for test currently constant
-  lazy val dataFill      = Seq(6,6)
-  lazy val errorFill     = Seq(4,4)
-  lazy val outputFill    = Seq(3,3)
+  lazy val dataFill      = Seq(10,10)
+  lazy val errorFill     = Seq(10,10)
+  lazy val outputFill    = Seq(10,10)
 
 
   lazy val numberNeurons = Seq(6,6)
@@ -44,135 +47,34 @@ class TwoStageTest() extends BasicNetworkTest{
   override lazy val gain = Seq(3,3)
 }
 
-class Two6x6x6 extends TwoStageTest {
-  override def blockName: String = "two6x6"
-  //override lazy val numberNeurons = Seq(12,6)
-  //override lazy val dimensions = Seq((12,12),(12,6))
+class BaseTwo(val first:Int, val middle:Int) extends TwoStageTest {
+  override def blockName: String = s"two${first}_${middle}"
 
-  override lazy val numberNeurons = Seq(6,6)
-  override lazy val dimensions = Seq((6,6),(6,6))
-
-  //override def waveformEnable = true
-  //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
-
-  override lazy val tapEnable = List(1,1)
-  override lazy val biasEnable = List(1,1)
-  override lazy val gain = Seq(3,3,3)
-  override def getTestLength = BasicTestInformation.tapLength*2048
-  override lazy val disableNonlinearity = false
-  override lazy val tapScale:Seq[Double] = Seq(1.0,1.0,1.0)
-
-}
-
-class Three6x6x6I extends TwoStageTest {
-
-  override lazy val dataFill      = Seq(20,40,20)
-  override lazy val errorFill     = Seq(40,40,40)
-  override lazy val outputFill    = Seq(40,40,40)
-
-  override def blockName: String = "three6x6"
-  override lazy val numberNeurons = Seq(6,12,6)
-  override lazy val dimensions = Seq((6,12),(12,12),(12,6))
-  override def waveformEnable = true
-  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
-
-  //override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.BRAILE_TYPE
-
-
-  override lazy val tapEnable = List(0,0,0)
-  override lazy val biasEnable = List(0,0,0)
-  override lazy val gain = Seq(9,7,5).map(x => x-1)
-  //override lazy val biasGain = 3
-  override def getTestLength = BasicTestInformation.tapLength*math.pow(2.0,9).toInt
+  override lazy val numberNeurons = Seq(first,first)
+  override lazy val dimensions = Seq((first,middle),(middle,first))
+  override lazy val gain = Seq(6,3)
   override lazy val disableNonlinearity = true
-  //override lazy val tapScale:Seq[Double] = Seq(1.0,2.0,.5)
-  override lazy val tapScale:Seq[Double] = Seq(1.0,1.0,0.5)
+}
 
+class Two6x6x6 extends BaseTwo(6,6) {
+  override lazy val tapScale:Seq[Double] = Seq(.25,.25)
+}
+
+class Two6x6_B extends BaseTwo(6,6) {
+  override def blockName: String = s"two${first}_${middle}_b"
+  override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.BRAILE_TYPE
+  override lazy val tapScale:Seq[Double] = Seq(.25,.25)
+}
+
+class Two10x10x10 extends BaseTwo(10,10) {
+  override lazy val tapScale:Seq[Double] = Seq(.5,.5)
+}
+
+class Two6x12x6 extends BaseTwo(6,12) {
 
 }
 
-class Three6x6x6 extends TwoStageTest {
-
-  override lazy val dataFill      = Seq(20,40,20)
-  override lazy val errorFill     = Seq(10,10,10)
-  override lazy val outputFill    = Seq(10,10,10)
-
-  override def blockName: String = "three6x6a"
-  override lazy val numberNeurons = Seq(6,6,6)
-  override lazy val dimensions = Seq((6,6),(6,6),(6,6))
-  //override def waveformEnable = true
-  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
-
-  //override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.BRAILE_TYPE
 
 
-  override lazy val tapEnable = List(1,1,1)
-  override lazy val biasEnable = List(1,1,1)
-  override lazy val gain = Seq(9,7,5).map(x => x-1)
-  //override lazy val biasGain = 3
-  override def getTestLength = BasicTestInformation.tapLength*math.pow(2.0,13).toInt
-  override lazy val disableNonlinearity = true
-  //override lazy val tapScale:Seq[Double] = Seq(1.0,2.0,.5)
-  override lazy val tapScale:Seq[Double] = Seq(.5,.5,.5)
 
 
-}
-
-class Four6x6x6 extends TwoStageTest {
-
-  override lazy val dataFill      = Seq(20,20,40,20)
-  override lazy val errorFill     = Seq(10,10,10,10)
-  override lazy val outputFill    = Seq(10,10,10,10)
-
-  override def blockName: String = "four6x6"
-  override lazy val numberNeurons = Seq(6,6,6,6)
-  override lazy val dimensions = Seq((6,6),(6,6),(6,6),(6,6))
-  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.RAND_TAPS
-
-  //override def waveformEnable = true
-  //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
-
-  //override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.BRAILE_TYPE
-
-
-  override lazy val tapEnable = List(1,1,1,1)
-  override lazy val biasEnable = List(1,1,1,1)
-  override lazy val gain = Seq(15,11,9,7).map(x => x)
-  //override lazy val biasGain = 3
-  override def getTestLength = BasicTestInformation.tapLength*math.pow(2.0,13).toInt
-  override lazy val disableNonlinearity = true
-  //override lazy val tapScale:Seq[Double] = Seq(1.0,2.0,.5)
-  override lazy val tapScale:Seq[Double] = Seq(.5,.5,.5,.5)
-
-
-}
-
-class Four12x12 extends TwoStageTest {
-
-  override lazy val dataFill      = Seq(20,20,40,20)
-  override lazy val errorFill     = Seq(10,10,10,10)
-  override lazy val outputFill    = Seq(10,10,10,10)
-
-  override def blockName: String = "four12x12"
-  val siz = 7
-  override lazy val numberNeurons = Seq(siz,siz,siz,siz)
-  override lazy val dimensions = Seq((siz,siz),(siz,siz),(siz,siz),(siz,siz))
-  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.RAND_TAPS
-
-  //override def waveformEnable = true
-  //override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.IDENT_TAPS
-
-  //override lazy val inputType:BasicNetworkTest.INPUT_TYPE = BasicNetworkTest.BRAILE_TYPE
-
-
-  override lazy val tapEnable = List(1,1,1,1)
-  override lazy val biasEnable = List(1,1,1,1)
-  override lazy val gain = Seq(15,11,9,7).map(x => x)
-  //override lazy val biasGain = 3
-  override def getTestLength = BasicTestInformation.tapLength*math.pow(2.0,13).toInt
-  override lazy val disableNonlinearity = true
-  //override lazy val tapScale:Seq[Double] = Seq(1.0,2.0,.5)
-  override lazy val tapScale:Seq[Double] = Seq(.5,.5,.5,.5)
-
-
-}
