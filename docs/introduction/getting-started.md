@@ -1,20 +1,34 @@
 # Getting Started
 
-The code generator is written in Scala and uses SBT as a build tool. To get started you need to download and install the following tools. For limited use in generating cores without simulation only SBT or IDEA is required.   
+The tool is written in Scala and uses SBT as a build tool as well as Scalatest for testing. 
 
-* [SBT](http://www.scala-sbt.org/) : Build tool to create cores and tests
+The minimal requirements for creating the cores is : 
+
+* [SBT](http://www.scala-sbt.org/)  Scala build tool which will automatically download test configuration
+* [Scala](https://www.scala-lang.org/) Scala is also required but might be automatically downloaded through SBT
+
+Optionally an IDE is useful and the distribution contains a project for IDEA. 
+
 * [Jetbrains IDEA](https://www.jetbrains.com/idea/) : Integrated Development Environment for editting
 
-The resulting designs are simulated and verified using open source tools. 
+The tool assumes uses the following tools for simulation and verification. 
 
-1. [Verilator] (https://www.veripool.org/wiki/verilator) : Free Verilog simulator
-1. Python with Numpy and Scipy
+* [Verilator] (https://www.veripool.org/wiki/verilator) : Free Verilog simulator
+* Python with Numpy and Scipy : Used for analysis and plotting of results
+
+Other simulators should work as well but will require setup a bit of setup, test bench conversion and potentially some generator fixes. The target RTL was used for a production FPGA but new constructs have been added and the cores have not been taken through a synthesis flow. 
 
 ## Running Basic Test
 
-Both the generation and testing of the resulting cores is handled by scalaTest. 
+Running tests can be done either on the command line using SBT or inside IDEA. The command line usage is shown below.
 
-* sbt test-only `test-name` --- `sbt test-only com.simplifide.generate.neural.TwoStageTest`
+* sbt test-only `test-name`
+
+A couple of examples are shown below which run basic tests. 
+
+
+* sbt test-only `com.simplifide.generate.neural.Two6x6x6`
+* sbt test-only `com.simplifide.generate.neural.Four12`
 
 An example section of the test code is shown below. 
 
