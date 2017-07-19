@@ -10,6 +10,10 @@ The results of a simple example project can be seen below.
 
 [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
 
+# Status - Next Steps
 
+This project was started to assess the feasability of porting an existing harwdware flow to neural networks and to do some basic study on the hardware architecture and potential solutions. At this point in time those goals have been met. This toolset can generate a configurable fully connected neural network with some limitations. This is a small subset of the required components but the infrastructure is in place to easily add more and generalize to more complicated architectures. 
 
+There are many possible improvements but even configurable hardware architectures differ depending on the requirements of the problem. At this point, there is an effort to clean up some of the control bugs limiting the configurability and study the convergence properties, but the next step would require an actual application. If anyone has an interest/application which this toolset would fit into please contact me to discuss. 
+ 
 
