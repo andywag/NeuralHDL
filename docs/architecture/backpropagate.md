@@ -1,10 +1,12 @@
 ## Back Propagation
 
-Back propagation uses the same structure as the feedforward and tap update algorithm using the equation below : 
+Back propagation uses the same structure as the feedforward and tap update algorithm using the following equation 
 
-* Equation : TBD
+$$e_n = (H^T_n * e_{n+1})$$
 
-This algorithm differs in that it uses the transpose of the taps which requires some reordering to avoid the need for an adder tree. This operation uses the transpose of the taps in the tap location and the error in the data port. This trick requires the memory to be able to select individual taps which is possible with proper memory selection. Without this trick an adder tree will be required to do the final accumulation or the data will need to be reordered. 
+This algorithm differs in that it uses the transpose of the taps which requires some reordering to avoid the need of an adder tree. The block diagram is show below. 
+
+----
 
 ```mermaid
 graph LR
@@ -46,10 +48,14 @@ The data flow for this operation is as follows :
 1. For each sample the data is rotated after each multiply to line up with the correct tap
 1. When the calculation is complete the output of the accumulator is fed into a delay line and output serially
 
+----
+
 There is an issue with this algorithm in that it uses the transpose of the taps which slightly complicates the memory access. To get around this problem while keeping the same structure the taps are accessed from memory in an interleaved fashion as shown below. The table below shows this operation which does the following things : 
 
 1. Rotates the tap address on a per tap basis
 1. Rotates the data as well using a delay line
+
+----
 
 | Type          | 0       | 1      | K      | K+1     | N       |
 | ------------- |:-------:| ------:| ------:| -------:| -------:|

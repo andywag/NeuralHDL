@@ -58,6 +58,7 @@ graph LR
 ```
 
 * [Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
-* [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/simple)
-* [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/SingleStageTest.scala)
+* [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/four_12_12)
+* [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/MultiStageTest.scala)
+* [Waveform](https://github.com/andywag/NeuralHDL/blob/master/tests/four_12_12/simx.vcd)
 

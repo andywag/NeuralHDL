@@ -7,7 +7,7 @@ the same inherent flaw in having tools do architecture.
 
 There are many parts of the design process that can be automated but architecture is an inherently
 creative process requiring human intervention. Tools are good at low level optimization but suffer
-when it comes to large processing. 
+when it comes to larger level optimization and partitioning. 
 
 As a signal processing/hardware architect, I want a convenient way to describe the design without 
 giving up control of how the architecture is mapped. Most tools including the current C++ 
@@ -24,6 +24,7 @@ adoption.
 1. https://github.com/VeriScala/VeriScala
 2. https://chisel.eecs.berkeley.edu/
 
+-----
 
 The issue with these languages is that hardware designers in general have extremely limited software 
 abilities and the initial design of the DSL can be challenging. The goal of this project is not to 
@@ -41,6 +42,8 @@ design of structured operations.
 
 1. HDLs (Verilog-VHDL) are good at timing, low-level bit manipulation and control
 2. HDLs are not good at parameterization and abstraction or automating structured designs
+
+-----
 
 These two conflicting issues make automation problematic since it is beneficial to write control logic using an HDL but abstract more structured items using a higher level language. This led to various incarnations of hybrid design tools which only used partial generation leading to issues. Internal DSL solve this issues by allowing control over the syntax so the complete design can be included in the same language and structure
 

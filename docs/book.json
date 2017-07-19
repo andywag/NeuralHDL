@@ -3,7 +3,7 @@
   "structure": { 
     "summary": "SUMMARY.md"
   },
-  "plugins": ["mermaid-2"],
+  "plugins": ["mermaid-2","katex"],
   "pluginsConfig": {
     "mermaid-2": {
       "theme": "forest"

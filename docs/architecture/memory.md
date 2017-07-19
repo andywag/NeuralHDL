@@ -6,7 +6,10 @@ The memory for each stage is split into 3 separate memories based on their size 
 1. Bias Memory
 1. Tap and Error Memory
 
+----
+
 The memory size of the model is fixed based on the size of the network, but the depths for the data and error require careful consideration to keep the network fully utilized. The main constraint for the network is the input data and error must be available at the same time to properly update the taps. This requires the data to be stored inside the block until the error is available or will halt the operations. 
+
 
 ## Data Memory
 The data memory contains the input data to the stage. This information is required for both the feedforward operation of the stage and the error updates. 
@@ -14,6 +17,7 @@ The data memory contains the input data to the stage. This information is requir
 1. The memory read requires one data sample per stage calculation. 
 1. The depth of the memory is a function of the maximum error feedback time and throughput requirements
 
+----
 
 | Address       | Data         |
 | ------------- |:------------:| 
@@ -31,7 +35,9 @@ The current memory is stored inefficiently using the mapping above where
 * K is the length of the input data vector
 * N is ceil(log2(K))
 
-`This mapping is innefficient but greatly eases both the addressing design as well as the debugging. This is used as a prototyping test and will be left as a mode for debug as well. `
+----
+
+`This mapping is innefficient and obviously not a choice for production but greatly eases both the addressing design as well as the debugging. This is used as a prototyping test and will be left as a mode for debug as well. `
 
 ## Bias Memory
 
@@ -51,6 +57,8 @@ The tap memory is a parallel memory which has an output width which is a multipl
 
 1. The memory requires one parallel read (number of neurons width) for each operation of the neural stage
 1. The depth of the memory is equivalent to the size of the taps plus the required error storage. 
+
+----
 
 The memory is assumed to have read/write access to individaul taps as well as the full set of parallel taps. This is used for 
 

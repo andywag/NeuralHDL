@@ -1,8 +1,15 @@
 # Error Update operation
 
-The error update calculation uses the same structure as the feedforward operation with a different input configuration. 
+The error update calculation follows the equations below. 
 
-* Equation TBD
+$$H_n = H_{n-1} + \lambda*f^{-1}(x_n * e_n)$$
+
+$$b_n = b_{n-1} + \lambda*f^{-1}(e_n)$$
+
+The operation uses the same structure as the feedforward operation with a different input configuration. For this case, the data uses the normal port, the error uses the tap port and the tap use the bias port. This allows the same usage of the circuit with some extra glue logic. 
+
+
+----
 
 The block diagram of the operation is shown below. 
 
@@ -36,6 +43,9 @@ graph LR
     Nonlinearity-->Output
 ```
     
+----    
+
+
 The operation shown above is very similar to the feedforward operation with the following differences 
 
 1. The tap input is the error (This is made more efficient by storing the tap and error in the same memory)
@@ -51,6 +61,8 @@ The data flow for this operation is as follows :
 1. The input data (scala) is multiplied by error (vector)
 1. The bias input is fed with the tap inputs 
 1. The output of the accumulator is fed back to the memory
+
+----
 
 The ordering of the operations is shown below
 

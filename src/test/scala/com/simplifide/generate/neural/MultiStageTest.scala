@@ -131,7 +131,7 @@ class FourSame(siz:Int) extends TwoStageTest {
 }
 
 class Four12 extends FourSame(12) {
-
+  override def waveformEnable = true
 }
 
 class Four15 extends FourSame(15) {
