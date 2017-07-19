@@ -9,6 +9,8 @@ Detailed documentation and instructions for use can be found here :
 The results of a simple example project can be seen below. 
 
 [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
+[Multi Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
+
 
 # Status - Next Steps
 
