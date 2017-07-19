@@ -4,12 +4,12 @@ NeuralHDL is an internal DSL written in scala for hardware design geared towards
 
 Detailed documentation and instructions for use can be found here :  
 
-[Detailed Documentation](https://andywag.github.io/NeuralHDL/index.html)
+* [Detailed Documentation](https://andywag.github.io/NeuralHDL/index.html)
 
 The results of a simple example project can be seen below. 
 
-[Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
-[Multi Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
+* [Two Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
+* [Multi Stage Network Test Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
 
 
 # Status - Next Steps
