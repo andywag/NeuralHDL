@@ -14,15 +14,20 @@ The framework for all designs is common so each of the examples below are based 
 * The results directory which contains the generated rtl
 * The scala code used to generate the network
 
+-----
+
 Given the nature of the tests and number of configurations, the scala code for the tests is being refactored down to only the smallest changes for the tests. The basic building blocks for the network configurations can be found in the following locations. 
 
 * [Test Generator Location](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural)
 * [Main Generator Test Block](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/BasicNetworkTest.scala)
 
-The generator code is based on an existing generic DSL for RTL generation and is a bit more complicated. The basic building blocks for the neural network blocks ban be found in the following location : 
+-----
+
+The generator code is based on an internal DSL (Domain Specific Language) for RTL generation and is a bit more complicated. The basic building blocks for the neural network blocks ban be found in the following location : 
 
 * [Generator Location](https://github.com/andywag/NeuralHDL/tree/master/src/main/scala/com/simplifide/generate/blocks/neural)
 
+-----
 ## Basic Example Testing
 
 The testing of the blocks is done using : 
@@ -31,73 +36,28 @@ The testing of the blocks is done using :
 * Verilator       : Runs a verilog simulator when the test is complete
 * Numpy           : Analyzes the results by looking at the output, taps, and error. Declares an error when the MSE of the error is greater than a user defined threshold
 
-## Single Stage Neural Network
+-----
+## Four Stage Example
 
-This is a simple test case which contains a network with a single stage with 6 inputs, 12 outputs utilizing 6 MAC blocks.
-
-```mermaid
-graph LR
-    Stage0[Stage - 6x12]
-    Input-->Stage0
-    Stage0-->Error
-    Stage0-->Output
-    Error-->Stage0
-```
-
-* [Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/SingleStage.ipynb)
-* [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/simple)
-* [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/SingleStageTest.scala)
-
-## Two Stage Neural Network
-
-This is a simple test case which contains a network with 2 fully connected stages.
-
-1. The first stage has 6 inputs and 12 outputs and uses 6 MAC units
-1. The second stage has 12 inputs and 6 outputs and uses 6 MAC units
-
+This example is a 4 stage 12x12 network. 
 
 ```mermaid
 graph LR
-    Stage0[Stage - 6x12]
-    Stage1[Stage - 12x6]
-    Input-->Stage0
-    Stage0-->Stage1
-    Stage1-->Stage0
-    Stage1-->Error
-    Stage1-->Output
-    Error-->Stage1
-```
-
-
-* [Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/TwoStage.ipynb)
-* [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/full)
-* [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/DoubleStageTest.scala)
-
-## Three Stage Neural Network
-
-This is the first realistic test case which contains a 3 stage network with 12 hidden neurons.
-
-
-1. The first stage has 6 inputs and 12 outputs and uses 6 MAC units
-1. The second stage contains 12 inputs and 12 outputs and uses 6 MAC units
-1. The third stage has 12 inputs and 6 outputs and uses 6 MAC units
-
-
-```mermaid
-graph LR
-    Stage0[Stage - 6x12]
+    Stage0[Stage - 12x12]
     Stage1[Stage - 12x12]
-    Stage2[Stage - 12x6]
+    Stage2[Stage - 12x12]
+    Stage3[Stage - 12x12]
     Input-->Stage0
     Stage0-->Stage1
     Stage1-->Stage2
+    Stage2-->Stage3
     Stage2-->Stage0
-    Stage2-->Error
-    Stage2-->Output
-    Error-->Stage2
+    Stage3-->Error
+    Stage3-->Output
+    Error-->Stage3
 ```
 
+* [Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
+* [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/simple)
+* [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/SingleStageTest.scala)
 
-* [Results](results/DoubleStage.jpynb)
-* [Output Directory - Generated Source and Results](../../tests/hidden)
-* [Block Generator](../../src/test/scala/com/simplifide/generate/neural/HiddenStageTest.scala)
