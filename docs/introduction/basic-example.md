@@ -39,7 +39,15 @@ The testing of the blocks is done using :
 -----
 ## Four Stage Example
 
-This example is a 4 stage 12x12 network. 
+There are quite a few test cases with different configurations which can mainly be found in these files
+
+* [Single Stage Test](https://github.com/andywag/NeuralHDL/blob/master/src/test/scala/com/simplifide/generate/neural/SingleStageTest.scala)
+* [Two Stage Test](https://github.com/andywag/NeuralHDL/blob/master/src/test/scala/com/simplifide/generate/neural/TwoStageTest.scala)
+* [MultiStage Test](https://github.com/andywag/NeuralHDL/blob/master/src/test/scala/com/simplifide/generate/neural/MultiStageTest.scala)
+
+-----
+
+This test is a 4 stage test with 12x12 inputs following the block diagram below. 
 
 ```mermaid
 graph LR
@@ -57,8 +65,43 @@ graph LR
     Error-->Stage3
 ```
 
+The results and general information about the test case can be found at the following links. 
+
 * [Results](https://github.com/andywag/NeuralHDL/blob/master/docs/results/MultiStage.ipynb)
 * [Output Directory - Generated Source and Results](https://github.com/andywag/NeuralHDL/tree/master/tests/four_12_12)
 * [Block Generator](https://github.com/andywag/NeuralHDL/tree/master/src/test/scala/com/simplifide/generate/neural/MultiStageTest.scala)
-* [Waveform](https://github.com/andywag/NeuralHDL/blob/master/tests/four_12_12/simx.vcd)
+
+-----
+
+The generator code for this example is also shown below. This main controls a set of configurations for the test. 
+
+
+```scala
+class FourSame(siz:Int) extends TwoStageTest {
+  // Fifo Depths
+  override lazy val dataFill      = Seq(20,20,40,20)
+  override lazy val errorFill     = Seq(10,10,10,10)
+  override lazy val outputFill    = Seq(10,10,10,10)
+  override def blockName: String = s"four_${siz}_${siz}"
+  override lazy val numberNeurons = Seq(siz,siz,siz,siz,siz)
+  // Dimensions of Network
+  override lazy val dimensions = Seq((siz,siz),(siz,siz),(siz,siz),(siz,siz))
+  // Type of Taps (Random Taps with Normal Distribution)
+  override lazy val tapType:BasicNetworkTest.TAP_TYPE = BasicNetworkTest.RAND_TAPS
+  override lazy val tapScale:Seq[Double] = Seq(.5,.5,.5,.5)
+
+  override lazy val tapEnable = List(1,1,1,1)
+  override lazy val biasEnable = List(1,1,1,1)
+  override lazy val gain = Seq(15,11,9,7).map(x => x)
+  override def getTestLength = BasicTestInformation.tapLength*math.pow(2.0,8).toInt
+  override lazy val disableNonlinearity = true
+
+}
+
+class Four12 extends FourSame(12) {
+  override def waveformEnable = true
+}
+
+
+```
 

@@ -1,23 +1,11 @@
-package com.simplifide.generate.blocks.neural
+# Simple Block Description
 
-import com.simplifide.generate.blocks.basic.flop.ClockControl
-import com.simplifide.generate.newparser.typ.NumberType
-import com.simplifide.generate.generator._
-import com.simplifide.generate.parser.{ConditionParser, SignalParser}
-import com.simplifide.generate.signal.{OpType, SignalTrait}
-import com.simplifide.generate.util.PathUtilities
+A description of a neuron(MAC) is shown below. This is a relatively simple example but in general what the descriptions of more complicated blocks look like. For this you can see that there is no concept of buswidths or even signal types. All operations on the signals depend on the signal type. This means that a fixed point signal will automatically create a fixed point description while a floating point signal will create a floating point signal. This leads to fully generic code.  
 
-/**
-  * Created by andy on 5/8/17.
-  */
+```scala
+
 case class Neuron(proto:SignalTrait)(implicit val clk:ClockControl) extends ComplexSegment  {
 
-  import com.simplifide.generate.newparser.typ.SegmentParser._
-  import com.simplifide.generate.doc.MdGenerator._
-
-  def createBody = {}
-
-  override def document =s""""""
 
   // Input/Output Declarations
   val dataOut:SignalTrait = proto.newSignal(name = "data_out",opType = OUTPUT)
@@ -34,6 +22,7 @@ case class Neuron(proto:SignalTrait)(implicit val clk:ClockControl) extends Comp
   val result = dataOut.newSignal(name = dataOut.appendName("result"))
 
   // Convenience information to allow automatic block testing
+  // This is only required when the operation needs to work both inside a module and as a segment
   override def inputs: Seq[SignalTrait] = {
     val clkSignals   = clk.allSignals(OpType.Input)
     val inputSignals = List(dataIn,taps,bias)
@@ -44,3 +33,5 @@ case class Neuron(proto:SignalTrait)(implicit val clk:ClockControl) extends Comp
 
 
 }
+
+```

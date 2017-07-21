@@ -31,30 +31,6 @@ object Sigmoid {
     val dataIn  = proto.newSignal(name = "data_in",opType = OpType.Input).asInstanceOf[FloatSignal]
     val bypass  = signal("bypass",INPUT)
 
-    override def document =
-
-
-
-      s"""
-This block contains a sigmoid nonlinear operation based on "Myers and Hutchinson" piecewise linear approximation.
-There are a few slight differences in the operation to simplify things due to the floating point aspect but
-there output error has similar properties with a maximum error of ~4.8%. This block is more naturally done using
-fixed point which inherently is internally done in the internal shifters of this block
-
-
-## Input/Output
-* output ${dataOut.document}  : Output of the block
-* input  ${dataIn.document}   : Input of the block
-
-## Generator Code
-
-The code used to generate this code is relatively complex
-
-* [Code Generator](${PathUtilities.nueralPath}/Sigmoid.scala)
-* [Verilog Output](../design/${name}.v)
-
-"""
-
 
     val lut  = List(0.0, 0.0625/2, 0.125, 0.25, 0.75, 0.8725, 0.935, 1.0).map(x => FloatWrap(x.toFloat))
     val bias = 127;
@@ -135,9 +111,7 @@ The code used to generate this code is relatively complex
     intOut.sgn := 0
 
     // Temporary Bypass of Sigmoid operation
-    //dataOut    := intOut $at clk
     dataOut    := $iff (bypass) $then dataIn $else intOut  $at clk
-    //dataOut    := dataIn $at clk
 
     override def createBody = {}
     override def inputs: Seq[SignalTrait] = dataIn :: clk.allSignals(INPUT)
